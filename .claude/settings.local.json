@@ -8,7 +8,22 @@
       "Bash(npm install)",
       "Bash(npx next build)",
       "Bash(npx shadcn@latest init -y)",
-      "Bash(npx shadcn@latest init --defaults)"
+      "Bash(npx shadcn@latest init --defaults)",
+      "Bash(npx shadcn@latest add input textarea card avatar scroll-area dialog dropdown-menu sidebar badge separator toast tooltip tabs table switch skeleton -y)",
+      "Bash(npx shadcn@latest add input textarea card avatar scroll-area dialog dropdown-menu sidebar badge separator sonner tooltip tabs table switch skeleton -y)",
+      "Bash(npm install prisma @prisma/client)",
+      "Bash(npx prisma init)",
+      "Bash(npx prisma validate)",
+      "Bash(npm install -D dotenv)",
+      "Bash(npx prisma generate)",
+      "Bash(curl -sL \"https://fonts.google.com/download?family=Poppins\" -o poppins.zip)",
+      "Bash(curl -sL \"https://fonts.google.com/download?family=Inter\" -o inter.zip)",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2\" -o poppins-600.woff2)",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLCz7Z1xlFQ.woff2\" -o poppins-700.woff2)",
+      "Bash(npm install next-themes)",
+      "Bash(npm install -D prettier)",
+      "Bash(npm run lint)",
+      "Bash(npm run type-check)"
     ]
   }
 }

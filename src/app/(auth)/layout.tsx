@@ -1,7 +1,7 @@
-export default function Home() {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-4xl font-bold">Ultra IA</h1>
+      {children}
     </main>
   );
 }
