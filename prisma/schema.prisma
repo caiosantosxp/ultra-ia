@@ -12,6 +12,7 @@ model User {
   email         String?        @unique
   emailVerified DateTime?
   image         String?
+  password      String?
   role          Role           @default(USER)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -55,6 +56,18 @@ model Session {
   @@map("sessions")
 }
 
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("password_reset_tokens")
+  @@index([email])
+}
+
 model Specialist {
   id            String         @id @default(cuid())
   name          String
@@ -72,7 +85,6 @@ model Specialist {
   conversations Conversation[]
   subscriptions Subscription[]
 
-  @@index([slug])
   @@map("specialists")
 }
 
@@ -98,7 +110,7 @@ model Message {
   conversationId String
   userId         String
   content        String       @db.Text
-  role           Role         @default(USER)
+  role           MessageRole  @default(USER)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -155,6 +167,11 @@ model Keyword {
 enum Role {
   USER
   ADMIN
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
 }
 
 enum SubscriptionStatus {

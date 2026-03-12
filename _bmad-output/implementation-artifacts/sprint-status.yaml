@@ -43,48 +43,48 @@ development_status:
   # Epic 1: Fundação do Projeto & Experiência Pública
   epic-1: in-progress
   1-1-inicializacao-do-projeto-design-system: done
-  1-2-landing-page-com-catalogo-de-especialistas: ready-for-dev
-  1-3-pagina-publica-do-especialista: ready-for-dev
-  1-4-paginas-legais-conformidade-rgpd-base: backlog
+  1-2-landing-page-com-catalogo-de-especialistas: done
+  1-3-pagina-publica-do-especialista: done
+  1-4-paginas-legais-conformidade-rgpd-base: done
   epic-1-retrospective: optional
 
   # Epic 2: Autenticação & Gestão de Conta
-  epic-2: backlog
-  2-1-registro-de-usuario: backlog
-  2-2-login-logout: backlog
-  2-3-reset-de-senha: backlog
-  2-4-gestao-de-perfil: backlog
-  2-5-exportacao-exclusao-de-dados-rgpd: backlog
+  epic-2: in-progress
+  2-1-registro-de-usuario: done
+  2-2-login-logout: done
+  2-3-reset-de-senha: done
+  2-4-gestao-de-perfil: done
+  2-5-exportacao-exclusao-de-dados-rgpd: done
   epic-2-retrospective: optional
 
   # Epic 3: Assinatura & Sistema de Pagamentos
-  epic-3: backlog
-  3-1-checkout-criacao-de-assinatura-stripe: backlog
-  3-2-webhooks-stripe-gestao-de-estado-de-assinatura: backlog
-  3-3-subscription-gating-controle-de-acesso: backlog
-  3-4-gestao-de-pagamento-portal-stripe: backlog
-  3-5-pagina-de-pricing: backlog
+  epic-3: in-progress
+  3-1-checkout-criacao-de-assinatura-stripe: ready-for-dev
+  3-2-webhooks-stripe-gestao-de-estado-de-assinatura: ready-for-dev
+  3-3-subscription-gating-controle-de-acesso: ready-for-dev
+  3-4-gestao-de-pagamento-portal-stripe: ready-for-dev
+  3-5-pagina-de-pricing: ready-for-dev
   epic-3-retrospective: optional
 
   # Epic 4: Chat IA & Interação com Especialista
-  epic-4: backlog
-  4-1-interface-de-chat-envio-de-mensagens: backlog
-  4-2-streaming-sse-integracao-n8n: backlog
-  4-3-historico-de-conversas-sidebar: backlog
-  4-4-controle-de-escopo-disclaimers-rate-limiting: backlog
-  4-5-armazenamento-anonimo-conformidade-rgpd-do-chat: backlog
+  epic-4: in-progress
+  4-1-interface-de-chat-envio-de-mensagens: ready-for-dev
+  4-2-streaming-sse-integracao-n8n: ready-for-dev
+  4-3-historico-de-conversas-sidebar: ready-for-dev
+  4-4-controle-de-escopo-disclaimers-rate-limiting: ready-for-dev
+  4-5-armazenamento-anonimo-conformidade-rgpd-do-chat: ready-for-dev
   epic-4-retrospective: optional
 
   # Epic 5: Painel Administrativo & Gestão de Agentes
-  epic-5: backlog
-  5-1-layout-admin-dashboard-de-metricas: backlog
-  5-2-gestao-de-agentes-especialistas: backlog
-  5-3-gestao-de-usuarios-assinaturas: backlog
-  5-4-metricas-de-uso-por-agente: backlog
+  epic-5: in-progress
+  5-1-layout-admin-dashboard-de-metricas: ready-for-dev
+  5-2-gestao-de-agentes-especialistas: ready-for-dev
+  5-3-gestao-de-usuarios-assinaturas: ready-for-dev
+  5-4-metricas-de-uso-por-agente: ready-for-dev
   epic-5-retrospective: optional
 
   # Epic 6: Notificações & Comunicação
-  epic-6: backlog
-  6-1-infraestrutura-de-email-transacional: backlog
-  6-2-emails-transacionais-de-conta-pagamento: backlog
+  epic-6: in-progress
+  6-1-infraestrutura-de-email-transacional: ready-for-dev
+  6-2-emails-transacionais-de-conta-pagamento: ready-for-dev
   epic-6-retrospective: optional

@@ -1,0 +1,190 @@
+# Story 4.3: Histórico de Conversas & Sidebar
+
+Status: ready-for-dev
+
+<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+
+## Story
+
+Como um **assinante**,
+Quero **visualizar meu histórico de conversas e alternar entre elas na sidebar**,
+Para que **possa continuar discussões anteriores e acessar contexto acumulado**.
+
+## Acceptance Criteria
+
+1. **[AC1 - Lista de conversas]** Dado que um assinante com conversas anteriores acessa `/chat`, quando a sidebar carrega, as conversas são listadas em ordem cronológica reversa (mais recente primeiro) com título auto-gerado e data
+2. **[AC2 - Performance]** O histórico carrega em menos de 1 segundo (NFR4); usar `ConversationListSkeleton` durante carregamento
+3. **[AC3 - Navegação]** Clicar em uma conversa na sidebar navega para `/chat/[conversationId]` e exibe todas as mensagens com scroll na última
+4. **[AC4 - Nova conversa]** Clicar em "+ Nouvelle conversation" cria uma nova conversa e exibe welcome message + quick prompts; a conversa anterior permanece no histórico
+5. **[AC5 - Busca]** Ctrl+K abre busca; digitar filtra conversas por título ou conteúdo (client-side para histórico carregado)
+6. **[AC6 - Infinite scroll]** Histórico longo usa infinite scroll (20 itens por página) na sidebar via SWR `useSWRInfinite`
+7. **[AC7 - API GET /api/conversations]** Retorna lista paginada `{ success: true, data: [...], pagination: { page, limit, total, hasMore } }` filtrada pelo userId autenticado; suporta query params `?page=1&limit=20`
+8. **[AC8 - API POST /api/conversations]** Cria nova conversa; body: `{ specialistId: string }`; retorna `{ success: true, data: { id, title, specialistId, createdAt } }`
+9. **[AC9 - API GET /api/conversations/[conversationId]]** Retorna conversa com mensagens; verifica ownership (403 se não for owner)
+10. **[AC10 - Soft delete]** Conversas usam `isDeleted: true` (soft delete) — nunca deletar permanentemente sem processo RGPD (Story 4.5)
+11. **[AC11 - Título auto-gerado]** Título da conversa é gerado a partir da primeira mensagem do usuário (truncado em 50 chars); "Nouvelle conversation" como default
+12. **[AC12 - SWR revalidation]** Após criar/deletar conversa, a lista na sidebar revalida automaticamente
+
+## Tasks / Subtasks
+
+- [ ] Task 1: Criar `src/app/api/conversations/route.ts` — GET lista + POST criar (AC: #1, #7, #8)
+  - [ ] 1.1 `GET`: `auth()` → 401; buscar `prisma.conversation.findMany({ where: { userId, isDeleted: false }, orderBy: { updatedAt: 'desc' }, skip, take })`; retornar com paginação
+  - [ ] 1.2 `POST`: `auth()` → 401; validar `{ specialistId: z.string().cuid() }` com Zod; `prisma.conversation.create({ data: { userId, specialistId, title: 'Nouvelle conversation' } })`; retornar conversa criada
+  - [ ] 1.3 Exportar `export const dynamic = 'force-dynamic'`
+
+- [ ] Task 2: Criar `src/app/api/conversations/[conversationId]/route.ts` — GET detalhes + DELETE (AC: #3, #9, #10)
+  - [ ] 2.1 `GET`: `auth()` → 401; buscar conversa com `include: { messages: { orderBy: { createdAt: 'asc' } } }`; verificar `conversation.userId === session.user.id` → 403
+  - [ ] 2.2 `DELETE`: soft delete — `prisma.conversation.update({ where: { id: conversationId }, data: { isDeleted: true } })`; verificar ownership
+
+- [ ] Task 3: Criar `src/app/api/conversations/[conversationId]/messages/route.ts` — GET mensagens paginadas (AC: #3)
+  - [ ] 3.1 `GET`: buscar mensagens com paginação cursor-based (melhor performance que offset para chat); retornar `{ messages, hasMore, nextCursor }`
+
+- [ ] Task 4: Criar Server Action `createConversation` em `src/actions/chat-actions.ts` (AC: #4, #11)
+  - [ ] 4.1 `createConversation(specialistId: string)`: chamar API `/api/conversations` via `fetch` ou diretamente via Prisma (Server Action → Prisma diretamente)
+  - [ ] 4.2 Retornar `{ success: true, data: { conversationId } }` para redirect client-side
+  - [ ] 4.3 Exportar `deleteConversation(conversationId: string)`: soft delete + verificar ownership
+
+- [ ] Task 5: Criar `src/components/chat/conversation-list.tsx` — item de lista (AC: #1, #2, #3)
+  - [ ] 5.1 Client Component; props: `{ conversation: ConversationSummary; isActive: boolean; onSelect: (id: string) => void }`
+  - [ ] 5.2 Layout: título (truncado em 2 linhas), data relativa (`"il y a 2 jours"`)  — usar `formatDistanceToNow` de `date-fns`
+  - [ ] 5.3 Estado ativo: destaque com `bg-muted` ou borda accentColor
+  - [ ] 5.4 `npm install date-fns` se não instalado
+
+- [ ] Task 6: Criar `src/components/chat/conversation-list-skeleton.tsx` — skeleton (AC: #2)
+  - [ ] 6.1 5 linhas de skeleton animadas (`animate-pulse`) com altura e larguras variadas
+  - [ ] 6.2 Usar `Skeleton` de `shadcn/ui` se disponível, ou div com `bg-muted rounded`
+
+- [ ] Task 7: Criar `src/components/chat/conversation-sidebar.tsx` — sidebar completa (AC: #1-#6, #12)
+  - [ ] 7.1 Client Component; props: `{ specialistId: string; currentConversationId?: string }`
+  - [ ] 7.2 Header: avatar do especialista + nome + botão "+ Nouvelle conversation"
+  - [ ] 7.3 Barra de busca (Ctrl+K): `<input>` com ícone Search; filtrar `conversations` client-side por `title.toLowerCase().includes(query)`
+  - [ ] 7.4 Lista: `useSWRInfinite` para buscar `/api/conversations?page={n}&limit=20`; renderizar `ConversationList` + `ConversationListSkeleton` durante loading
+  - [ ] 7.5 Infinite scroll: `IntersectionObserver` no último item → chamar `setSize(size + 1)` do `useSWRInfinite`
+  - [ ] 7.6 Ao clicar em "+ Nouvelle conversation": chamar `createConversation(specialistId)` → `router.push(/chat/${conversationId})`
+  - [ ] 7.7 Responsividade: sidebar fixa (280px) no desktop `lg:`, overlay com Sheet no mobile
+
+- [ ] Task 8: Criar páginas de chat (AC: #3, #4)
+  - [ ] 8.1 `src/app/(dashboard)/chat/page.tsx`: redirecionar para última conversa ativa ou mostrar estado vazio com botão "Démarrer une conversation"
+  - [ ] 8.2 `src/app/(dashboard)/chat/[conversationId]/page.tsx`: Server Component; buscar conversa + mensagens iniciais via Prisma; passar para Client Components
+  - [ ] 8.3 `src/app/(dashboard)/layout.tsx` (se ainda não existir): layout dashboard com sidebar + main
+
+- [ ] Task 9: Atualizar `src/stores/chat-store.ts` — adicionar suporte a carregamento de histórico (AC: #3)
+  - [ ] 9.1 Adicionar action `loadMessages(messages: Message[])`: substituir `messages` com histórico carregado da API (para quando usuário navega para conversa existente)
+  - [ ] 9.2 Adicionar `initializeConversation(conversationId: string, messages: Message[])`: setar `currentConversationId` + `loadMessages`
+
+- [ ] Task 10: Atualizar título da conversa após primeira mensagem (AC: #11)
+  - [ ] 10.1 Em `src/app/api/chat/stream/route.ts` (Story 4.2): após persistir primeira mensagem do usuário, atualizar `conversation.title = content.slice(0, 50)` se título ainda for "Nouvelle conversation"
+  - [ ] 10.2 Em `src/app/api/conversations/route.ts` no POST: manter title como "Nouvelle conversation" inicialmente
+
+- [ ] Task 11: Testes e validação (AC: todos)
+  - [ ] 11.1 Verificar lista em ordem reversa + skeleton durante loading
+  - [ ] 11.2 Criar nova conversa → verificar redirect + lista atualizada na sidebar
+  - [ ] 11.3 Clicar em conversa existente → verificar carregamento das mensagens + scroll no final
+  - [ ] 11.4 Busca Ctrl+K → filtrar por título funciona
+  - [ ] 11.5 Infinite scroll: com 21+ conversas → verificar carregamento da 2ª página
+
+## Dev Notes
+
+### Dependências de Histórias Anteriores
+
+- **Story 4.1**: modelos Prisma `Conversation` e `Message` + layout dashboard com sidebar
+- **Story 4.2**: `useChatStore` (será estendido nesta story com `loadMessages`)
+
+### SWR Pattern para Lista de Conversas
+
+```typescript
+// src/hooks/use-conversations.ts
+import useSWRInfinite from 'swr/infinite'
+
+const fetcher = (url: string) => fetch(url).then(r => r.json()).then(r => r.data)
+
+export function useConversations() {
+  const { data, error, isLoading, size, setSize, mutate } = useSWRInfinite(
+    (pageIndex) => `/api/conversations?page=${pageIndex + 1}&limit=20`,
+    fetcher
+  )
+
+  const conversations = data ? data.flat() : []
+  const hasMore = data ? data[data.length - 1]?.pagination?.hasMore : false
+
+  return { conversations, hasMore, isLoading, error, loadMore: () => setSize(size + 1), mutate }
+}
+```
+
+### Infinite Scroll com IntersectionObserver
+
+```typescript
+// No componente conversation-sidebar.tsx
+const bottomRef = useRef<HTMLDivElement>(null)
+
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    ([entry]) => { if (entry.isIntersecting && hasMore) loadMore() },
+    { threshold: 0.5 }
+  )
+  if (bottomRef.current) observer.observe(bottomRef.current)
+  return () => observer.disconnect()
+}, [hasMore, loadMore])
+
+// No JSX: <div ref={bottomRef} className="h-1" />
+```
+
+### Padrão de Rota da Área Dashboard
+
+```
+src/app/(dashboard)/
+├── layout.tsx              # Layout com sidebar + header + main
+├── chat/
+│   ├── page.tsx            # Lista / redirect
+│   └── [conversationId]/
+│       └── page.tsx        # Chat ativo
+```
+
+### Estrutura de Arquivos
+
+**Novos arquivos:**
+- `src/app/api/conversations/route.ts`
+- `src/app/api/conversations/[conversationId]/route.ts`
+- `src/app/api/conversations/[conversationId]/messages/route.ts`
+- `src/app/(dashboard)/chat/page.tsx`
+- `src/app/(dashboard)/chat/[conversationId]/page.tsx`
+- `src/app/(dashboard)/layout.tsx`
+- `src/components/chat/conversation-list.tsx`
+- `src/components/chat/conversation-list-skeleton.tsx`
+- `src/components/chat/conversation-sidebar.tsx`
+- `src/hooks/use-conversations.ts`
+
+**Arquivos a modificar:**
+- `src/stores/chat-store.ts` — adicionar `loadMessages`, `initializeConversation`
+- `src/app/api/chat/stream/route.ts` — atualizar título após 1ª mensagem
+- `src/actions/chat-actions.ts` — criar / deletar conversas
+- `package.json` — instalar `date-fns` se ausente
+
+### Project Structure Notes
+
+Alinhamento com arquitetura ([Source: architecture.md#Complete Project Directory Structure]):
+- `src/app/api/conversations/route.ts` ✓
+- `src/components/chat/conversation-sidebar.tsx` ✓
+- `src/components/chat/conversation-list.tsx` ✓
+- `src/components/chat/conversation-list-skeleton.tsx` ✓
+- `src/hooks/` — padrão SWR para data fetching client-side ✓
+
+### References
+
+- [Source: _bmad-output/planning-artifacts/architecture.md#Complete Project Directory Structure]
+- [Source: _bmad-output/planning-artifacts/architecture.md#API Naming Conventions]
+- [Source: _bmad-output/planning-artifacts/architecture.md#API Response Format]
+- [Source: _bmad-output/planning-artifacts/architecture.md#Data Fetching — SWR 2.x]
+- [Source: _bmad-output/planning-artifacts/epics.md#Story 4.3]
+
+## Dev Agent Record
+
+### Agent Model Used
+
+claude-sonnet-4-6
+
+### Debug Log References
+
+### Completion Notes List
+
+### File List
