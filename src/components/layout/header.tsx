@@ -1,13 +1,15 @@
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { UserMenu } from '@/components/shared/user-menu';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { DesktopNavLinks } from '@/components/layout/nav-links';
 import { auth } from '@/lib/auth';
+import { getT } from '@/lib/i18n/get-t';
 
 export async function Header() {
-  const session = await auth();
+  const [session, t] = await Promise.all([auth(), getT()]);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
@@ -17,14 +19,15 @@ export async function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Navigation principale" className="hidden items-center gap-6 lg:flex">
+        <nav aria-label={t.nav.mainNav} className="hidden items-center gap-3 lg:flex">
           <DesktopNavLinks />
+          <LanguageSwitcher />
           <ThemeToggle />
           {session?.user ? (
             <UserMenu user={session.user} />
           ) : (
             <Link href="/login" className={buttonVariants({ variant: 'secondary' })}>
-              Se connecter
+              {t.nav.login}
             </Link>
           )}
         </nav>

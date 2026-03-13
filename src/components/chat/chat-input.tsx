@@ -5,6 +5,7 @@ import { SendHorizontal } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/use-t';
 
 interface ChatInputProps {
   onSend: (content: string) => Promise<void>;
@@ -15,6 +16,7 @@ interface ChatInputProps {
 export function ChatInput({ onSend, isStreaming = false, disabled = false }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const t = useT();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-focus on mount
@@ -56,18 +58,18 @@ export function ChatInput({ onSend, isStreaming = false, disabled = false }: Cha
   }
 
   return (
-    <div className="flex items-end gap-2 border-t bg-background px-4 py-3">
+    <div className="flex items-end gap-2 py-3">
       <textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Posez votre question au spécialiste..."
-        aria-label="Écrire un message"
+        placeholder={t.chat.placeholder}
+        aria-label={t.chat.write}
         rows={1}
         disabled={isDisabled}
         className={cn(
-          'min-h-[40px] flex-1 resize-none overflow-y-auto rounded-md border bg-background px-3 py-2 text-sm outline-none',
+          'min-h-[34px] flex-1 resize-none overflow-y-auto rounded-md border bg-background px-3 py-1.5 text-sm outline-none',
           'placeholder:text-muted-foreground',
           'focus-visible:ring-2 focus-visible:ring-ring',
           'disabled:cursor-not-allowed disabled:opacity-50'
@@ -76,7 +78,7 @@ export function ChatInput({ onSend, isStreaming = false, disabled = false }: Cha
       <Button
         onClick={() => void handleSend()}
         disabled={!canSend}
-        aria-label="Envoyer un message"
+        aria-label={t.chat.send}
         size="icon"
         className="shrink-0"
       >

@@ -3,18 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/use-t';
 
-export const navLinks = [
-  { href: '/#specialists', label: 'Spécialistes' },
-  { href: '/pricing', label: 'Tarifs' },
+export const navHrefs = [
+  { href: '/#specialists', key: 'specialists' as const },
+  { href: '/pricing', key: 'pricing' as const },
 ];
 
 export function DesktopNavLinks() {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <>
-      {navLinks.map((link) => (
+      {navHrefs.map((link) => (
         <Link
           key={link.href}
           href={link.href}
@@ -23,7 +25,7 @@ export function DesktopNavLinks() {
             pathname === link.href ? 'text-foreground' : 'text-muted-foreground'
           )}
         >
-          {link.label}
+          {t.nav[link.key]}
         </Link>
       ))}
     </>

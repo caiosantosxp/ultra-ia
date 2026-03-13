@@ -18,6 +18,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 function generateSlug(name: string): string {
   return name
@@ -53,6 +60,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
       avatarUrl: '',
       tags: [],
       quickPrompts: [],
+      language: 'fr',
       systemPrompt: '',
       scopeLimits: '',
       ...defaultValues,
@@ -152,6 +160,28 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="language"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Idioma do agente</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o idioma" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="fr">Français</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

@@ -1,13 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Phone, Star, Volume2, Send } from 'lucide-react';
 import type { Specialist } from '@prisma/client';
 
 import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button-variants';
 import { QuickPrompt } from '@/components/specialist/quick-prompt';
 import { SubscribeButton } from '@/components/specialist/subscribe-button';
-import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/use-t';
 
 interface SpecialistProfileProps {
   specialist: Specialist;
@@ -39,106 +40,210 @@ export function SpecialistProfile({
     .join('')
     .slice(0, 2);
 
+  const t = useT();
   const priceFormatted = formatPrice(price);
+  const firstName = name.split(' ')[0];
+
+  const chatHref = hasActiveSubscription
+    ? '/chat'
+    : isAuthenticated
+      ? `/specialist/${slug}?checkout=true`
+      : `/register?callbackUrl=/specialist/${slug}?checkout=true`;
 
   return (
-    <article role="article" className="flex flex-col gap-6">
-      {/* Task 8: Back navigation */}
-      <Link
-        href="/"
-        className="flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors duration-150 hover:text-primary"
+    <article role="article" className="flex flex-col gap-6 pb-8">
+      {/* ── Hero Banner ── */}
+      <div
+        className="relative overflow-hidden rounded-2xl shadow-lg"
+        style={{
+          background: `linear-gradient(135deg, ${accentColor}ee 0%, ${accentColor} 60%, ${accentColor}99 100%)`,
+          minHeight: '200px',
+        }}
       >
-        <ArrowLeft className="h-4 w-4" />
-        Nos Experts
-      </Link>
-
-      {/* Task 2.7: Avatar com next/image, responsive (Task 9.6) */}
-      <div className="flex justify-center">
-        <div
-          className="relative h-24 w-24 overflow-hidden rounded-full ring-4 sm:h-[120px] sm:w-[120px]"
-          style={{ '--tw-ring-color': accentColor } as React.CSSProperties}
+        {/* Back button */}
+        <Link
+          href="/"
+          aria-label={t.profile.backAria}
+          className="absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/35"
         >
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt={`${name} - Expert ${domain}`}
-              fill
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center text-2xl font-semibold text-white"
-              style={{ backgroundColor: accentColor }}
-            >
-              {initials}
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+
+        <div className="flex items-end justify-between px-5 pb-5 pt-14">
+          {/* Left: name + title + buttons */}
+          <div className="z-10 flex flex-col gap-3">
+            <div>
+              <h1 className="font-heading text-4xl font-bold leading-tight text-white">{name}</h1>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <span className="text-sm text-white/80">{domain}</span>
+                {tags[0] && (
+                  <span className="rounded-full bg-emerald-400/90 px-2.5 py-0.5 text-xs font-semibold text-white">
+                    {tags[0]}
+                  </span>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <Link
+                href={chatHref}
+                className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow transition hover:bg-white/90"
+              >
+                <MessageCircle className="h-3.5 w-3.5" />
+                {t.profile.chat}
+              </Link>
+              <button
+                type="button"
+                aria-label={t.profile.callSoon}
+                className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow transition hover:bg-white/90"
+              >
+                <Phone className="h-3.5 w-3.5" />
+                {t.profile.call}
+              </button>
+            </div>
+          </div>
+
+          {/* Right: avatar + social proof */}
+          <div className="z-10 flex flex-col items-end gap-2">
+            {/* Subscriber count */}
+            <div className="flex items-center gap-1.5 rounded-xl bg-black/20 px-2.5 py-1.5 backdrop-blur-sm">
+              <div className="flex -space-x-1.5">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-4 w-4 rounded-full bg-white/50 ring-1 ring-white/70"
+                  />
+                ))}
+              </div>
+              <span className="text-xs font-medium text-white">{t.profile.subscribers}</span>
+            </div>
+
+            {/* Avatar */}
+            <div className="relative h-28 w-24 overflow-hidden rounded-xl shadow-lg">
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt={`${name} - ${domain}`}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div
+                  className="flex h-full w-full items-center justify-center text-2xl font-bold text-white"
+                  style={{ backgroundColor: `${accentColor}99` }}
+                >
+                  {initials}
+                </div>
+              )}
+            </div>
+
+            {/* Star rating */}
+            <div className="flex items-center gap-1 rounded-lg bg-black/20 px-2 py-1 backdrop-blur-sm">
+              <div className="flex">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <span className="ml-0.5 text-xs text-white/90">4.9</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Task 2.3: Nome (H1, Poppins 700) + Domain (H3) — Task 9.4 mobile scale */}
-      <div className="text-center">
-        <h1 className="font-heading text-[2rem] font-bold leading-tight sm:text-4xl">{name}</h1>
-        <h2 className="mt-1 text-lg text-muted-foreground">{domain}</h2>
+      {/* ── Tagline ── */}
+      <div className="border-l-2 border-foreground/20 py-1 pl-4">
+        <p className="font-serif text-xl italic leading-snug">{description.split('.')[0]}.</p>
       </div>
 
-      {/* Task 2.3: Descrição (Body Large) */}
-      <p className="text-base leading-relaxed sm:text-lg">{description}</p>
+      {/* ── Listen button ── */}
+      <button
+        type="button"
+        className="flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        aria-label={t.profile.listenAria}
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+          <Volume2 className="h-4 w-4" />
+        </span>
+        {t.profile.listen}
+      </button>
 
-      {/* Task 2.5: Tags (Badge outline, flex wrap) */}
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <Badge key={tag} variant="outline">
-            {tag}
-          </Badge>
-        ))}
-      </div>
+      {/* ── Bio ── */}
+      <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
 
-      {/* Task 2.4: Preço */}
-      <div className="text-center">
-        <p className="text-2xl font-semibold">
-          {priceFormatted}
-          <span className="text-lg font-normal text-muted-foreground">/mois</span>
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">Accès illimité à l&apos;expert</p>
-      </div>
-
-      {/* Task 3: Quick Prompts clicáveis — mobile horizontal scroll, desktop vertical */}
-      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-x-visible sm:px-0">
-        <div className="flex gap-2 sm:flex-col">
-          {quickPrompts.map((prompt) => (
-            <div key={prompt} className="min-w-[220px] sm:min-w-0 sm:w-full">
-              <QuickPrompt
-                prompt={prompt}
-                href={`/login?specialist=${slug}&prompt=${encodeURIComponent(prompt)}`}
-                ariaLabel={`Poser la question: ${prompt}`}
-              />
-            </div>
+      {/* ── Tags ── */}
+      {tags.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {tags.slice(1).map((tag) => (
+            <Badge key={tag} variant="outline">
+              {tag}
+            </Badge>
           ))}
         </div>
+      )}
+
+      {/* ── Price card ── */}
+      <div className="rounded-xl border bg-card p-4 text-center">
+        <p className="text-2xl font-semibold">
+          {priceFormatted}
+          <span className="text-base font-normal text-muted-foreground">{t.profile.perMonth}</span>
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{t.profile.unlimitedAccess} {firstName}</p>
       </div>
 
-      {/* CTA principal full-width */}
-      <div className="mt-2">
-        {!isAuthenticated ? (
-          <Link
-            href={`/register?callbackUrl=/specialist/${slug}?checkout=true`}
-            aria-label={`Démarrer une conversation avec ${name}`}
-            className={cn(
-              buttonVariants(),
-              'h-12 w-full rounded-xl text-base font-semibold'
-            )}
-          >
-            Démarrer une conversation
-          </Link>
-        ) : (
-          <SubscribeButton
-            specialistId={specialist.id}
-            hasActiveSubscription={hasActiveSubscription}
-            autoCheckout={autoCheckout}
-          />
-        )}
+      {/* ── Quick prompts ── */}
+      {quickPrompts.length > 0 && (
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            {t.profile.frequentQuestions}
+          </p>
+          <div className="flex flex-col gap-2">
+            {quickPrompts.map((prompt) => (
+              <QuickPrompt
+                key={prompt}
+                prompt={prompt}
+                href={`/login?specialist=${slug}&prompt=${encodeURIComponent(prompt)}`}
+                ariaLabel={`${t.profile.askQuestion} ${firstName}: ${prompt}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Main CTA ── */}
+      {!isAuthenticated ? (
+        <Link
+          href={`/register?callbackUrl=/specialist/${slug}?checkout=true`}
+          aria-label={`${t.profile.startConversationAria} ${name}`}
+          className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow transition hover:bg-primary/90"
+        >
+          {t.profile.startConversation}
+        </Link>
+      ) : (
+        <SubscribeButton
+          specialistId={specialist.id}
+          hasActiveSubscription={hasActiveSubscription}
+          autoCheckout={autoCheckout}
+        />
+      )}
+
+      {/* ── Chat input preview ── */}
+      <div className="flex items-center gap-3 rounded-full border bg-card px-4 py-2.5 shadow-sm">
+        <div className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-full bg-muted">
+          {avatarUrl && (
+            <Image src={avatarUrl} alt={name} width={28} height={28} className="object-cover" />
+          )}
+        </div>
+        <span className="flex-1 truncate text-sm text-muted-foreground">
+          {quickPrompts[0] ?? `${t.profile.askQuestion} ${firstName}…`}
+        </span>
+        <span
+          aria-hidden="true"
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
+        >
+          <Send className="h-3.5 w-3.5" />
+        </span>
       </div>
     </article>
   );

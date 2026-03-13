@@ -1,24 +1,28 @@
+'use client';
+
 import { Info } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/use-t';
 
 interface DisclaimerBannerProps {
   className?: string;
 }
 
 export function DisclaimerBanner({ className }: DisclaimerBannerProps) {
+  const t = useT();
   return (
     <div
       role="complementary"
-      aria-label="Aviso legal"
+      aria-label={t.disclaimer.ariaLabel}
       className={cn(
-        'flex items-center gap-2 border-t bg-muted/50 px-4 py-2',
+        'flex items-center gap-2 bg-muted/50 px-0 py-1',
         className
       )}
     >
       <Info className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" />
       <p className="text-xs text-muted-foreground">
-        Je suis une IA spécialisée et ne remplace pas un professionnel certifié.
+        {t.disclaimer.text}
       </p>
     </div>
   );

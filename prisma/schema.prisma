@@ -84,6 +84,7 @@ model Specialist {
   isActive      Boolean             @default(true)
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
+  language      String              @default("fr")
   scopeLimits   String?
   systemPrompt  String?
   conversations Conversation[]

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import { APP_URL } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { auth } from '@/lib/auth';
+import { getT } from '@/lib/i18n/get-t';
 import {
   Accordion,
   AccordionContent,
@@ -28,56 +30,21 @@ export const metadata: Metadata = {
   },
 };
 
-const benefits = [
-  'Accès 24h/24, 7j/7 à votre expert IA',
-  'Questions illimitées (dans la limite journalière)',
-  'Historique complet de vos conversations',
-  'Réponses personnalisées selon votre contexte',
-  'Expert spécialisé dans votre domaine',
-];
+export default async function PricingPage() {
+  const [session, t] = await Promise.all([auth(), getT()]);
+  const ctaHref = session?.user ? '/specialist/gestion-entreprise' : '/register';
+  const { benefits, faqs } = t.pricing;
 
-const faqs = [
-  {
-    value: 'payment',
-    question: 'Comment fonctionne le paiement ?',
-    answer: 'Paiement sécurisé via Stripe. Votre carte est débitée mensuellement au même jour.',
-  },
-  {
-    value: 'cancel',
-    question: 'Puis-je annuler à tout moment ?',
-    answer:
-      'Oui, depuis votre espace "Facturation". L\'accès reste actif jusqu\'à la fin de la période payée.',
-  },
-  {
-    value: 'commitment',
-    question: 'Y a-t-il un engagement ?',
-    answer: 'Aucun engagement. Abonnement mensuel résiliable à tout moment sans frais.',
-  },
-  {
-    value: 'missed-payment',
-    question: 'Que se passe-t-il si je rate un paiement ?',
-    answer:
-      "Vous bénéficiez d'une période de grâce. Nous vous contactons avant toute interruption de service.",
-  },
-  {
-    value: 'data-security',
-    question: 'Les données de ma conversation sont-elles sécurisées ?',
-    answer:
-      'Oui, vos conversations sont chiffrées. Vous pouvez demander leur suppression à tout moment (conformité RGPD).',
-  },
-];
-
-export default function PricingPage() {
   return (
     <main className="mx-auto max-w-[1280px] px-4 py-16 lg:px-6">
       {/* Hero Section */}
       <section className="mb-12 text-center">
         <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-          Tarifs simples et transparents
+          {t.pricing.title}
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Votre expert IA spécialisé, disponible à tout moment pour{' '}
-          <span className="font-semibold text-foreground">99€/mois</span>.
+          {t.pricing.subtitle}{' '}
+          <span className="font-semibold text-foreground">99€{t.pricing.perMonth}</span>.
         </p>
       </section>
 
@@ -89,15 +56,15 @@ export default function PricingPage() {
               id="pricing-card-heading"
               className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
-              Expert IA
+              {t.pricing.expertLabel}
             </p>
             <div className="mt-2 flex items-baseline gap-1">
               <span className="font-heading text-5xl font-bold text-foreground">99€</span>
-              <span className="text-lg text-muted-foreground">/mois</span>
+              <span className="text-lg text-muted-foreground">{t.pricing.perMonth}</span>
             </div>
           </CardHeader>
           <CardContent className="pt-4">
-            <ul className="space-y-3" aria-label="Avantages inclus">
+            <ul className="space-y-3" aria-label={t.pricing.benefitsAria}>
               {benefits.map((benefit) => (
                 <li key={benefit} className="flex items-start gap-2.5">
                   <CheckCircle
@@ -110,17 +77,15 @@ export default function PricingPage() {
             </ul>
             <div className="mt-6 flex flex-col items-center gap-2">
               <Link
-                href="/register"
+                href={ctaHref}
                 className={cn(
                   buttonVariants({ variant: 'default', size: 'lg' }),
                   'min-h-[44px] w-full justify-center'
                 )}
               >
-                Commencer
+                {t.pricing.ctaStart}
               </Link>
-              <p className="text-xs text-muted-foreground">
-                Annulation à tout moment. Aucun engagement.
-              </p>
+              <p className="text-xs text-muted-foreground">{t.pricing.cancelNote}</p>
             </div>
           </CardContent>
         </Card>
@@ -132,7 +97,7 @@ export default function PricingPage() {
           id="faq-heading"
           className="mb-8 text-center font-heading text-2xl font-bold text-foreground"
         >
-          Questions fréquentes
+          {t.pricing.faqTitle}
         </h2>
         <Accordion multiple={false}>
           {faqs.map((faq) => (

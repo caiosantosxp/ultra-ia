@@ -7,9 +7,11 @@ import { Menu, X } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { logout } from '@/actions/auth-actions';
 import { cn } from '@/lib/utils';
-import { navLinks } from '@/components/layout/nav-links';
+import { navHrefs } from '@/components/layout/nav-links';
+import { useT } from '@/lib/i18n/use-t';
 
 interface MobileNavProps {
   isAuthenticated?: boolean;
@@ -19,20 +21,21 @@ export function MobileNav({ isAuthenticated }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="ghost" size="icon" aria-label="Ouvrir le menu">
+          <Button variant="ghost" size="icon" aria-label={t.nav.mobileMenu}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         }
       />
       <SheetContent side="right" className="w-[280px]">
-        <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
-        <nav aria-label="Navigation mobile" className="mt-8 flex flex-col gap-4">
-          {navLinks.map((link) => (
+        <SheetTitle className="sr-only">{t.nav.mobileTitle}</SheetTitle>
+        <nav aria-label={t.nav.mobileNav} className="mt-8 flex flex-col gap-4">
+          {navHrefs.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -42,11 +45,14 @@ export function MobileNav({ isAuthenticated }: MobileNavProps) {
                 pathname === link.href ? 'text-primary' : 'text-foreground'
               )}
             >
-              {link.label}
+              {t.nav[link.key]}
             </Link>
           ))}
           <div className="my-2 border-t" />
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
           {isAuthenticated ? (
             <>
               <Link
@@ -54,7 +60,7 @@ export function MobileNav({ isAuthenticated }: MobileNavProps) {
                 onClick={() => setOpen(false)}
                 className={cn(buttonVariants({ variant: 'outline' }), 'mt-2')}
               >
-                Mon profil
+                {t.userMenu.profile}
               </Link>
               <button
                 disabled={isLoggingOut}
@@ -64,7 +70,7 @@ export function MobileNav({ isAuthenticated }: MobileNavProps) {
                 }}
                 className={cn(buttonVariants({ variant: 'ghost' }), 'mt-1 text-destructive hover:text-destructive')}
               >
-                {isLoggingOut ? 'Déconnexion...' : 'Déconnexion'}
+                {isLoggingOut ? t.userMenu.loggingOut : t.userMenu.logout}
               </button>
             </>
           ) : (
@@ -73,7 +79,7 @@ export function MobileNav({ isAuthenticated }: MobileNavProps) {
               onClick={() => setOpen(false)}
               className={cn(buttonVariants(), 'mt-2')}
             >
-              Se connecter
+              {t.nav.login}
             </Link>
           )}
         </nav>

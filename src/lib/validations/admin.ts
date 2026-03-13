@@ -17,6 +17,7 @@ export const createSpecialistSchema = z.object({
   avatarUrl: z.string().url('URL invalide'),
   tags: z.array(z.string().min(1).max(50)).max(10),
   quickPrompts: z.array(z.string().min(1).max(200)).max(8),
+  language: z.enum(['fr', 'en']),
   systemPrompt: z.string().max(10000).optional(),
   scopeLimits: z.string().max(5000).optional(),
 });

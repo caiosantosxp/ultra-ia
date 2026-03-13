@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { APP_URL } from '@/lib/constants';
+import { getT } from '@/lib/i18n/get-t';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { ChatHeroPreview } from '@/components/specialist/chat-hero-preview';
 import { SpecialistCard } from '@/components/specialist/specialist-card';
@@ -46,7 +47,7 @@ async function getSpecialists() {
 }
 
 export default async function HomePage() {
-  const [specialists, session] = await Promise.all([getSpecialists(), auth()]);
+  const [specialists, session, t] = await Promise.all([getSpecialists(), auth(), getT()]);
 
   const userId = session?.user?.id;
   let activeSubscriptionIds = new Set<string>();
@@ -70,24 +71,23 @@ export default async function HomePage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
             <h1 className="text-[2rem] font-bold leading-tight lg:text-4xl">
-              Votre expert IA, disponible 24h/24
+              {t.landing.heroTitle}
             </h1>
             <p className="text-lg text-muted-foreground lg:text-xl">
-              Accédez à des spécialistes IA dans divers domaines. Des conseils personnalisés,
-              adaptés à votre situation, à tout moment.
+              {t.landing.heroDesc}
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
                 href="#specialists"
                 className={cn(buttonVariants({ size: 'lg' }), 'min-h-11')}
               >
-                Découvrir nos experts
+                {t.landing.discover}
               </Link>
               <Link
                 href="#specialists"
                 className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'min-h-11')}
               >
-                Voir la démo
+                {t.landing.demo}
               </Link>
             </div>
           </div>
@@ -100,7 +100,7 @@ export default async function HomePage() {
 
       {/* Specialist Catalog */}
       <section id="specialists" className="mx-auto max-w-[1280px] px-4 py-12 lg:px-6">
-        <h2 className="mb-8 text-center">Nos Experts IA</h2>
+        <h2 className="mb-8 text-center">{t.landing.sectionTitle}</h2>
 
         {specialists.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -115,7 +115,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <p className="py-12 text-center text-muted-foreground">
-            Nos experts arrivent bientôt...
+            {t.landing.comingSoon}
           </p>
         )}
       </section>
