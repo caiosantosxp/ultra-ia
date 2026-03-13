@@ -2,12 +2,14 @@ import { notFound } from 'next/navigation';
 import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { APP_URL } from '@/lib/constants';
 import { SpecialistProfile, formatPrice } from '@/components/specialist/specialist-profile';
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ checkout?: string }>;
 }
 
 const getSpecialist = unstable_cache(
@@ -52,10 +54,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function SpecialistPage({ params }: Props) {
-  const { slug } = await params;
+export default async function SpecialistPage({ params, searchParams }: Props) {
+  const [{ slug }, { checkout }] = await Promise.all([params, searchParams]);
   const specialist = await getSpecialist(slug);
   if (!specialist) notFound();
+
+  // Check auth and subscription status for CTA (AC #1, #9)
+  const session = await auth();
+  const userId = session?.user?.id;
+  let hasActiveSubscription = false;
+  if (userId) {
+    const sub = await prisma.subscription.findUnique({
+      where: { userId_specialistId: { userId, specialistId: specialist.id } },
+      select: { status: true },
+    });
+    hasActiveSubscription = sub?.status === 'ACTIVE';
+  }
+
+  // Auto-trigger checkout param (FR4: post-registration redirect)
+  const autoCheckout = checkout === 'true' && !!userId && !hasActiveSubscription;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -75,7 +92,12 @@ export default async function SpecialistPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>') }}
       />
       <div className="mx-auto max-w-[720px] px-4 py-8 sm:px-6">
-        <SpecialistProfile specialist={specialist} />
+        <SpecialistProfile
+          specialist={specialist}
+          isAuthenticated={!!userId}
+          hasActiveSubscription={hasActiveSubscription}
+          autoCheckout={autoCheckout}
+        />
       </div>
     </>
   );

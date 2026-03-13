@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button-variants';
-import { ChatHeroPreview } from '@/components/specialist/chat-hero-preview';
-import { cn } from '@/lib/utils';
-import { SpecialistCard } from '@/components/specialist/specialist-card';
+
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { APP_URL } from '@/lib/constants';
+import { buttonVariants } from '@/components/ui/button-variants';
+import { ChatHeroPreview } from '@/components/specialist/chat-hero-preview';
+import { SpecialistCard } from '@/components/specialist/specialist-card';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'ultra-ia | Votre Expert IA Spécialisé',
@@ -44,7 +46,17 @@ async function getSpecialists() {
 }
 
 export default async function HomePage() {
-  const specialists = await getSpecialists();
+  const [specialists, session] = await Promise.all([getSpecialists(), auth()]);
+
+  const userId = session?.user?.id;
+  let activeSubscriptionIds = new Set<string>();
+  if (userId && specialists.length > 0) {
+    const subs = await prisma.subscription.findMany({
+      where: { userId, status: 'ACTIVE', specialistId: { in: specialists.map((s) => s.id) } },
+      select: { specialistId: true },
+    });
+    activeSubscriptionIds = new Set(subs.map((s) => s.specialistId));
+  }
 
   return (
     <>
@@ -93,7 +105,12 @@ export default async function HomePage() {
         {specialists.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {specialists.map((specialist) => (
-              <SpecialistCard key={specialist.id} specialist={specialist} />
+              <SpecialistCard
+                key={specialist.id}
+                specialist={specialist}
+                isAuthenticated={!!userId}
+                hasActiveSubscription={activeSubscriptionIds.has(specialist.id)}
+              />
             ))}
           </div>
         ) : (

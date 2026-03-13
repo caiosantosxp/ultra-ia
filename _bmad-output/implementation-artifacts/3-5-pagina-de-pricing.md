@@ -1,6 +1,6 @@
 # Story 3.5: Página de Pricing
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -24,9 +24,9 @@ so that **I can understand the cost before creating an account**.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Criar a página SSR de pricing (AC: #1, #2, #3, #5, #6, #7, #8)
-  - [ ] 1.1 Criar `src/app/(public)/pricing/page.tsx` como Server Component
-  - [ ] 1.2 Configurar `export const metadata` com título, description e Open Graph em francês:
+- [x] Task 1: Criar a página SSR de pricing (AC: #1, #2, #3, #5, #6, #7, #8)
+  - [x] 1.1 Criar `src/app/(public)/pricing/page.tsx` como Server Component
+  - [x] 1.2 Configurar `export const metadata` com título, description e Open Graph em francês:
     ```typescript
     export const metadata: Metadata = {
       title: 'Tarifs | ultra-ia',
@@ -41,46 +41,46 @@ so that **I can understand the cost before creating an account**.
       },
     };
     ```
-  - [ ] 1.3 Implementar hero section da pricing page: H1 "Tarifs simples et transparents", subtítulo com proposta de valor
-  - [ ] 1.4 Criar card de pricing principal com: valor 99€/mês em destaque, período de cobrança mensal, lista de benefícios com ícones (checkmark)
-  - [ ] 1.5 CTA Button primário "Commencer" → `<Link href="/register">`, full-width no mobile
-  - [ ] 1.6 Nota sob o CTA: "Annulation à tout moment. Aucun engagement." para reduzir fricção
-  - [ ] 1.7 Usar `process.env.NEXT_PUBLIC_APP_URL` para URLs canônicas no metadata
+  - [x] 1.3 Implementar hero section da pricing page: H1 "Tarifs simples et transparents", subtítulo com proposta de valor
+  - [x] 1.4 Criar card de pricing principal com: valor 99€/mês em destaque, período de cobrança mensal, lista de benefícios com ícones (checkmark)
+  - [x] 1.5 CTA Button primário "Commencer" → `<Link href="/register">`, full-width no mobile
+  - [x] 1.6 Nota sob o CTA: "Annulation à tout moment. Aucun engagement." para reduzir fricção
+  - [x] 1.7 Usar `process.env.NEXT_PUBLIC_APP_URL` para URLs canônicas no metadata (via APP_URL de @/lib/constants)
 
-- [ ] Task 2: Seção de benefícios detalhados (AC: #2)
-  - [ ] 2.1 Listar benefícios incluídos no plano:
+- [x] Task 2: Seção de benefícios detalhados (AC: #2)
+  - [x] 2.1 Listar benefícios incluídos no plano:
     - ✅ Accès 24h/24, 7j/7 à votre expert IA
     - ✅ Questions illimitées (dans la limite journalière)
     - ✅ Historique complet de vos conversations
     - ✅ Réponses personnalisées selon votre contexte
     - ✅ Expert spécialisé dans votre domaine
-  - [ ] 2.2 Usar ícones do Lucide React (já instalado via ShadCN) — `CheckCircle` em `text-primary`
-  - [ ] 2.3 Layout: lista com espaçamento adequado, Body font (Inter), legível em mobile
+  - [x] 2.2 Usar ícones do Lucide React (já instalado via ShadCN) — `CheckCircle` em `text-primary`
+  - [x] 2.3 Layout: lista com espaçamento adequado, Body font (Inter), legível em mobile
 
-- [ ] Task 3: Seção FAQ (AC: #4)
-  - [ ] 3.1 Implementar FAQ com `Accordion` do ShadCN (`src/components/ui/accordion.tsx`)
-  - [ ] 3.2 Instalar o componente Accordion se não existir: `npx shadcn@latest add accordion`
-  - [ ] 3.3 Perguntas e respostas do FAQ (em francês):
+- [x] Task 3: Seção FAQ (AC: #4)
+  - [x] 3.1 Implementar FAQ com `Accordion` do ShadCN (`src/components/ui/accordion.tsx`)
+  - [x] 3.2 Instalar o componente Accordion se não existir: `npx shadcn@latest add accordion`
+  - [x] 3.3 Perguntas e respostas do FAQ (em francês):
     - **Comment fonctionne le paiement ?** → Paiement sécurisé via Stripe. Votre carte est débitée mensuellement.
     - **Puis-je annuler à tout moment ?** → Oui, vous pouvez annuler depuis votre espace "Facturation". L'accès reste actif jusqu'à la fin de la période payée.
     - **Y a-t-il un engagement ?** → Aucun engagement. Abonnement mensuel résiliable à tout moment.
     - **Que se passe-t-il si je rate un paiement ?** → Vous bénéficiez d'une période de grâce. Nous vous contactons pour régulariser avant toute interruption.
     - **Les données de ma conversation sont-elles sécurisées ?** → Oui, vos conversations sont chiffrées et vous pouvez demander leur suppression à tout moment (RGPD).
-  - [ ] 3.4 FAQ com `type="single"` e `collapsible` para acessibilidade
-  - [ ] 3.5 `<section aria-labelledby="faq-heading">` com `<h2 id="faq-heading">Questions fréquentes</h2>`
+  - [x] 3.4 FAQ com `multiple={false}` (base-ui equiv. de single+collapsible) para acessibilidade
+  - [x] 3.5 `<section aria-labelledby="faq-heading">` com `<h2 id="faq-heading">Questions fréquentes</h2>`
 
-- [ ] Task 4: Adicionar link "Tarifs" no Header (AC: #3)
-  - [ ] 4.1 Verificar `src/components/layout/header.tsx` — adicionar link "Tarifs" apontando para `/pricing` no nav
-  - [ ] 4.2 Adicionar no mobile nav `src/components/layout/mobile-nav.tsx` também
-  - [ ] 4.3 Destacar link como ativo quando na rota `/pricing` usando `usePathname()` (hook Next.js)
+- [x] Task 4: Adicionar link "Tarifs" no Header (AC: #3)
+  - [x] 4.1 Verificar `src/components/layout/header.tsx` — adicionar link "Tarifs" apontando para `/pricing` no nav
+  - [x] 4.2 Adicionar no mobile nav `src/components/layout/mobile-nav.tsx` também
+  - [x] 4.3 Destacar link como ativo quando na rota `/pricing` usando `usePathname()` (hook Next.js) — via DesktopNavLinks client component
 
-- [ ] Task 5: Layout responsivo e acessibilidade (AC: #7, #8, #9)
-  - [ ] 5.1 Layout: max-width 1280px centrado, padding lateral `px-4 lg:px-6`
-  - [ ] 5.2 Card de pricing: max-width 400px centrado no desktop, full-width no mobile
-  - [ ] 5.3 Verificar dark mode: card com `bg-card` e `text-card-foreground` do design system
-  - [ ] 5.4 Testar keyboard navigation: Tab order lógico hero → card → CTA → FAQ
-  - [ ] 5.5 CTA Button com touch target mínimo 44x44px
-  - [ ] 5.6 Verificar `npm run lint` e `npx tsc --noEmit` sem erros
+- [x] Task 5: Layout responsivo e acessibilidade (AC: #7, #8, #9)
+  - [x] 5.1 Layout: max-width 1280px centrado, padding lateral `px-4 lg:px-6`
+  - [x] 5.2 Card de pricing: max-width 400px centrado no desktop, full-width no mobile
+  - [x] 5.3 Verificar dark mode: card com `bg-card` e `text-card-foreground` do design system
+  - [x] 5.4 Testar keyboard navigation: Tab order lógico hero → card → CTA → FAQ
+  - [x] 5.5 CTA Button com touch target mínimo 44x44px (`min-h-[44px]`)
+  - [x] 5.6 Verificar `npm run lint` e `npx tsc --noEmit` sem erros — ambos passaram
 
 ## Dev Notes
 
@@ -282,13 +282,35 @@ Claude Sonnet 4.6
 
 ### Debug Log References
 
+- base-ui Accordion usa `multiple` (não `openMultiple`) para controlar modo single — corrigido após erro de TypeScript
+- Accordion instalado via `npx shadcn@latest add accordion` — precisou corrigir import order no arquivo gerado (lucide-react antes de @/lib/utils)
+- Header é Server Component async: criado `DesktopNavLinks` client component para usePathname() no active state da nav desktop
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed — comprehensive developer guide for pricing page created
 - Página estática SSR simples sem dependências de API ou banco de dados
 - Reutiliza public layout (Header + Footer) da Story 1.2 sem modificações estruturais
-- Accordion ShadCN para FAQ — verificar se já instalado antes de rodar `shadcn add`
-- Task 4 modifica header.tsx e mobile-nav.tsx para adicionar link "Tarifs"
+- Accordion ShadCN instalado e usado para FAQ — `multiple={false}` para modo single (base-ui API)
+- Task 4 modifica header.tsx e mobile-nav.tsx para link `/pricing` com active state via usePathname()
+- CTA usa `buttonVariants` + `Link` (padrão do projeto para links que parecem botões)
+- `APP_URL` de `@/lib/constants` usado para URLs canônicas no metadata (em vez de process.env direto)
+- Lint e type-check passaram sem erros nos arquivos desta story
+- Todos os ACs implementados e verificados
 
 ### File List
 
+- src/app/(public)/pricing/page.tsx (NOVO)
+- src/components/layout/nav-links.tsx (NOVO)
+- src/components/ui/accordion.tsx (NOVO — instalado via shadcn)
+- src/components/layout/header.tsx (MODIFICADO)
+- src/components/layout/mobile-nav.tsx (MODIFICADO)
+
+## Change Log
+
+- 2026-03-12: Story implementada por Claude Sonnet 4.6 — Página de Pricing SSR criada com hero, pricing card, FAQ accordion, e link "Tarifs" ativo no header/mobile-nav
+- 2026-03-12: Code review por Claude Sonnet 4.6 — 4 issues corrigidos (1 HIGH, 3 MEDIUM):
+  - [H1] nav-links.tsx + mobile-nav.tsx: `#specialists` → `/#specialists` (link quebrado em /pricing)
+  - [M1] pricing/page.tsx: adicionado `alternates.canonical` ao metadata (Guardrail violado)
+  - [M2] mobile-nav.tsx: removido array `navLinks` duplicado, passa a importar de nav-links.tsx
+  - [M3] pricing/page.tsx: corrigida ordem de imports (libs antes de componentes, `import type` por último)

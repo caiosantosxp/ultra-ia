@@ -1,6 +1,6 @@
 # Story 6.1: Infraestrutura de Email Transacional
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -25,26 +25,26 @@ so that **all transactional emails are delivered consistently and professionally
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Instalar Resend SDK (AC: #1)
-  - [ ] 1.1 Instalar pacote: `npm install resend`
-  - [ ] 1.2 Verificar versão instalada é `^6.9.3` (latest stable março 2026)
+- [x] Task 1: Instalar Resend SDK (AC: #1)
+  - [x] 1.1 Instalar pacote: `npm install resend`
+  - [x] 1.2 Verificar versão instalada é `^6.9.3` (latest stable março 2026)
 
-- [ ] Task 2: Configurar variáveis de ambiente (AC: #2, #10)
-  - [ ] 2.1 Adicionar ao `.env.example`:
+- [x] Task 2: Configurar variáveis de ambiente (AC: #2, #10)
+  - [x] 2.1 Adicionar ao `.env.example`:
     ```bash
     # Email (Resend)
     RESEND_API_KEY="re_..."
     EMAIL_FROM="ultra-ia <noreply@ultra-ia.com>"
     ```
-  - [ ] 2.2 Adicionar ao `.env.local` (desenvolvimento):
+  - [x] 2.2 Adicionar ao `.env.local` (desenvolvimento):
     ```bash
     RESEND_API_KEY="re_test_..."
     EMAIL_FROM="ultra-ia <onboarding@resend.dev>"
     ```
     > Nota: Em dev, usar `onboarding@resend.dev` (domínio sandbox do Resend free tier)
 
-- [ ] Task 3: Criar schemas Zod para templates de email (AC: #8)
-  - [ ] 3.1 Criar `src/lib/validations/email.ts`:
+- [x] Task 3: Criar schemas Zod para templates de email (AC: #8)
+  - [x] 3.1 Criar `src/lib/validations/email.ts`:
     ```typescript
     import { z } from 'zod'
 
@@ -107,8 +107,8 @@ so that **all transactional emails are delivered consistently and professionally
     }
     ```
 
-- [ ] Task 4: Criar templates HTML de email (AC: #5, #6, #9)
-  - [ ] 4.1 Criar `src/lib/email-templates.ts` — funções que geram HTML inline para cada template:
+- [x] Task 4: Criar templates HTML de email (AC: #5, #6, #9)
+  - [x] 4.1 Criar `src/lib/email-templates.ts` — funções que geram HTML inline para cada template:
     ```typescript
     // Layout base responsivo — inline CSS obrigatório para emails
     const EMAIL_STYLES = {
@@ -144,134 +144,18 @@ so that **all transactional emails are delivered consistently and professionally
     }
 
     // Cada função de template retorna { subject, html }
-    export function welcomeTemplate(vars: { userName: string; dashboardUrl: string }) {
-      const content = `
-        <h1 style="${EMAIL_STYLES.heading}">Bienvenue sur ultra-ia !</h1>
-        <p style="${EMAIL_STYLES.body}">
-          Bonjour ${vars.userName},<br><br>
-          Votre compte a été créé avec succès. Vous pouvez dès maintenant découvrir
-          nos experts IA spécialisés et commencer vos premières consultations.
-        </p>
-        <p style="text-align: center; margin: 32px 0;">
-          <a href="${vars.dashboardUrl}" style="${EMAIL_STYLES.button}">Accéder au tableau de bord</a>
-        </p>
-        <p style="${EMAIL_STYLES.muted}">
-          Si vous n'avez pas créé ce compte, veuillez ignorer cet email.
-        </p>
-      `
-      return {
-        subject: 'Bienvenue sur ultra-ia !',
-        html: wrapLayout(content, `${vars.dashboardUrl}/settings`),
-      }
-    }
-
-    export function subscriptionConfirmationTemplate(vars: {
-      userName: string; specialistName: string; amount: string; nextBillingDate: string; chatUrl: string
-    }) {
-      const content = `
-        <h1 style="${EMAIL_STYLES.heading}">Abonnement confirmé</h1>
-        <p style="${EMAIL_STYLES.body}">
-          Bonjour ${vars.userName},<br><br>
-          Votre abonnement à <strong>${vars.specialistName}</strong> est maintenant actif.
-        </p>
-        <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-          <tr><td style="padding: 8px 0; color: #6B7280;">Spécialiste</td><td style="padding: 8px 0; font-weight: 600;">${vars.specialistName}</td></tr>
-          <tr><td style="padding: 8px 0; color: #6B7280;">Montant mensuel</td><td style="padding: 8px 0; font-weight: 600;">${vars.amount}</td></tr>
-          <tr><td style="padding: 8px 0; color: #6B7280;">Prochaine facturation</td><td style="padding: 8px 0; font-weight: 600;">${vars.nextBillingDate}</td></tr>
-        </table>
-        <p style="text-align: center; margin: 32px 0;">
-          <a href="${vars.chatUrl}" style="${EMAIL_STYLES.button}">Démarrer une conversation</a>
-        </p>
-      `
-      return {
-        subject: `Abonnement confirmé — ${vars.specialistName}`,
-        html: wrapLayout(content, `${vars.chatUrl.split('/chat')[0]}/settings`),
-      }
-    }
-
-    export function paymentFailedTemplate(vars: {
-      userName: string; specialistName: string; gracePeriodEnd: string; billingUrl: string
-    }) {
-      const content = `
-        <h1 style="${EMAIL_STYLES.heading}">Problème de paiement</h1>
-        <p style="${EMAIL_STYLES.body}">
-          Bonjour ${vars.userName},<br><br>
-          Le renouvellement de votre abonnement à <strong>${vars.specialistName}</strong> a échoué.
-          Votre accès reste actif jusqu'au <strong>${vars.gracePeriodEnd}</strong>.
-        </p>
-        <p style="${EMAIL_STYLES.body}">
-          Veuillez mettre à jour votre méthode de paiement pour continuer à utiliser le service.
-        </p>
-        <p style="text-align: center; margin: 32px 0;">
-          <a href="${vars.billingUrl}" style="${EMAIL_STYLES.button}">Mettre à jour le paiement</a>
-        </p>
-        <p style="${EMAIL_STYLES.muted}">
-          Si vous ne mettez pas à jour avant le ${vars.gracePeriodEnd}, votre accès au chat sera suspendu.
-        </p>
-      `
-      return {
-        subject: 'Action requise — Problème de paiement',
-        html: wrapLayout(content, `${vars.billingUrl.split('/billing')[0]}/settings`),
-      }
-    }
-
-    export function paymentUpdatedTemplate(vars: {
-      userName: string; specialistName: string; amount: string; nextBillingDate: string; chatUrl: string
-    }) {
-      const content = `
-        <h1 style="${EMAIL_STYLES.heading}">Paiement confirmé</h1>
-        <p style="${EMAIL_STYLES.body}">
-          Bonjour ${vars.userName},<br><br>
-          Votre paiement pour <strong>${vars.specialistName}</strong> a été traité avec succès.
-        </p>
-        <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-          <tr><td style="padding: 8px 0; color: #6B7280;">Montant</td><td style="padding: 8px 0; font-weight: 600;">${vars.amount}</td></tr>
-          <tr><td style="padding: 8px 0; color: #6B7280;">Prochaine facturation</td><td style="padding: 8px 0; font-weight: 600;">${vars.nextBillingDate}</td></tr>
-        </table>
-        <p style="text-align: center; margin: 32px 0;">
-          <a href="${vars.chatUrl}" style="${EMAIL_STYLES.button}">Reprendre la conversation</a>
-        </p>
-      `
-      return {
-        subject: 'Paiement confirmé — Accès rétabli',
-        html: wrapLayout(content, `${vars.chatUrl.split('/chat')[0]}/settings`),
-      }
-    }
-
-    export function passwordResetTemplate(vars: { userName: string; resetUrl: string }) {
-      const content = `
-        <h1 style="${EMAIL_STYLES.heading}">Réinitialisation du mot de passe</h1>
-        <p style="${EMAIL_STYLES.body}">
-          Bonjour ${vars.userName},<br><br>
-          Vous avez demandé la réinitialisation de votre mot de passe ultra-ia.
-          Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
-          Ce lien expire dans <strong>1 heure</strong>.
-        </p>
-        <p style="text-align: center; margin: 32px 0;">
-          <a href="${vars.resetUrl}" style="${EMAIL_STYLES.button}">Réinitialiser le mot de passe</a>
-        </p>
-        <p style="${EMAIL_STYLES.muted}">
-          Si vous n'avez pas fait cette demande, ignorez cet email.
-        </p>
-      `
-      return {
-        subject: 'Réinitialisation de votre mot de passe',
-        html: wrapLayout(content, `${vars.resetUrl.split('/reset')[0]}/settings`),
-      }
-    }
+    export function welcomeTemplate(vars: { userName: string; dashboardUrl: string }) { ... }
+    export function subscriptionConfirmationTemplate(vars: { ... }) { ... }
+    export function paymentFailedTemplate(vars: { ... }) { ... }
+    export function paymentUpdatedTemplate(vars: { ... }) { ... }
+    export function passwordResetTemplate(vars: { userName: string; resetUrl: string }) { ... }
 
     // Mapa template → função geradora
-    export const templateFunctions: Record<string, (vars: Record<string, string>) => { subject: string; html: string }> = {
-      'welcome': welcomeTemplate,
-      'subscription-confirmation': subscriptionConfirmationTemplate,
-      'payment-failed': paymentFailedTemplate,
-      'payment-updated': paymentUpdatedTemplate,
-      'password-reset': passwordResetTemplate,
-    }
+    export const templateFunctions: Record<string, (vars: Record<string, string>) => { subject: string; html: string }> = { ... }
     ```
 
-- [ ] Task 5: Criar serviço de email com retry (AC: #1, #3, #4, #7)
-  - [ ] 5.1 Criar `src/lib/email.ts`:
+- [x] Task 5: Criar serviço de email com retry (AC: #1, #3, #4, #7)
+  - [x] 5.1 Criar `src/lib/email.ts`:
     ```typescript
     import { Resend } from 'resend'
     import { emailSchemaMap, type EmailTemplate } from '@/lib/validations/email'
@@ -300,86 +184,28 @@ so that **all transactional emails are delivered consistently and professionally
 
     export async function sendEmail({ to, template, variables }: SendEmailInput): Promise<SendEmailResult> {
       // 1. Validar variáveis com Zod schema
-      const schema = emailSchemaMap[template]
-      if (!schema) {
-        return { success: false, error: { code: 'INVALID_TEMPLATE', message: `Unknown template: ${template}` } }
-      }
-
-      const parsed = schema.safeParse(variables)
-      if (!parsed.success) {
-        return {
-          success: false,
-          error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message },
-        }
-      }
-
       // 2. Gerar conteúdo do email
-      const templateFn = templateFunctions[template]
-      if (!templateFn) {
-        return { success: false, error: { code: 'TEMPLATE_NOT_FOUND', message: `No template function for: ${template}` } }
-      }
-      const { subject, html } = templateFn(variables)
-
       // 3. Enviar com retry (backoff exponencial)
-      let lastError: Error | null = null
-
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        try {
-          const { data, error } = await resend.emails.send({
-            from: process.env.EMAIL_FROM ?? 'ultra-ia <noreply@ultra-ia.com>',
-            to,
-            subject,
-            html,
-          })
-
-          if (error) {
-            lastError = new Error(error.message)
-            if (attempt < MAX_RETRIES - 1) {
-              const delay = BASE_DELAY_MS * Math.pow(4, attempt)
-              await sleep(delay)
-              continue
-            }
-          }
-
-          if (data) {
-            return { success: true, data: { id: data.id } }
-          }
-        } catch (err) {
-          lastError = err instanceof Error ? err : new Error(String(err))
-          if (attempt < MAX_RETRIES - 1) {
-            const delay = BASE_DELAY_MS * Math.pow(4, attempt)
-            await sleep(delay)
-            continue
-          }
-        }
-      }
-
-      // Logar erro final
-      console.error(`[email] Failed to send "${template}" to ${to} after ${MAX_RETRIES} attempts:`, lastError)
-
-      return {
-        success: false,
-        error: { code: 'EMAIL_SEND_FAILED', message: lastError?.message ?? 'Unknown error after retries' },
-      }
+      // ...
     }
     ```
 
-- [ ] Task 6: Adicionar error codes para email (AC: #4)
-  - [ ] 6.1 Os seguintes error codes são usados pelo serviço de email (compatíveis com padrão existente):
+- [x] Task 6: Adicionar error codes para email (AC: #4)
+  - [x] 6.1 Os seguintes error codes são usados pelo serviço de email (compatíveis com padrão existente):
     - `INVALID_TEMPLATE` — template desconhecido
     - `VALIDATION_ERROR` — variáveis do template inválidas (Zod)
     - `TEMPLATE_NOT_FOUND` — função de template não registrada
     - `EMAIL_SEND_FAILED` — falha após 3 tentativas
-  - [ ] 6.2 Retorno segue o padrão `{ success, data?, error? }` do projeto
+  - [x] 6.2 Retorno segue o padrão `{ success, data?, error? }` do projeto
 
-- [ ] Task 7: Testes manuais de validação (AC: todos)
-  - [ ] 7.1 Verificar que `sendEmail()` compila sem erros TypeScript
-  - [ ] 7.2 Verificar que todos os schemas Zod validam corretamente (campos obrigatórios, URLs válidas)
-  - [ ] 7.3 Verificar que cada template gera HTML válido com header, footer e link de preferências
-  - [ ] 7.4 Verificar que o retry logic respeita backoff exponencial (1s, 4s, 16s)
-  - [ ] 7.5 Verificar que o EMAIL_FROM fallback funciona quando variável não definida
-  - [ ] 7.6 Verificar que emails são renderizados em francês
-  - [ ] 7.7 Verificar que o layout é responsivo (max-width 480px)
+- [x] Task 7: Testes manuais de validação (AC: todos)
+  - [x] 7.1 Verificar que `sendEmail()` compila sem erros TypeScript — ✅ `tsc --noEmit` zero erros nos arquivos de email
+  - [x] 7.2 Verificar que todos os schemas Zod validam corretamente (campos obrigatórios, URLs válidas) — ✅ validado via Node.js
+  - [x] 7.3 Verificar que cada template gera HTML válido com header, footer e link de preferências — ✅ verificado
+  - [x] 7.4 Verificar que o retry logic respeita backoff exponencial (1s, 4s, 16s) — ✅ Math.pow(4, attempt) = 1000ms, 4000ms, 16000ms
+  - [x] 7.5 Verificar que o EMAIL_FROM fallback funciona quando variável não definida — ✅ fallback `'ultra-ia <noreply@ultra-ia.com>'`
+  - [x] 7.6 Verificar que emails são renderizados em francês — ✅ `lang="fr"` + conteúdo em francês
+  - [x] 7.7 Verificar que o layout é responsivo (max-width 480px) — ✅ `max-width: 480px` em todos os templates
 
 ## Dev Notes
 
@@ -512,8 +338,39 @@ src/lib/validations/email.ts        # Schemas Zod para variáveis
 
 ### Agent Model Used
 
+claude-sonnet-4-6
+
 ### Debug Log References
+
+- `sendPasswordResetEmail` em `auth-actions.ts` foi mantida como wrapper de compatibilidade sobre `sendEmail()` — não era necessário alterar `auth-actions.ts`
+- Resend já estava instalado em `^6.9.3` (Task 1 já completa no estado inicial)
+- `.env.example` e `.env.local` atualizados: `EMAIL_FROM` agora inclui display name `"ultra-ia <noreply@ultra-ia.com>"`
+- Erro TypeScript pré-existente em `chat-area.tsx` (Epic 4) — não relacionado a esta story
 
 ### Completion Notes List
 
+- ✅ `sendEmail({ to, template, variables })` genérica com retry exponencial implementada (AC #1, #3, #7)
+- ✅ Remetente padronizado `"ultra-ia <noreply@ultra-ia.com>"` com fallback (AC #2)
+- ✅ Retry automático 3 tentativas: 1s, 4s, 16s backoff exponencial (AC #3)
+- ✅ Erros logados via `console.error` (AC #4, NFR20)
+- ✅ 5 templates HTML com header/logo + footer/RGPD (AC #5)
+- ✅ Todo conteúdo em francês, `lang="fr"` (AC #6)
+- ✅ Layout responsivo max-width 480px, Inter/sans-serif, cores design system (AC #9)
+- ✅ Schemas Zod para todos os 5 templates com validação de URL e campos obrigatórios (AC #8)
+- ✅ `RESEND_API_KEY` e `EMAIL_FROM` em `.env.example` e `.env.local` (AC #10)
+- ✅ `sendPasswordResetEmail` mantida como wrapper retrocompatível para `auth-actions.ts`
+- ✅ Zero erros TypeScript nos arquivos de email
+- ✅ Zero erros ESLint
+
 ### File List
+
+- `src/lib/email.ts` — REWRITTEN: serviço principal `sendEmail()` com retry + `sendPasswordResetEmail` refatorado para usar `sendEmail()` + Sentry para logging em produção
+- `src/lib/email-templates.ts` — CREATED/FIXED: 5 templates HTML inline com `escapeHtml()` (XSS fix), `PREFERENCES_URL` via `APP_URL` (URL fix), `paymentFailedTemplate` com `specialistName`
+- `src/lib/validations/email.ts` — CREATED/FIXED: schemas Zod, `paymentFailedSchema` com `specialistName` adicionado
+- `.env.example` — MODIFIED: `EMAIL_FROM` atualizado para `"ultra-ia <noreply@ultra-ia.com>"`
+- `.env.local` — MODIFIED: `RESEND_API_KEY` dev key + `EMAIL_FROM` sandbox `onboarding@resend.dev`
+
+## Change Log
+
+- 2026-03-12: Story 6.1 implementada — infraestrutura de email transacional com Resend, 5 templates HTML em francês, schemas Zod, retry exponencial (3 tentativas: 1s/4s/16s)
+- 2026-03-12: Code Review aplicado — [H1] escapeHtml() em todos os templates (XSS fix); [H2] sendPasswordResetEmail refatorado para usar sendEmail() com retry e RGPD footer; [M1] PREFERENCES_URL via APP_URL/constants (URL parsing fix); [M2] specialistName adicionado ao paymentFailedSchema e paymentFailedTemplate; Sentry integrado para logging em produção (AC #4)

@@ -4,10 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { Card, CardContent } from '@/components/ui/card';
 import { QuickPrompt } from '@/components/specialist/quick-prompt';
+import { SubscribeButton } from '@/components/specialist/subscribe-button';
 import { cn } from '@/lib/utils';
 
 interface SpecialistCardProps {
   specialist: {
+    id: string;
     name: string;
     slug: string;
     domain: string;
@@ -17,9 +19,15 @@ interface SpecialistCardProps {
     tags: string[];
     quickPrompts: string[];
   };
+  isAuthenticated?: boolean;
+  hasActiveSubscription?: boolean;
 }
 
-export function SpecialistCard({ specialist }: SpecialistCardProps) {
+export function SpecialistCard({
+  specialist,
+  isAuthenticated = false,
+  hasActiveSubscription = false,
+}: SpecialistCardProps) {
   const initials = specialist.name
     .split(' ')
     .map((w) => w[0])
@@ -69,13 +77,22 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
         </div>
 
         {/* CTA */}
-        <Link
-          href={`/specialist/${specialist.slug}`}
-          aria-label={`Démarrer une conversation avec ${specialist.name}`}
-          className={cn(buttonVariants(), 'mt-2 w-full min-h-11')}
-        >
-          Démarrer une conversation
-        </Link>
+        <div className="mt-2 w-full">
+          {!isAuthenticated ? (
+            <Link
+              href={`/register?callbackUrl=/specialist/${specialist.slug}?checkout=true`}
+              aria-label={`Démarrer une conversation avec ${specialist.name}`}
+              className={cn(buttonVariants(), 'w-full min-h-11')}
+            >
+              Démarrer une conversation
+            </Link>
+          ) : (
+            <SubscribeButton
+              specialistId={specialist.id}
+              hasActiveSubscription={hasActiveSubscription}
+            />
+          )}
+        </div>
       </CardContent>
     </Card>
   );

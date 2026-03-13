@@ -3,12 +3,8 @@ import { buttonVariants } from '@/components/ui/button-variants';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { UserMenu } from '@/components/shared/user-menu';
 import { MobileNav } from '@/components/layout/mobile-nav';
+import { DesktopNavLinks } from '@/components/layout/nav-links';
 import { auth } from '@/lib/auth';
-
-const navLinks = [
-  { href: '#specialists', label: 'Spécialistes' },
-  { href: '#pricing', label: 'Tarifs' },
-];
 
 export async function Header() {
   const session = await auth();
@@ -22,15 +18,7 @@ export async function Header() {
 
         {/* Desktop nav */}
         <nav aria-label="Navigation principale" className="hidden items-center gap-6 lg:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
+          <DesktopNavLinks />
           <ThemeToggle />
           {session?.user ? (
             <UserMenu user={session.user} />

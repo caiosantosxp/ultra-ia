@@ -1,11 +1,26 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import bcrypt from 'bcrypt';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  // Admin user
+  const adminPassword = await bcrypt.hash(process.env.ADMIN_SEED_PASSWORD ?? 'Admin@ultra-ia2026!', 12);
+  await prisma.user.upsert({
+    where: { email: 'admin@ultra-ia.com' },
+    update: {},
+    create: {
+      email: 'admin@ultra-ia.com',
+      name: 'Admin',
+      role: 'ADMIN',
+      password: adminPassword,
+    },
+  });
+  console.log('Seed completed: admin user created/updated');
+
   await prisma.specialist.upsert({
     where: { slug: 'gestion-entreprise' },
     update: {},

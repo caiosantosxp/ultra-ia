@@ -2,17 +2,14 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { logout } from '@/actions/auth-actions';
 import { cn } from '@/lib/utils';
-
-const navLinks = [
-  { href: '#specialists', label: 'Spécialistes' },
-  { href: '#pricing', label: 'Tarifs' },
-];
+import { navLinks } from '@/components/layout/nav-links';
 
 interface MobileNavProps {
   isAuthenticated?: boolean;
@@ -21,6 +18,7 @@ interface MobileNavProps {
 export function MobileNav({ isAuthenticated }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();
+  const pathname = usePathname();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -39,7 +37,10 @@ export function MobileNav({ isAuthenticated }: MobileNavProps) {
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="text-lg font-medium text-foreground transition-colors hover:text-primary"
+              className={cn(
+                'text-lg font-medium transition-colors hover:text-primary',
+                pathname === link.href ? 'text-primary' : 'text-foreground'
+              )}
             >
               {link.label}
             </Link>

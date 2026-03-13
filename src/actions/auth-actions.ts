@@ -4,10 +4,13 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import { AuthError } from 'next-auth';
 
+import * as Sentry from '@sentry/nextjs';
+
 import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from '@/lib/validations/auth';
 import { prisma } from '@/lib/prisma';
 import { signIn, signOut } from '@/lib/auth';
-import { sendPasswordResetEmail } from '@/lib/email';
+import { sendEmail, sendPasswordResetEmail } from '@/lib/email';
+import { EMAIL_TEMPLATES } from '@/lib/validations/email';
 import { APP_URL } from '@/lib/constants';
 
 export async function login(input: unknown) {
@@ -54,8 +57,9 @@ export async function register(input: unknown) {
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
+  let newUser: Awaited<ReturnType<typeof prisma.user.create>>;
   try {
-    await prisma.user.create({ data: { name, email, password: hashedPassword } });
+    newUser = await prisma.user.create({ data: { name, email, password: hashedPassword } });
   } catch (e: unknown) {
     const isPrismaUniqueError =
       typeof e === 'object' && e !== null && 'code' in e && (e as { code: string }).code === 'P2002';
@@ -66,6 +70,31 @@ export async function register(input: unknown) {
       };
     }
     throw e;
+  }
+
+  // Enviar email de boas-vindas — falha NÃO bloqueia o registro (AC #1, Task 2.3)
+  if (newUser.email) {
+    try {
+      const emailResult = await sendEmail({
+        to: newUser.email,
+        template: EMAIL_TEMPLATES.WELCOME,
+        variables: {
+          userName: newUser.name ?? newUser.email,
+          dashboardUrl: `${APP_URL}/chat`,
+        },
+      });
+      if (!emailResult.success) {
+        Sentry.captureMessage('[register] Welcome email failed', {
+          level: 'warning',
+          tags: { context: 'welcome-email', userId: newUser.id },
+          extra: { error: emailResult.error },
+        });
+      }
+    } catch (emailError) {
+      Sentry.captureException(emailError, {
+        tags: { context: 'welcome-email', userId: newUser.id },
+      });
+    }
   }
 
   return { success: true as const };

@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 const mockMessages = [
   { role: 'user' as const, content: 'Comment améliorer la rentabilité de ma PME ?' },
@@ -21,22 +23,6 @@ const mockMessages = [
     content: 'Excellent ! Voici 3 leviers prioritaires pour votre profil...',
   },
 ];
-
-function useReducedMotion() {
-  const [reducedMotion, setReducedMotion] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  });
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  return reducedMotion;
-}
 
 export function ChatHeroPreview() {
   const reducedMotion = useReducedMotion();

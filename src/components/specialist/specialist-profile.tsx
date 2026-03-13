@@ -1,15 +1,19 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import type { Specialist } from '@prisma/client';
 
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { QuickPrompt } from '@/components/specialist/quick-prompt';
+import { SubscribeButton } from '@/components/specialist/subscribe-button';
 import { cn } from '@/lib/utils';
 
 interface SpecialistProfileProps {
   specialist: Specialist;
+  isAuthenticated?: boolean;
+  hasActiveSubscription?: boolean;
+  autoCheckout?: boolean;
 }
 
 export function formatPrice(priceInCents: number): string {
@@ -20,7 +24,12 @@ export function formatPrice(priceInCents: number): string {
   }).format(priceInCents / 100);
 }
 
-export function SpecialistProfile({ specialist }: SpecialistProfileProps) {
+export function SpecialistProfile({
+  specialist,
+  isAuthenticated = false,
+  hasActiveSubscription = false,
+  autoCheckout = false,
+}: SpecialistProfileProps) {
   const { name, slug, domain, description, accentColor, avatarUrl, tags, quickPrompts, price } =
     specialist;
 
@@ -110,15 +119,27 @@ export function SpecialistProfile({ specialist }: SpecialistProfileProps) {
         </div>
       </div>
 
-      {/* Task 4: CTA principal full-width */}
-      <Link
-        href={`/login?specialist=${slug}`}
-        aria-label={`Démarrer une conversation avec ${name}`}
-        className={cn(buttonVariants(), 'mt-2 h-12 w-full rounded-xl text-base font-semibold')}
-      >
-        Démarrer une conversation
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Link>
+      {/* CTA principal full-width */}
+      <div className="mt-2">
+        {!isAuthenticated ? (
+          <Link
+            href={`/register?callbackUrl=/specialist/${slug}?checkout=true`}
+            aria-label={`Démarrer une conversation avec ${name}`}
+            className={cn(
+              buttonVariants(),
+              'h-12 w-full rounded-xl text-base font-semibold'
+            )}
+          >
+            Démarrer une conversation
+          </Link>
+        ) : (
+          <SubscribeButton
+            specialistId={specialist.id}
+            hasActiveSubscription={hasActiveSubscription}
+            autoCheckout={autoCheckout}
+          />
+        )}
+      </div>
     </article>
   );
 }

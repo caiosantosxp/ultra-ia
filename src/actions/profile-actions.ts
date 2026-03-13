@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { anonymizeUserConversations, deleteUserConversations } from '@/lib/rgpd-chat';
 import { updateProfileSchema } from '@/lib/validations/profile';
 
 export async function updateProfile(input: unknown) {
@@ -56,5 +57,45 @@ export async function updateProfile(input: unknown) {
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Erreur lors de la mise à jour du profil' },
     };
+  }
+}
+
+/**
+ * RGPD: Deletar conta do usuário com opção de anonimização ou exclusão completa.
+ * - 'anonymize' (padrão): conversas e mensagens têm userId definido como null (retém conteúdo para analytics)
+ * - 'delete': conversas e mensagens são deletadas permanentemente
+ * Chamado como Server Action a partir da UI de configurações de conta.
+ */
+export async function deleteAccount(deleteType: 'anonymize' | 'delete' = 'anonymize') {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
+  }
+
+  const userId = session.user.id;
+  const userEmail = session.user.email;
+
+  try {
+    // MEDIUM-1: Operação atômica — conversas e user.delete na mesma transação
+    await prisma.$transaction(async (tx) => {
+      // AC4: Suporte a exclusão completa (não apenas anonimização)
+      if (deleteType === 'delete') {
+        await deleteUserConversations(userId, tx);
+      } else {
+        await anonymizeUserConversations(userId, tx);
+      }
+
+      if (userEmail) {
+        await tx.passwordResetToken.deleteMany({ where: { email: userEmail } });
+      }
+      // Deletar user — cascades: Account, Session, Subscription
+      // Conversations/Messages com userId=null (anonimizadas) são preservadas via onDelete: SetNull
+      await tx.user.delete({ where: { id: userId } });
+    });
+
+    return { success: true, data: { message: 'Conta excluída com sucesso' } };
+  } catch (error) {
+    console.error('[deleteAccount] Error:', error);
+    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Erro ao excluir conta' } };
   }
 }
