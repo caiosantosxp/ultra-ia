@@ -2,16 +2,17 @@ import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getT } from '@/lib/i18n/get-t';
 import { ProfileForm } from '@/components/dashboard/profile-form';
 import { RgpdSettings } from '@/components/settings/rgpd-settings';
 
 export const metadata: Metadata = {
-  title: 'Paramètres',
-  description: 'Gérez votre profil et vos préférences',
+  title: 'Settings',
+  description: 'Manage your profile and preferences',
 };
 
 export default async function SettingsPage() {
-  const session = await auth();
+  const [session, t] = await Promise.all([auth(), getT()]);
 
   if (!session?.user) {
     redirect('/login');
@@ -37,7 +38,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="font-heading mb-6 text-2xl font-bold">Paramètres</h1>
+      <h1 className="font-heading mb-6 text-2xl font-bold">{t.settings.title}</h1>
       <div className="space-y-6">
         <ProfileForm
           user={{

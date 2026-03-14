@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/lib/auth';
@@ -27,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const specialist = subscription?.specialist ?? null;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-svh overflow-hidden">
       {specialist && (
         <ConversationSidebar
           specialistId={specialist.id}
@@ -37,12 +38,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
         />
       )}
 
-      <SidebarInset>
+      <SidebarInset className="overflow-hidden">
         {/* Dashboard Header */}
         <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
           <div className="flex items-center gap-2">
             {specialist && <SidebarTrigger aria-label="Basculer la barre latérale" />}
-            <span className="font-heading text-sm font-semibold text-primary">ultra-ia</span>
+            <Link href="/" className="font-heading text-sm font-semibold text-primary hover:opacity-80 transition-opacity">ultra-ia</Link>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />

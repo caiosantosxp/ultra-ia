@@ -44,6 +44,24 @@ export async function createCheckoutSession(input: unknown) {
     return { success: true as const, data: { redirectTo: '/chat' } };
   }
 
+  // DEV BYPASS: when BYPASS_SUBSCRIPTION=true, skip Stripe and activate directly
+  if (process.env.BYPASS_SUBSCRIPTION === 'true') {
+    await prisma.subscription.upsert({
+      where: { userId_specialistId: { userId: session.user.id!, specialistId } },
+      update: { status: 'ACTIVE', currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+      create: {
+        userId: session.user.id!,
+        specialistId,
+        stripeSubscriptionId: `dev_bypass_${Date.now()}`,
+        stripeCustomerId: `dev_customer_${session.user.id}`,
+        status: 'ACTIVE',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+    return { success: true as const, data: { redirectTo: '/chat' } };
+  }
+
   // 5. Validate required env configuration
   if (!process.env.STRIPE_PRICE_ID) {
     console.error('STRIPE_PRICE_ID is not defined');

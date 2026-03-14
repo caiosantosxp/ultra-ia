@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useStreaming } from '@/hooks/use-streaming';
 import { useUsageLimit } from '@/components/chat/usage-meter';
 import { useChatStore } from '@/stores/chat-store';
+import { useT } from '@/lib/i18n/use-t';
 
 interface PrismaMessage {
   id: string;
@@ -49,6 +50,7 @@ interface ChatAreaProps {
 
 export function ChatArea({ initialMessages, conversationId, specialist }: ChatAreaProps) {
   const router = useRouter();
+  const t = useT();
   const { messages, isStreaming, streamingContent, setMessages, setConversation, addMessage } =
     useChatStore();
   const { startStream } = useStreaming();
@@ -94,7 +96,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
       if (!currentConversationId) {
         const result = await createConversation({ specialistId: specialist.id });
         if (!result.success) {
-          toast.error('Impossible de créer la conversation. Veuillez réessayer.');
+          toast.error(t.chatArea.createError);
           return;
         }
         currentConversationId = result.data.conversationId;
@@ -117,7 +119,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
       if (!activeConversationId) {
         const msgResult = await sendMessage({ conversationId: currentConversationId, content });
         if (!msgResult.success) {
-          toast.error("Échec de l'envoi du message. Veuillez réessayer.");
+          toast.error(t.chatArea.sendError);
           return;
         }
         router.push(`/chat/${currentConversationId}`);
@@ -127,7 +129,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
       // Subsequent messages: stream route handles DB persist for user + assistant messages
       void startStream(currentConversationId, content);
     },
-    [activeConversationId, specialist, addMessage, setConversation, startStream, router]
+    [activeConversationId, specialist, addMessage, setConversation, startStream, router, t]
   );
 
   const handleQuickPrompt = useCallback(
@@ -141,18 +143,13 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header com UsageMeter (AC4) */}
-      <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
-        <UsageMeter />
-      </div>
-
       {/* Messages area */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto"
         aria-live="polite"
-        aria-label="Messages du chat"
+        aria-label={t.chatArea.messagesArea}
       >
         {isEmpty && specialist ? (
           /* Welcome state */
@@ -169,7 +166,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
                 <p className="text-sm text-muted-foreground">{specialist.domain}</p>
               </div>
               <p className="max-w-sm text-sm text-muted-foreground">
-                Bonjour&nbsp;! Je suis votre spécialiste en {specialist.domain}. Comment puis-je vous aider&nbsp;?
+                {t.chatArea.greeting} {specialist.domain}{t.chatArea.greetingSuffix}
               </p>
             </div>
 
@@ -178,7 +175,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
               <div
                 className="flex w-full max-w-lg gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:overflow-x-visible"
                 role="list"
-                aria-label="Questions suggérées"
+                aria-label={t.chatArea.suggestedQuestions}
               >
                 {specialist.quickPrompts.slice(0, 3).map((prompt) => (
                   <QuickPrompt key={prompt} prompt={prompt} onClick={handleQuickPrompt} />
@@ -189,9 +186,9 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
         ) : (
           /* Messages list */
           <ul
-            className="space-y-4 px-4 py-4"
+            className="mx-auto w-full max-w-3xl space-y-4 px-4 py-4"
             role="list"
-            aria-label="Historique des messages"
+            aria-label={t.chatArea.messageHistory}
           >
             {messages.map((message) => (
               <ChatMessage
@@ -229,14 +226,15 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
       </div>
 
       {/* Disclaimer (AC3) + Input */}
-      <div className="shrink-0">
-        {isLimitReached && (
-          <p className="border-t px-4 py-2 text-center text-xs text-destructive" role="alert">
-            Vous avez atteint la limite quotidienne. Revenez demain!
-          </p>
-        )}
-        <DisclaimerBanner />
-        <ChatInput onSend={handleSend} isStreaming={isStreaming} disabled={!specialist || isLimitReached} />
+      <div className="shrink-0 border-t bg-background">
+        <div className="mx-auto w-full max-w-3xl px-4">
+          {isLimitReached && (
+            <p className="py-2 text-center text-xs text-destructive" role="alert">
+              {t.chatArea.limitReached}
+            </p>
+          )}
+          <ChatInput onSend={handleSend} isStreaming={isStreaming} disabled={!specialist || isLimitReached} />
+        </div>
       </div>
     </div>
   );

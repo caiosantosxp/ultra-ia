@@ -43,7 +43,7 @@ interface UserDetailCardProps {
 function SubscriptionStatusBadge({ status }: { status: SubscriptionStatus }) {
   switch (status) {
     case 'ACTIVE':
-      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">ATIVO</Badge>;
+      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">ATIVO</Badge>;
     case 'PAST_DUE':
       return (
         <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">PAGAMENTO FALHOU</Badge>

@@ -15,6 +15,15 @@ export const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        /* Design System variants */
+        white:
+          "bg-white text-gray-900 rounded-2xl shadow-lg hover:bg-gray-100 hover:shadow-xl border-transparent",
+        glass:
+          "glass-dark text-white rounded-2xl hover:bg-black/50 border-transparent",
+        "glass-subtle":
+          "glass-subtle text-white rounded-full hover:bg-white/30 border-transparent",
+        "icon-ghost":
+          "bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-xl border-transparent",
       },
       size: {
         default:
@@ -28,6 +37,9 @@ export const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
+        /* Design System sizes */
+        pill: "h-11 gap-2 px-6 rounded-2xl text-base has-data-[icon=inline-end]:pr-5 has-data-[icon=inline-start]:pl-5",
+        submit: "size-14 rounded-full [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {

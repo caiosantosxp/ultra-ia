@@ -1,9 +1,14 @@
+'use client';
+
 import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 import { buttonVariants } from '@/components/ui/button-variants';
+import { useT } from '@/lib/i18n/use-t';
 
 export function PaymentBanner() {
+  const t = useT();
+
   return (
     <div
       role="alert"
@@ -12,16 +17,13 @@ export function PaymentBanner() {
     >
       <div className="flex items-center gap-3">
         <AlertTriangle className="h-5 w-5 shrink-0 text-warning" aria-hidden="true" />
-        <p className="text-sm font-medium">
-          Votre paiement a échoué. Mettez à jour votre moyen de paiement pour continuer à utiliser
-          le service.
-        </p>
+        <p className="text-sm font-medium">{t.paymentBanner.text}</p>
       </div>
       <Link
         href="/billing"
         className={buttonVariants({ variant: 'outline', size: 'sm' })}
       >
-        Mettre à jour
+        {t.paymentBanner.update}
       </Link>
     </div>
   );

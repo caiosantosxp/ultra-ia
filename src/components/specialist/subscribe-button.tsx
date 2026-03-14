@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { createCheckoutSession } from '@/actions/subscription-actions';
+import { useT } from '@/lib/i18n/use-t';
 
 interface Props {
   specialistId: string;
@@ -17,6 +18,7 @@ interface Props {
 
 export function SubscribeButton({ specialistId, hasActiveSubscription, autoCheckout }: Props) {
   const router = useRouter();
+  const t = useT();
   const [isPending, startTransition] = useTransition();
   const autoCheckoutTriggeredRef = useRef(false);
 
@@ -49,7 +51,7 @@ export function SubscribeButton({ specialistId, hasActiveSubscription, autoCheck
   if (hasActiveSubscription) {
     return (
       <Link href="/chat" className={buttonVariants({ className: 'w-full min-h-11' })}>
-        Accéder au chat
+        {t.profile.accessChat}
       </Link>
     );
   }
@@ -59,9 +61,9 @@ export function SubscribeButton({ specialistId, hasActiveSubscription, autoCheck
       onClick={handleSubscribe}
       disabled={isPending}
       className="w-full min-h-11"
-      aria-label="Démarrer une conversation avec cet expert"
+      aria-label={t.profile.startConversationExpert}
     >
-      {isPending ? 'Chargement...' : 'Démarrer une conversation'}
+      {isPending ? t.profile.subscribing : t.profile.startConversation}
     </Button>
   );
 }

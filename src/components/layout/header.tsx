@@ -12,21 +12,24 @@ export async function Header() {
   const [session, t] = await Promise.all([auth(), getT()]);
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-4 lg:px-6">
-        <Link href="/" className="font-heading text-xl font-bold text-primary">
+        <Link
+          href="/"
+          className="font-heading text-xl font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
+        >
           ultra-ia
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label={t.nav.mainNav} className="hidden items-center gap-3 lg:flex">
+        <nav aria-label={t.nav.mainNav} className="hidden items-center gap-2 lg:flex">
           <DesktopNavLinks />
           <LanguageSwitcher />
           <ThemeToggle />
           {session?.user ? (
             <UserMenu user={session.user} />
           ) : (
-            <Link href="/login" className={buttonVariants({ variant: 'secondary' })}>
+            <Link href="/login" className={buttonVariants({ variant: 'default', size: 'sm' })}>
               {t.nav.login}
             </Link>
           )}

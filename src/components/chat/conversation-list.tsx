@@ -3,17 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { MessageSquare, Trash2 } from 'lucide-react';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import type { ConversationSummary } from '@/hooks/use-conversations';
+import { useT } from '@/lib/i18n/use-t';
+import { useLanguageStore } from '@/stores/language-store';
 
 interface ConversationListProps {
   conversations: ConversationSummary[];
   currentConversationId?: string;
-  // HIGH-3 fix: expose delete callback so sidebar can revalidate SWR after deletion (AC12)
   onDelete?: (id: string) => Promise<void>;
 }
 
@@ -22,12 +23,15 @@ export function ConversationList({
   currentConversationId,
   onDelete,
 }: ConversationListProps) {
+  const t = useT();
+  const locale = useLanguageStore((s) => s.locale);
+  const dateLocale = locale === 'en' ? enUS : fr;
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   if (conversations.length === 0) {
     return (
       <div className="px-3 py-4 text-center text-xs text-muted-foreground">
-        Aucune conversation
+        {t.sidebar.noConversations}
       </div>
     );
   }
@@ -49,10 +53,10 @@ export function ConversationList({
       <ul className="space-y-1 px-2 py-1" role="list" aria-label="Conversations">
         {conversations.map((conversation) => {
           const isActive = currentConversationId === conversation.id;
-          const title = conversation.title ?? 'Nouvelle conversation';
+          const title = conversation.title ?? t.sidebar.newConversation;
           const timeAgo = formatDistanceToNow(new Date(conversation.updatedAt), {
             addSuffix: true,
-            locale: fr,
+            locale: dateLocale,
           });
           const isDeleting = deletingId === conversation.id;
 
@@ -81,8 +85,8 @@ export function ConversationList({
                   onClick={(e) => handleDelete(e, conversation.id)}
                   disabled={isDeleting}
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-50"
-                  aria-label={`Supprimer la conversation ${title}`}
-                  title="Supprimer"
+                  aria-label={`${t.sidebar.deleteAria} ${title}`}
+                  title={t.sidebar.delete}
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>

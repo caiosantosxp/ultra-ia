@@ -1,0 +1,34 @@
+import { redirect } from 'next/navigation';
+
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { ExpertPanelSidebar } from '@/components/admin/expert-panel-sidebar';
+
+export default async function ExpertLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+
+  if (!session?.user) redirect('/login');
+  if (session.user.role !== 'EXPERT') redirect('/chat');
+
+  const specialist = await prisma.specialist.findFirst({
+    where: { ownerId: session.user.id },
+    select: { id: true, name: true, accentColor: true },
+  });
+
+  if (!specialist) redirect('/chat');
+
+  return (
+    <div className="flex min-h-screen">
+      <ExpertPanelSidebar
+        specialistId={specialist.id}
+        specialistName={specialist.name}
+        accentColor={specialist.accentColor}
+        basePath="/expert"
+        user={session.user}
+      />
+      <div className="flex-1 overflow-auto p-6">
+        {children}
+      </div>
+    </div>
+  );
+}

@@ -9,16 +9,23 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const access = await checkSubscriptionAccess(session.user.id);
+  // ADMIN users bypass subscription check
+  if (session.user.role !== 'ADMIN') {
+    const access = await checkSubscriptionAccess(session.user.id);
 
-  if (!access.hasAccess) {
-    return <SubscriptionBlockedPage status={access.status} />;
+    if (!access.hasAccess) {
+      return <SubscriptionBlockedPage status={access.status} />;
+    }
+
+    if (access.isPastDue) {
+      return (
+        <>
+          <PaymentBanner />
+          {children}
+        </>
+      );
+    }
   }
 
-  return (
-    <>
-      {access.isPastDue && <PaymentBanner />}
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

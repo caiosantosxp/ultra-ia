@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { register } from '@/actions/auth-actions';
 import { registerSchema, type RegisterInput } from '@/lib/validations/auth';
+import { useT } from '@/lib/i18n/use-t';
 
 function GoogleIcon() {
   return (
@@ -39,6 +40,7 @@ function GoogleIcon() {
 
 export function RegisterForm() {
   const router = useRouter();
+  const t = useT();
   const [isPending, startTransition] = useTransition();
 
   const {
@@ -61,7 +63,7 @@ export function RegisterForm() {
         } else if (result.error.code === 'VALIDATION_ERROR') {
           toast.error(result.error.message);
         } else {
-          toast.error('Une erreur inattendue est survenue. Veuillez réessayer.');
+          toast.error(t.auth.unexpectedError);
         }
         return;
       }
@@ -73,7 +75,7 @@ export function RegisterForm() {
       });
 
       if (signInResult?.error) {
-        toast.error('Compte créé ! Veuillez vous connecter manuellement.');
+        toast.error(t.auth.accountCreated);
         router.push('/login');
         return;
       }
@@ -92,8 +94,8 @@ export function RegisterForm() {
     <div className="flex w-full max-w-sm flex-col gap-6 p-6 sm:p-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="font-heading text-2xl font-bold">Créer un compte</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Rejoignez ultra-ia</p>
+        <h1 className="font-heading text-2xl font-bold">{t.auth.register}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t.auth.joinUs}</p>
       </div>
 
       {/* Google OAuth */}
@@ -105,30 +107,30 @@ export function RegisterForm() {
         disabled={isPending}
       >
         <GoogleIcon />
-        <span className="ml-2">Continuer avec Google</span>
+        <span className="ml-2">{t.auth.continueWithGoogle}</span>
       </Button>
 
       {/* Separator */}
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />
-        <span className="text-xs text-muted-foreground">ou</span>
+        <span className="text-xs text-muted-foreground">{t.auth.or}</span>
         <Separator className="flex-1" />
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-        {/* Nom */}
+        {/* Name */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="name"
             className="text-sm font-medium leading-none"
           >
-            Nom <span aria-hidden="true">*</span>
+            {t.auth.name} <span aria-hidden="true">*</span>
           </label>
           <Input
             id="name"
             type="text"
-            placeholder="Votre nom"
+            placeholder={t.auth.yourName}
             autoComplete="name"
             aria-required="true"
             aria-invalid={!!errors.name}
@@ -169,13 +171,13 @@ export function RegisterForm() {
           )}
         </div>
 
-        {/* Mot de passe */}
+        {/* Password */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="password"
             className="text-sm font-medium leading-none"
           >
-            Mot de passe <span aria-hidden="true">*</span>
+            {t.auth.password} <span aria-hidden="true">*</span>
           </label>
           <Input
             id="password"
@@ -201,15 +203,15 @@ export function RegisterForm() {
           className="mt-2 h-11 w-full"
           disabled={isPending}
         >
-          {isPending ? 'Création en cours…' : 'Créer mon compte'}
+          {isPending ? t.auth.creating : t.auth.createMyAccount}
         </Button>
       </form>
 
       {/* Login link */}
       <p className="text-center text-sm text-muted-foreground">
-        Déjà un compte ?{' '}
+        {t.auth.alreadyAccount}{' '}
         <Link href="/login" className="text-primary underline-offset-4 hover:underline">
-          Se connecter
+          {t.auth.signIn}
         </Link>
       </p>
     </div>

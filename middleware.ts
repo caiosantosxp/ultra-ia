@@ -1,14 +1,19 @@
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
 
-import { auth } from '@/lib/auth';
+import { authConfig } from '@/lib/auth.config';
+
+const { auth } = NextAuth(authConfig);
 
 const publicRoutes = ['/', '/login', '/register', '/pricing', '/privacy', '/terms', '/forgot-password', '/reset-password'];
 const publicPrefixes = ['/specialist/', '/api/auth/', '/auth/'];
 const adminRoutes = ['/admin'];
+const expertRoutes = ['/expert'];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isAuthenticated = !!req.auth;
+  const role = req.auth?.user?.role;
 
   const isPublic =
     publicRoutes.includes(pathname) ||
@@ -16,7 +21,10 @@ export default auth((req) => {
 
   if (isPublic) {
     if (isAuthenticated && (pathname === '/login' || pathname === '/register')) {
-      return NextResponse.redirect(new URL('/chat', req.url));
+      let dest = '/chat';
+      if (role === 'ADMIN') dest = '/admin/dashboard';
+      else if (role === 'EXPERT') dest = '/expert/dashboard';
+      return NextResponse.redirect(new URL(dest, req.url));
     }
     return NextResponse.next();
   }
@@ -32,9 +40,23 @@ export default auth((req) => {
   }
 
   if (adminRoutes.some((route) => pathname.startsWith(route))) {
-    if (req.auth?.user?.role !== 'ADMIN') {
+    if (role !== 'ADMIN') {
       return NextResponse.redirect(new URL('/chat', req.url));
     }
+  }
+
+  if (expertRoutes.some((route) => pathname.startsWith(route))) {
+    if (role !== 'EXPERT' && role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/chat', req.url));
+    }
+  }
+
+  if (pathname === '/chat' && role === 'ADMIN') {
+    return NextResponse.redirect(new URL('/admin/dashboard', req.url));
+  }
+
+  if (pathname === '/chat' && role === 'EXPERT') {
+    return NextResponse.redirect(new URL('/expert/dashboard', req.url));
   }
 
   return NextResponse.next();

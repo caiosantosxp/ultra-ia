@@ -20,8 +20,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { useT } from '@/lib/i18n/use-t';
 
 export function RgpdSettings() {
+  const t = useT();
   const router = useRouter();
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -47,9 +49,9 @@ export function RgpdSettings() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success('Vos données ont été téléchargées');
+      toast.success(t.settings.exportSuccess);
     } catch {
-      toast.error("Erreur lors de l'export. Veuillez réessayer.");
+      toast.error(t.settings.exportError);
     } finally {
       setIsExporting(false);
     }
@@ -62,11 +64,10 @@ export function RgpdSettings() {
       if (!response.ok) throw new Error('Delete failed');
 
       setIsDeleteDialogOpen(false);
-      // Toast shown before push so it persists in sessionStorage for the landing page
-      toast.success('Votre compte a été supprimé');
+      toast.success(t.settings.deleteSuccess);
       router.push('/');
     } catch {
-      toast.error('Erreur lors de la suppression. Veuillez réessayer.');
+      toast.error(t.settings.deleteError);
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
     }
@@ -76,20 +77,16 @@ export function RgpdSettings() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Données &amp; Confidentialité</CardTitle>
-          <CardDescription>
-            Gérez vos données personnelles conformément au RGPD.
-          </CardDescription>
+          <CardTitle>{t.settings.privacyTitle}</CardTitle>
+          <CardDescription>{t.settings.privacyDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Export Section */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">Exporter mes données</h3>
-            <p className="text-sm text-muted-foreground">
-              Téléchargez une copie de toutes vos données personnelles, conversations et abonnements.
-            </p>
+            <h3 className="text-sm font-medium">{t.settings.exportTitle}</h3>
+            <p className="text-sm text-muted-foreground">{t.settings.exportDesc}</p>
             <Button variant="outline" onClick={handleExport} disabled={isExporting}>
-              {isExporting ? 'Exportation...' : 'Télécharger mes données'}
+              {isExporting ? t.settings.exporting : t.settings.exportButton}
             </Button>
           </div>
 
@@ -97,17 +94,14 @@ export function RgpdSettings() {
 
           {/* Danger Zone */}
           <div className="space-y-2 rounded-lg border border-destructive/50 p-4">
-            <h3 className="text-sm font-medium text-destructive">Zone de danger</h3>
-            <p className="text-sm text-muted-foreground">
-              La suppression de votre compte est irréversible. Toutes vos données, conversations
-              et abonnements seront définitivement supprimés.
-            </p>
+            <h3 className="text-sm font-medium text-destructive">{t.settings.dangerZone}</h3>
+            <p className="text-sm text-muted-foreground">{t.settings.deleteDesc}</p>
             <Button
               variant="destructive"
               onClick={() => setIsDeleteDialogOpen(true)}
               disabled={isDeleting}
             >
-              Supprimer mon compte
+              {t.settings.deleteButton}
             </Button>
           </div>
         </CardContent>
@@ -117,11 +111,8 @@ export function RgpdSettings() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => !isDeleting && setIsDeleteDialogOpen(open)}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Supprimer définitivement votre compte ?</DialogTitle>
-            <DialogDescription>
-              Cette action est irréversible. Toutes vos données seront définitivement supprimées,
-              incluant votre profil, toutes vos conversations et vos abonnements actifs.
-            </DialogDescription>
+            <DialogTitle>{t.settings.deleteDialogTitle}</DialogTitle>
+            <DialogDescription>{t.settings.deleteDialogDesc}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
@@ -129,10 +120,10 @@ export function RgpdSettings() {
               onClick={() => setIsDeleteDialogOpen(false)}
               disabled={isDeleting}
             >
-              Annuler
+              {t.settings.cancel}
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Suppression...' : 'Supprimer définitivement'}
+              {isDeleting ? t.settings.deleting : t.settings.deleteConfirm}
             </Button>
           </DialogFooter>
         </DialogContent>

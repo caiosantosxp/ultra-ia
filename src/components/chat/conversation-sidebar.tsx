@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ConversationList } from '@/components/chat/conversation-list';
 import { ConversationListSkeleton } from '@/components/chat/conversation-list-skeleton';
+import { useT } from '@/lib/i18n/use-t';
 
 interface ConversationSidebarProps {
   specialistId: string;
@@ -33,7 +34,7 @@ export function ConversationSidebar({
   specialistDomain,
 }: ConversationSidebarProps) {
   const router = useRouter();
-  // HIGH-1 fix: derive active conversation from URL instead of relying on prop never passed by layout
+  const t = useT();
   const pathname = usePathname();
   const currentConversationId = pathname?.match(/^\/chat\/([^/]+)/)?.[1];
 
@@ -69,11 +70,10 @@ export function ConversationSidebar({
     return () => observer.disconnect();
   }, [hasMore, loadMore]);
 
-  // HIGH-2 fix: filter by title AND lastMessageSnippet (AC5)
   const filteredConversations = searchQuery
     ? conversations.filter((c) => {
         const q = searchQuery.toLowerCase();
-        const titleMatch = (c.title ?? 'Nouvelle conversation').toLowerCase().includes(q);
+        const titleMatch = (c.title ?? t.sidebar.newConversation).toLowerCase().includes(q);
         const contentMatch = (c.lastMessageSnippet ?? '').toLowerCase().includes(q);
         return titleMatch || contentMatch;
       })
@@ -92,12 +92,10 @@ export function ConversationSidebar({
     }
   }
 
-  // HIGH-3 fix: delete handler with SWR revalidation (AC12)
   async function handleDeleteConversation(conversationId: string) {
     const result = await deleteConversation(conversationId);
     if (result.success) {
       await mutate();
-      // If the deleted conversation was active, go to /chat
       if (currentConversationId === conversationId) {
         router.push('/chat');
       }
@@ -120,7 +118,7 @@ export function ConversationSidebar({
               <p className="truncate text-xs text-muted-foreground">{specialistDomain}</p>
             </div>
           </div>
-          <SidebarTrigger className="shrink-0" aria-label="Basculer la barre latérale" />
+          <SidebarTrigger className="shrink-0" aria-label={t.sidebar.toggleAria} />
         </div>
       </SidebarHeader>
 
@@ -130,10 +128,10 @@ export function ConversationSidebar({
           disabled={isCreating}
           className="w-full justify-start gap-2"
           size="sm"
-          aria-label="Nouvelle conversation"
+          aria-label={t.sidebar.newConversation}
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
-          {isCreating ? 'Création...' : 'Nouvelle conversation'}
+          {isCreating ? t.sidebar.creating : t.sidebar.newConversation}
         </Button>
 
         {/* Search bar — Ctrl+K (AC5) */}
@@ -145,11 +143,11 @@ export function ConversationSidebar({
           <Input
             ref={searchInputRef}
             type="search"
-            placeholder="Rechercher… (Ctrl+K)"
+            placeholder={t.sidebar.search}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-8 pl-8 text-sm"
-            aria-label="Rechercher dans les conversations"
+            aria-label={t.sidebar.searchAria}
           />
         </div>
       </div>
@@ -157,7 +155,7 @@ export function ConversationSidebar({
       <Separator />
 
       <SidebarContent>
-        <nav aria-label="Navigation des conversations" className="flex h-full flex-col">
+        <nav aria-label={t.sidebar.navAria} className="flex h-full flex-col">
           {isLoading ? (
             <ConversationListSkeleton />
           ) : (

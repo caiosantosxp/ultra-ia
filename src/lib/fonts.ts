@@ -1,30 +1,13 @@
-import localFont from 'next/font/local';
+import { Inter } from 'next/font/google';
+import { GeistMono } from 'geist/font/mono';
 
-export const poppins = localFont({
-  src: [
-    {
-      path: '../../public/fonts/poppins-600.woff2',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/poppins-700.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-heading',
-  display: 'swap',
+export const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
 });
 
-export const inter = localFont({
-  src: [
-    {
-      path: '../../public/fonts/inter-latin.woff2',
-      weight: '400 600',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-sans',
-  display: 'swap',
-});
+export const geistMono = GeistMono;
+
+// Legacy aliases para não quebrar imports existentes
+export const geistSans = inter; // aponta para Inter
+export const poppins = { variable: inter.variable };

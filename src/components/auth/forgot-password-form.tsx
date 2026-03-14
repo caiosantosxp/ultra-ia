@@ -34,7 +34,7 @@ export function ForgotPasswordForm() {
   if (submitted) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 text-center">
-        <CheckCircle className="mx-auto mb-3 size-10 text-green-500" aria-hidden="true" />
+        <CheckCircle className="mx-auto mb-3 size-10 text-blue-500" aria-hidden="true" />
         <p className="text-sm text-foreground">
           Si cet email existe, un lien de réinitialisation a été envoyé
         </p>

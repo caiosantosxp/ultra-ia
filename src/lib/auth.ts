@@ -3,18 +3,17 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import bcrypt from 'bcrypt';
+import type { Role } from '@prisma/client';
+
 import { prisma } from '@/lib/prisma';
 import { loginSchema } from '@/lib/validations/auth';
+import { authConfig } from '@/lib/auth.config';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   // @ts-expect-error — @auth/prisma-adapter@2.11.1 uses @auth/core@0.41.1; next-auth bundles 0.41.0 (minor version mismatch, safe to ignore)
   adapter: PrismaAdapter(prisma),
-  session: { strategy: 'database', maxAge: 30 * 24 * 60 * 60 },
-  pages: {
-    signIn: '/login',
-    newUser: '/register',
-    error: '/auth/error',
-  },
+  session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -38,10 +37,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { id: string; role: Role }).role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
-        session.user.role = (user as { role: import('@prisma/client').Role }).role;
+        session.user.id = token.id as string;
+        session.user.role = token.role as Role;
       }
       return session;
     },

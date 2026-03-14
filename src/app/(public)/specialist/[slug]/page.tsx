@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { APP_URL } from '@/lib/constants';
-import { SpecialistProfile, formatPrice } from '@/components/specialist/specialist-profile';
+import { SpecialistProfile } from '@/components/specialist/specialist-profile';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -81,7 +81,7 @@ export default async function SpecialistPage({ params, searchParams }: Props) {
     description: specialist.description,
     url: `${APP_URL}/specialist/${specialist.slug}`,
     image: specialist.avatarUrl,
-    priceRange: `${formatPrice(specialist.price)}/mois`,
+    priceRange: `${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(specialist.price / 100)}/mois`,
     areaServed: { '@type': 'Place', name: 'France' },
   };
 

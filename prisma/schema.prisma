@@ -23,6 +23,7 @@ model User {
   messages         Message[]
   sessions         Session[]
   subscriptions    Subscription[]
+  ownedSpecialist  Specialist?    @relation("SpecialistOwner")
 
   @@map("users")
 }
@@ -71,25 +72,37 @@ model PasswordResetToken {
 }
 
 model Specialist {
-  id            String              @id @default(cuid())
-  name          String
-  slug          String              @unique
-  domain        String
-  description   String
-  price         Int
-  accentColor   String
-  avatarUrl     String
-  tags          String[]
-  quickPrompts  String[]
-  isActive      Boolean             @default(true)
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  language      String              @default("fr")
-  scopeLimits   String?
-  systemPrompt  String?
-  conversations Conversation[]
-  knowledgeDocs KnowledgeDocument[]
-  subscriptions Subscription[]
+  id               String              @id @default(cuid())
+  name             String
+  slug             String              @unique
+  domain           String
+  description      String
+  price            Int
+  accentColor      String
+  avatarUrl        String
+  tags             String[]
+  quickPrompts     String[]
+  isActive         Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  language         String              @default("fr")
+  scopeLimits      String?
+  systemPrompt     String?
+  // Security settings
+  showSources      Boolean             @default(false)
+  showBranding     Boolean             @default(true)
+  personalBranding Boolean             @default(false)
+  hideSidebar      Boolean             @default(false)
+  requirePhone     Boolean             @default(false)
+  // Owner (expert user who manages this specialist)
+  ownerId          String?             @unique
+  owner            User?               @relation("SpecialistOwner", fields: [ownerId], references: [id])
+  conversations    Conversation[]
+  knowledgeDocs    KnowledgeDocument[]
+  subscriptions    Subscription[]
+  leads            Lead[]
+  keywords         Keyword[]
+  teamMembers      ExpertTeamMember[]
 
   @@map("specialists")
 }
@@ -164,25 +177,49 @@ model Subscription {
 }
 
 model Lead {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  score     Int      @default(0)
-  source    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String     @id @default(cuid())
+  specialistId String?
+  email        String
+  name         String?
+  phone        String?
+  score        Int        @default(0)
+  source       String?
+  status       LeadStatus @default(NEW)
+  leadType     LeadType   @default(LEAD)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  specialist   Specialist? @relation(fields: [specialistId], references: [id])
 
+  @@index([specialistId])
   @@map("leads")
 }
 
 model Keyword {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  weight    Int      @default(1)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String     @id @default(cuid())
+  specialistId String
+  name         String
+  weight       Float      @default(1)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
 
+  @@unique([specialistId, name])
+  @@index([specialistId])
   @@map("keywords")
+}
+
+model ExpertTeamMember {
+  id           String     @id @default(cuid())
+  specialistId String
+  email        String
+  name         String?
+  role         String     @default("Admin")
+  createdAt    DateTime   @default(now())
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+
+  @@unique([specialistId, email])
+  @@index([specialistId])
+  @@map("expert_team_members")
 }
 
 model DailyUsage {
@@ -212,6 +249,7 @@ model ProcessedStripeEvent {
 enum Role {
   USER
   ADMIN
+  EXPERT
 }
 
 enum MessageRole {
@@ -225,4 +263,16 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELED
   EXPIRED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  LOST
+}
+
+enum LeadType {
+  LEAD
+  PREMIUM
 }

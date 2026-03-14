@@ -67,25 +67,25 @@ export default async function HomePage() {
       />
 
       {/* Hero Section */}
-      <section className="mx-auto max-w-[1280px] px-4 py-16 lg:px-6 lg:py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+      <section className="mx-auto max-w-[1280px] px-3 py-12 md:px-6 md:pt-4 md:pb-16">
+        <div className="grid items-center gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
-            <h1 className="text-[2rem] font-bold leading-tight lg:text-4xl">
+            <h1 className="text-[2.25rem] font-bold leading-tight tracking-tight lg:text-5xl">
               {t.landing.heroTitle}
             </h1>
             <p className="text-lg text-muted-foreground lg:text-xl">
               {t.landing.heroDesc}
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3">
               <Link
                 href="#specialists"
-                className={cn(buttonVariants({ size: 'lg' }), 'min-h-11')}
+                className={cn(buttonVariants({ size: 'pill' }), 'min-h-11')}
               >
                 {t.landing.discover}
               </Link>
               <Link
                 href="#specialists"
-                className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'min-h-11')}
+                className={cn(buttonVariants({ size: 'pill', variant: 'outline' }), 'min-h-11')}
               >
                 {t.landing.demo}
               </Link>

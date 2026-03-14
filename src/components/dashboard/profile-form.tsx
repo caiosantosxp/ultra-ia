@@ -18,6 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useT } from '@/lib/i18n/use-t';
 
 interface ProfileFormProps {
   user: {
@@ -30,6 +31,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ user, isOAuthUser, oauthProvider }: ProfileFormProps) {
+  const t = useT();
   const [isPending, startTransition] = useTransition();
 
   const {
@@ -49,9 +51,9 @@ export function ProfileForm({ user, isOAuthUser, oauthProvider }: ProfileFormPro
     startTransition(async () => {
       const result = await updateProfile(data);
       if (result.success) {
-        toast.success(result.data?.message ?? 'Profil mis à jour avec succès');
+        toast.success(result.data?.message ?? t.settings.savedSuccess);
       } else {
-        toast.error(result.error?.message ?? 'Une erreur est survenue');
+        toast.error(result.error?.message ?? t.settings.error);
       }
     });
   };
@@ -61,36 +63,36 @@ export function ProfileForm({ user, isOAuthUser, oauthProvider }: ProfileFormPro
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle className="text-xl">Mon Profil</CardTitle>
-        <CardDescription>Gérez vos informations personnelles</CardDescription>
+        <CardTitle className="text-xl">{t.settings.profileTitle}</CardTitle>
+        <CardDescription>{t.settings.profileDesc}</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <CardContent className="space-y-6">
-          {/* Méthode de connexion */}
+          {/* Login method */}
           <div className="space-y-2">
-            <p className="text-sm font-medium">Méthode de connexion</p>
+            <p className="text-sm font-medium">{t.settings.loginMethod}</p>
             {isOAuthUser ? (
               <Badge variant="secondary" className="gap-1.5">
                 <span>🔗</span>
-                <span>Connecté via {providerLabel}</span>
+                <span>{t.settings.connectedVia} {providerLabel}</span>
               </Badge>
             ) : (
-              <Badge variant="secondary">Email / Mot de passe</Badge>
+              <Badge variant="secondary">{t.settings.emailPassword}</Badge>
             )}
           </div>
 
           <Separator />
 
-          {/* Nom */}
+          {/* Name */}
           <div className="space-y-1.5">
             <label htmlFor="name" className="text-sm font-medium">
-              Nom <span aria-hidden="true">*</span>
+              {t.auth.name} <span aria-hidden="true">*</span>
             </label>
             <Input
               id="name"
               type="text"
-              placeholder="Votre nom"
+              placeholder={t.auth.yourName}
               className={`h-11 ${errors.name ? 'border-destructive' : ''}`}
               aria-required="true"
               aria-invalid={!!errors.name}
@@ -117,10 +119,10 @@ export function ProfileForm({ user, isOAuthUser, oauthProvider }: ProfileFormPro
                   value={user.email ?? ''}
                   readOnly
                   className="h-11 cursor-not-allowed opacity-60"
-                  aria-label={`Email géré par ${providerLabel}`}
+                  aria-label={`${t.settings.emailManagedBy} ${providerLabel}`}
                 />
                 <p className="text-muted-foreground text-xs">
-                  Email géré par {providerLabel} — non modifiable
+                  {t.settings.emailManagedBy} {providerLabel} — {t.settings.emailNotEditable}
                 </p>
               </div>
             ) : (
@@ -152,7 +154,7 @@ export function ProfileForm({ user, isOAuthUser, oauthProvider }: ProfileFormPro
             className="w-full sm:w-auto"
             aria-busy={isPending}
           >
-            {isPending ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            {isPending ? t.settings.saving : t.settings.saveChanges}
           </Button>
         </CardFooter>
       </form>

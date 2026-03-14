@@ -23,7 +23,9 @@ export async function login(input: unknown) {
 
   try {
     await signIn('credentials', { email, password, redirect: false });
-    return { success: true as const, data: { redirectTo: '/chat' } };
+    const user = await prisma.user.findUnique({ where: { email }, select: { role: true } });
+    const redirectTo = user?.role === 'ADMIN' ? '/admin/dashboard' : '/chat';
+    return { success: true as const, data: { redirectTo } };
   } catch (error) {
     if (error instanceof AuthError) {
       return { success: false as const, error: { code: 'INVALID_CREDENTIALS', message: 'Email ou mot de passe incorrect' } };

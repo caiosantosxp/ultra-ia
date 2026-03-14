@@ -19,6 +19,13 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        /* Design System variants */
+        glass:
+          "glass-subtle text-white rounded-full border-white/30 [a]:hover:bg-white/30",
+        category:
+          "bg-zinc-100 border border-zinc-200 text-gray-700 rounded-full dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300 [a]:hover:bg-zinc-200",
+        "category-glass":
+          "glass-subtle text-white rounded-full border-white/30 [a]:hover:bg-white/30",
       },
     },
     defaultVariants: {
