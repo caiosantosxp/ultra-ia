@@ -7,6 +7,8 @@ import { prisma } from '@/lib/prisma';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExpertSubscriptionsChart } from '@/components/admin/expert-subscriptions-chart';
+import { SpecialistOwnerCard } from '@/components/admin/specialist-owner-card';
+import { getT } from '@/lib/i18n/get-t';
 
 const MESSAGE_LIMIT = 30_000;
 
@@ -16,6 +18,7 @@ export default async function ExpertDashboardPage({ params }: Props) {
   const session = await auth();
   if (!session?.user || session.user.role !== 'ADMIN') redirect('/chat');
 
+  const t = await getT();
   const { id } = await params;
 
   const now = new Date();
@@ -30,10 +33,14 @@ export default async function ExpertDashboardPage({ params }: Props) {
     uniqueUsersResult,
     newSubsData,
     knowledgeDocsCount,
+    availableExperts,
   ] = await Promise.all([
     prisma.specialist.findUnique({
       where: { id },
-      select: { id: true, name: true, avatarUrl: true, accentColor: true, isActive: true },
+      select: {
+        id: true, name: true, avatarUrl: true, accentColor: true, isActive: true,
+        owner: { select: { id: true, name: true, email: true } },
+      },
     }),
     prisma.message.count({
       where: {
@@ -58,6 +65,19 @@ export default async function ExpertDashboardPage({ params }: Props) {
       orderBy: { createdAt: 'asc' },
     }),
     prisma.knowledgeDocument.count({ where: { specialistId: id } }),
+    // EXPERT users without a specialist (available to link), excluding current owner
+    prisma.user.findMany({
+      where: {
+        role: 'EXPERT',
+        deletedAt: null,
+        OR: [
+          { ownedSpecialist: null },
+          { ownedSpecialist: { id } },
+        ],
+      },
+      select: { id: true, name: true, email: true },
+      orderBy: { name: 'asc' },
+    }),
   ]);
 
   if (!specialist) redirect('/admin/agents');
@@ -86,20 +106,20 @@ export default async function ExpertDashboardPage({ params }: Props) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-heading">
-            Bienvenue {specialist.name}&nbsp;!
+            {t.admin.agentDashboard.welcome} {specialist.name}&nbsp;!
           </h1>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
             <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
-            {specialist.isActive ? 'Votre IA est publique' : 'Votre IA est privée'}
+            {specialist.isActive ? t.admin.agentDashboard.aiPublic : t.admin.agentDashboard.aiPrivate}
           </div>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Share2 className="h-3.5 w-3.5" />
-            Partager
+            {t.admin.agentDashboard.share}
           </Button>
           <Button size="sm" className="gap-1.5" style={{ backgroundColor: specialist.accentColor }}>
-            Votre clone
+            {t.admin.agentDashboard.yourClone}
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -114,11 +134,11 @@ export default async function ExpertDashboardPage({ params }: Props) {
           {/* Votre utilisation */}
           <div className="rounded-xl border bg-card p-5 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Votre utilisation
+              {t.admin.agentDashboard.yourUsage}
             </p>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Messages ce mois-ci</span>
+                <span className="text-muted-foreground">{t.admin.agentDashboard.messagesThisMonth}</span>
                 <Badge
                   variant="outline"
                   className="text-xs"
@@ -129,9 +149,9 @@ export default async function ExpertDashboardPage({ params }: Props) {
               </div>
               <div className="flex items-baseline gap-1.5 text-sm text-muted-foreground">
                 <span className="text-xl font-bold text-foreground">
-                  {messagesThisMonth.toLocaleString('fr-FR')}
+                  {messagesThisMonth.toLocaleString(t.dateLocale)}
                 </span>
-                <span>/ {MESSAGE_LIMIT.toLocaleString('fr-FR')}</span>
+                <span>/ {MESSAGE_LIMIT.toLocaleString(t.dateLocale)}</span>
               </div>
               {/* Progress bar */}
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -146,20 +166,20 @@ export default async function ExpertDashboardPage({ params }: Props) {
           {/* Vos statistiques */}
           <div className="rounded-xl border bg-card p-5 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Vos statistiques
+              {t.admin.agentDashboard.yourStats}
             </p>
             <div className="divide-y">
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-muted-foreground">Conversations</span>
-                <span className="text-sm font-semibold">{totalConversations.toLocaleString('fr-FR')}</span>
+                <span className="text-sm text-muted-foreground">{t.admin.agentDashboard.conversations}</span>
+                <span className="text-sm font-semibold">{totalConversations.toLocaleString(t.dateLocale)}</span>
               </div>
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-muted-foreground">Messages échangés</span>
-                <span className="text-sm font-semibold">{totalMessages.toLocaleString('fr-FR')}</span>
+                <span className="text-sm text-muted-foreground">{t.admin.agentDashboard.messagesExchanged}</span>
+                <span className="text-sm font-semibold">{totalMessages.toLocaleString(t.dateLocale)}</span>
               </div>
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-muted-foreground">Utilisateurs uniques</span>
-                <span className="text-sm font-semibold">{uniqueUsers.toLocaleString('fr-FR')}</span>
+                <span className="text-sm text-muted-foreground">{t.admin.agentDashboard.uniqueUsers}</span>
+                <span className="text-sm font-semibold">{uniqueUsers.toLocaleString(t.dateLocale)}</span>
               </div>
             </div>
           </div>
@@ -169,16 +189,16 @@ export default async function ExpertDashboardPage({ params }: Props) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Revenus
+                  {t.admin.agentDashboard.revenue}
                 </p>
-                <p className="mt-0.5 text-sm font-medium">Nouveaux abonnements</p>
-                <p className="text-xs text-muted-foreground">90 derniers jours</p>
+                <p className="mt-0.5 text-sm font-medium">{t.admin.agentDashboard.newSubscriptions}</p>
+                <p className="text-xs text-muted-foreground">{t.admin.agentDashboard.last90Days}</p>
               </div>
               <Link
                 href={`/admin/agents/${id}/monetizacao/rendas`}
                 className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
               >
-                Voir tout <ArrowRight className="h-3 w-3" />
+                {t.admin.agentDashboard.seeAll} <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
             <ExpertSubscriptionsChart data={subsChartData} />
@@ -209,7 +229,7 @@ export default async function ExpertDashboardPage({ params }: Props) {
             <div className="absolute bottom-3 left-3 right-3">
               <div className="flex items-center gap-2 rounded-xl bg-black/70 px-3 py-2 text-sm text-white backdrop-blur-sm">
                 <span className="flex-1 text-xs font-medium">
-                  Vos insights et thèmes abordés
+                  {t.admin.agentDashboard.insights}
                 </span>
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold">
                   1
@@ -225,10 +245,17 @@ export default async function ExpertDashboardPage({ params }: Props) {
           >
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-muted-foreground" />
-              <span>{knowledgeDocsCount} ressources entraînées</span>
+              <span>{knowledgeDocsCount} {t.admin.agentDashboard.trainedResources}</span>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </Link>
+
+          {/* Owner management */}
+          <SpecialistOwnerCard
+            specialistId={id}
+            owner={specialist.owner ?? null}
+            availableExperts={availableExperts}
+          />
         </div>
       </div>
     </div>

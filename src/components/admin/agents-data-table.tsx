@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import {
   flexRender,
@@ -23,20 +23,23 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { type AgentRow, agentColumns } from '@/components/admin/agents-columns';
+import { type AgentRow, getAgentColumns } from '@/components/admin/agents-columns';
+import { useT } from '@/lib/i18n/use-t';
 
 interface AgentsDataTableProps {
   data: AgentRow[];
 }
 
 export function AgentsDataTable({ data }: AgentsDataTableProps) {
+  const t = useT();
+  const columns = useMemo(() => getAgentColumns(t), [t]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table known limitation with React Compiler
   const table = useReactTable({
     data,
-    columns: agentColumns,
+    columns: columns,
     state: { sorting, globalFilter },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -56,7 +59,7 @@ export function AgentsDataTable({ data }: AgentsDataTableProps) {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Input
-          placeholder="Rechercher par nom ou domaine..."
+          placeholder={t.admin.agentsPage.searchPlaceholder}
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
@@ -91,8 +94,8 @@ export function AgentsDataTable({ data }: AgentsDataTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={agentColumns.length} className="h-24 text-center text-muted-foreground">
-                  Aucun agent trouvé. Commencez par créer votre premier agent.
+                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                  {t.admin.agentsPage.noAgents}
                 </TableCell>
               </TableRow>
             )}
@@ -102,7 +105,7 @@ export function AgentsDataTable({ data }: AgentsDataTableProps) {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} agent(s) au total
+          {table.getFilteredRowModel().rows.length} {t.admin.agentsPage.total}
         </p>
         <div className="flex items-center gap-2">
           <Button
@@ -111,7 +114,7 @@ export function AgentsDataTable({ data }: AgentsDataTableProps) {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Précédent
+            {t.admin.agentsPage.previous}
           </Button>
           <span className="text-sm text-muted-foreground">
             Page {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
@@ -122,7 +125,7 @@ export function AgentsDataTable({ data }: AgentsDataTableProps) {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Suivant
+            {t.admin.agentsPage.next}
           </Button>
         </div>
       </div>

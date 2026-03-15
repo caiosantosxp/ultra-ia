@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { AdminSidebar, AdminMobileSidebar } from '@/components/admin/admin-sidebar';
 import { Breadcrumbs } from '@/components/admin/breadcrumbs';
+import { getT } from '@/lib/i18n/get-t';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Admin Ultra-IA',
@@ -20,17 +21,25 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/chat');
   }
 
+  const t = await getT();
+
+  const user = {
+    name: session.user.name,
+    email: session.user.email,
+    image: session.user.image,
+  };
+
   return (
     <div className="flex min-h-screen">
       {/* Desktop sidebar (240px, fixed) */}
-      <AdminSidebar />
+      <AdminSidebar user={user} />
 
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-auto">
         {/* Mobile header with hamburger */}
         <header className="flex h-14 items-center gap-3 border-b px-4 lg:hidden">
-          <AdminMobileSidebar />
-          <span className="font-heading text-sm font-bold text-primary">Painel Admin</span>
+          <AdminMobileSidebar user={user} />
+          <span className="font-heading text-sm font-bold text-primary">{t.admin.sidebar.adminTitle}</span>
         </header>
 
         <main className="flex-1 p-6">

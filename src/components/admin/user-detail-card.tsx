@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Copy, ExternalLink, Clock } from 'lucide-react';
+import { Copy, ExternalLink, Clock, XCircle } from 'lucide-react';
 import type { SubscriptionStatus } from '@prisma/client';
 import { toast } from 'sonner';
 import {
@@ -19,6 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useT } from '@/lib/i18n/use-t';
 
 interface Specialist {
   name: string;
@@ -41,19 +42,20 @@ interface UserDetailCardProps {
 }
 
 function SubscriptionStatusBadge({ status }: { status: SubscriptionStatus }) {
+  const t = useT();
   switch (status) {
     case 'ACTIVE':
-      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">ATIVO</Badge>;
+      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{t.admin.userSubscriptions.statusActive}</Badge>;
     case 'PAST_DUE':
       return (
-        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">PAGAMENTO FALHOU</Badge>
+        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">{t.admin.userSubscriptions.statusPastDue}</Badge>
       );
     case 'CANCELED':
-      return <Badge variant="secondary">CANCELADO</Badge>;
+      return <Badge variant="secondary">{t.admin.userSubscriptions.statusCanceled}</Badge>;
     case 'EXPIRED':
-      return <Badge variant="secondary">EXPIRADO</Badge>;
+      return <Badge variant="secondary">{t.admin.userSubscriptions.statusExpired}</Badge>;
     case 'PENDING':
-      return <Badge variant="outline">PENDENTE</Badge>;
+      return <Badge variant="outline">{t.admin.userSubscriptions.statusPending}</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -67,8 +69,10 @@ function SubscriptionActions({
   subscription: Subscription;
 }) {
   const router = useRouter();
+  const t = useT();
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [isExtending, setIsExtending] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
 
   const canTakeActions =
@@ -85,12 +89,12 @@ function SubscriptionActions({
       const json = await res.json();
       if (json.success) {
         setGeneratedLink(json.data.url);
-        toast.success('Link de pagamento gerado com sucesso!');
+        toast.success(t.admin.userSubscriptions.portalLinkSuccess);
       } else {
-        toast.error(json.error?.message ?? 'Erro ao gerar link');
+        toast.error(json.error?.message ?? t.admin.userSubscriptions.portalLinkError);
       }
     } catch {
-      toast.error('Erro de rede ao gerar link de pagamento');
+      toast.error(t.admin.userSubscriptions.portalLinkNetworkError);
     } finally {
       setIsGeneratingLink(false);
     }
@@ -106,15 +110,37 @@ function SubscriptionActions({
       });
       const json = await res.json();
       if (json.success) {
-        toast.success('Período de graça estendido em +7 dias!');
+        toast.success(t.admin.userSubscriptions.extendSuccess);
         router.refresh();
       } else {
-        toast.error(json.error?.message ?? 'Erro ao estender período');
+        toast.error(json.error?.message ?? t.admin.userSubscriptions.extendError);
       }
     } catch {
-      toast.error('Erro de rede ao estender período de graça');
+      toast.error(t.admin.userSubscriptions.extendNetworkError);
     } finally {
       setIsExtending(false);
+    }
+  }
+
+  async function handleCancelSubscription() {
+    setIsCanceling(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel-subscription', subscriptionId: subscription.id }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t.admin.userSubscriptions.cancelSuccess);
+        router.refresh();
+      } else {
+        toast.error(json.error?.message ?? t.admin.userSubscriptions.cancelError);
+      }
+    } catch {
+      toast.error(t.admin.userSubscriptions.cancelNetworkError);
+    } finally {
+      setIsCanceling(false);
     }
   }
 
@@ -122,9 +148,9 @@ function SubscriptionActions({
     if (!generatedLink) return;
     try {
       await navigator.clipboard.writeText(generatedLink);
-      toast.success('Link copiado para a área de transferência!');
+      toast.success(t.admin.userSubscriptions.copySuccess);
     } catch {
-      toast.error('Não foi possível copiar o link');
+      toast.error(t.admin.userSubscriptions.copyError);
     }
   }
 
@@ -139,7 +165,7 @@ function SubscriptionActions({
             disabled={isGeneratingLink}
           >
             <ExternalLink className="mr-2 h-4 w-4" />
-            {isGeneratingLink ? 'Gerando...' : 'Gerar link de pagamento'}
+            {isGeneratingLink ? t.admin.userSubscriptions.generating : t.admin.userSubscriptions.generateLink}
           </Button>
 
           <AlertDialog>
@@ -148,32 +174,59 @@ function SubscriptionActions({
               disabled={isExtending}
             >
               <Clock className="mr-2 h-4 w-4" />
-              {isExtending ? 'Estendendo...' : 'Estender +7 dias'}
+              {isExtending ? t.admin.userSubscriptions.extending : t.admin.userSubscriptions.extend7Days}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Confirmar extensão de acesso</AlertDialogTitle>
+                <AlertDialogTitle>{t.admin.userSubscriptions.confirmExtensionTitle}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Isso irá estender o período de acesso desta assinatura em +7 dias no banco de
-                  dados local. A alteração não será sincronizada com o Stripe imediatamente.
-                  Confirma?
+                  {t.admin.userSubscriptions.confirmExtensionDesc}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel>{t.admin.userSubscriptions.back}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleExtendGracePeriod}>
-                  Confirmar extensão
+                  {t.admin.userSubscriptions.confirmExtensionBtn}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          {subscription.status === 'ACTIVE' && (
+            <AlertDialog>
+              <AlertDialogTrigger
+                className={buttonVariants({ variant: 'destructive', size: 'sm' })}
+                disabled={isCanceling}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                {isCanceling ? t.admin.userSubscriptions.canceling : t.admin.userSubscriptions.cancelSubscription}
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.admin.userSubscriptions.cancelViaStripeTitle}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t.admin.userSubscriptions.cancelViaStripeDesc}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.admin.userSubscriptions.back}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleCancelSubscription}
+                    className={buttonVariants({ variant: 'destructive' })}
+                  >
+                    {t.admin.userSubscriptions.confirmCancel}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       )}
 
       {generatedLink && (
         <div className="rounded-md border bg-muted p-3">
           <p className="mb-2 text-xs font-medium text-muted-foreground">
-            Link gerado (compartilhe com o usuário):
+            {t.admin.userSubscriptions.generatedLink}
           </p>
           <div className="flex items-center gap-2">
             <code className="flex-1 truncate rounded text-xs">{generatedLink}</code>
@@ -188,15 +241,17 @@ function SubscriptionActions({
 }
 
 export function UserDetailCard({ userId, subscriptions }: UserDetailCardProps) {
+  const t = useT();
+
   if (subscriptions.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Assinaturas</CardTitle>
+          <CardTitle className="text-base">{t.admin.userSubscriptions.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Este usuário não possui assinaturas registradas.
+            {t.admin.userSubscriptions.noSubscriptions}
           </p>
         </CardContent>
       </Card>
@@ -206,7 +261,7 @@ export function UserDetailCard({ userId, subscriptions }: UserDetailCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Assinaturas</CardTitle>
+        <CardTitle className="text-base">{t.admin.userSubscriptions.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {subscriptions.map((sub) => (
@@ -223,17 +278,17 @@ export function UserDetailCard({ userId, subscriptions }: UserDetailCardProps) {
               <div className="text-xs text-muted-foreground">
                 {sub.currentPeriodStart && (
                   <span>
-                    Início: {new Date(sub.currentPeriodStart).toLocaleDateString('pt-BR')}
+                    {t.admin.userSubscriptions.startDate}: {new Date(sub.currentPeriodStart).toLocaleDateString(t.dateLocale)}
                   </span>
                 )}
                 {sub.currentPeriodStart && sub.currentPeriodEnd && ' → '}
                 {sub.currentPeriodEnd && (
                   <span>
-                    Fim: {new Date(sub.currentPeriodEnd).toLocaleDateString('pt-BR')}
+                    {t.admin.userSubscriptions.endDate}: {new Date(sub.currentPeriodEnd).toLocaleDateString(t.dateLocale)}
                   </span>
                 )}
                 {sub.cancelAtPeriodEnd && (
-                  <span className="ml-2 text-orange-600">(Cancelamento agendado)</span>
+                  <span className="ml-2 text-orange-600">({t.admin.userSubscriptions.scheduledCancellation})</span>
                 )}
               </div>
             )}

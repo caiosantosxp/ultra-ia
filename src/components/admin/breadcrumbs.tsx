@@ -3,22 +3,24 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
-
-const SEGMENT_LABELS: Record<string, string> = {
-  admin: 'Admin',
-  dashboard: 'Dashboard',
-  agents: 'Agentes',
-  users: 'Usuários',
-  analytics: 'Analytics',
-  settings: 'Config',
-};
-
-function formatSegment(segment: string): string {
-  return SEGMENT_LABELS[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
-}
+import { useT } from '@/lib/i18n/use-t';
 
 export function Breadcrumbs() {
   const pathname = usePathname();
+  const t = useT();
+
+  const SEGMENT_LABELS: Record<string, string> = {
+    admin: 'Admin',
+    dashboard: t.admin.nav.dashboard,
+    agents: t.admin.nav.agents,
+    users: t.admin.nav.users,
+    analytics: t.admin.nav.analytics,
+    settings: t.admin.nav.settings,
+  };
+
+  function formatSegment(segment: string): string {
+    return SEGMENT_LABELS[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
+  }
   const segments = pathname.split('/').filter(Boolean);
 
   if (segments.length === 0) return null;

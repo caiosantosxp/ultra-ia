@@ -4,13 +4,19 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { AgentsDataTable } from '@/components/admin/agents-data-table';
 import { CreateAgentDialog } from '@/components/admin/create-agent-dialog';
+import { getT } from '@/lib/i18n/get-t';
 
 export default async function AgentsPage() {
   const session = await auth();
   if (!session?.user || session.user.role !== 'ADMIN') redirect('/chat');
 
+  const t = await getT();
+
   const agents = await prisma.specialist.findMany({
-    include: { _count: { select: { subscriptions: true, conversations: true } } },
+    include: {
+      _count: { select: { subscriptions: true, conversations: true } },
+      owner: { select: { id: true, name: true, email: true } },
+    },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -18,9 +24,9 @@ export default async function AgentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Agents</h1>
+          <h1 className="text-2xl font-bold font-heading">{t.admin.agentsPage.title}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {agents.length} agent{agents.length !== 1 ? 's' : ''} enregistré{agents.length !== 1 ? 's' : ''}
+            {agents.length} {t.admin.agentsPage.total}
           </p>
         </div>
         <CreateAgentDialog />

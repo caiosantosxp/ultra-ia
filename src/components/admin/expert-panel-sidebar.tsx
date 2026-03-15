@@ -15,10 +15,12 @@ import {
   TrendingUp,
   User,
   Users,
+  Users2,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/use-t';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +53,7 @@ export function ExpertPanelSidebar({
 }: ExpertPanelSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useT();
   const base = basePath ?? `/admin/agents/${specialistId}`;
 
   function isActive(segment: string) {
@@ -116,27 +119,33 @@ export function ExpertPanelSidebar({
         <NavItem
           href={`${base}/dashboard`}
           icon={LayoutDashboard}
-          label="Tableau de bord"
+          label={t.admin.expertSidebar.dashboard}
           active={isActive('dashboard')}
         />
         <NavItem
           href={`${base}/analytics`}
           icon={BarChart2}
-          label="Utilisation"
+          label={t.admin.expertSidebar.usage}
           active={isActive('analytics')}
+        />
+        <NavItem
+          href={`${base}/subscribers`}
+          icon={Users2}
+          label={t.admin.expertSidebar.subscribers}
+          active={isActive('subscribers')}
         />
         <NavItem
           href={`${base}/personalizacao`}
           icon={Settings2}
-          label="Personnalisation"
+          label={t.admin.expertSidebar.customization}
           active={isActive('personalizacao')}
         />
 
-        <SectionLabel>Identity</SectionLabel>
+        <SectionLabel>{t.admin.expertSidebar.identitySection}</SectionLabel>
         <NavItem
           href={`${base}/identidade/treinamento`}
           icon={BookOpen}
-          label="Entrainement"
+          label={t.admin.expertSidebar.training}
           active={
             pathname.includes('/identidade/treinamento') ||
             pathname.endsWith('/identidade')
@@ -145,17 +154,17 @@ export function ExpertPanelSidebar({
         <NavItem
           href={`${base}/identidade/voz`}
           icon={Mic}
-          label="Voix"
+          label={t.admin.expertSidebar.voice}
           active={pathname.includes('/identidade/voz')}
         />
         <NavItem
           href={`${base}/identidade/instrucoes`}
           icon={Settings}
-          label="Instructions"
+          label={t.admin.expertSidebar.instructions}
           active={pathname.includes('/identidade/instrucoes')}
         />
 
-        <SectionLabel>Monetization</SectionLabel>
+        <SectionLabel>{t.admin.expertSidebar.monetizationSection}</SectionLabel>
 
         {/* Leads parent */}
         <div>
@@ -168,7 +177,7 @@ export function ExpertPanelSidebar({
             )}
           >
             <Users className="h-4 w-4 shrink-0" />
-            <span className="flex-1">Leads</span>
+            <span className="flex-1">{t.admin.expertSidebar.leads}</span>
             <ChevronRight
               className={cn(
                 'h-3.5 w-3.5 shrink-0 opacity-50 transition-transform',
@@ -181,7 +190,7 @@ export function ExpertPanelSidebar({
             <NavItem
               href={`${base}/monetizacao/leads`}
               icon={Users}
-              label="Tableau"
+              label={t.admin.expertSidebar.leadsTable}
               active={
                 pathname === `${base}/monetizacao/leads` ||
                 (leadsActive && !pathname.includes('/configuracao'))
@@ -191,7 +200,7 @@ export function ExpertPanelSidebar({
             <NavItem
               href={`${base}/monetizacao/leads/configuracao`}
               icon={Settings2}
-              label="Configuration"
+              label={t.admin.expertSidebar.leadsConfig}
               active={pathname.includes('/leads/configuracao')}
               indent
             />
@@ -201,7 +210,7 @@ export function ExpertPanelSidebar({
         <NavItem
           href={`${base}/monetizacao/rendas`}
           icon={TrendingUp}
-          label="Revenus"
+          label={t.admin.expertSidebar.revenue}
           active={rendasActive}
         />
       </nav>
@@ -213,7 +222,7 @@ export function ExpertPanelSidebar({
             href="/admin/agents"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Voltar para agentes
+            {t.admin.expertSidebar.backToAgents}
           </Link>
         </div>
       )}
@@ -222,8 +231,7 @@ export function ExpertPanelSidebar({
       {user && (
         <div className="border-t px-2 py-3">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted/60 focus:outline-none">
+            <DropdownMenuTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted/60 focus:outline-none bg-transparent border-0">
                 <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                   {user.image ? (
                     <Image
@@ -240,7 +248,7 @@ export function ExpertPanelSidebar({
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col text-left">
                   <span className="truncate text-xs font-medium text-foreground">
-                    {user.name ?? 'Mon compte'}
+                    {user.name ?? t.admin.expertSidebar.myAccount}
                   </span>
                   {user.email && (
                     <span className="truncate text-[10px] text-muted-foreground">
@@ -249,7 +257,6 @@ export function ExpertPanelSidebar({
                   )}
                 </div>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-40" />
-              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="start" className="w-52">
               <DropdownMenuGroup>
@@ -260,7 +267,7 @@ export function ExpertPanelSidebar({
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push('/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
-                Paramètres du compte
+                {t.admin.expertSidebar.accountSettings}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -268,7 +275,7 @@ export function ExpertPanelSidebar({
                 onClick={() => signOut({ callbackUrl: '/login' })}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                Se déconnecter
+                {t.admin.expertSidebar.signOut}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
