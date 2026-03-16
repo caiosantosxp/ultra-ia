@@ -24,7 +24,10 @@ export async function login(input: unknown) {
   try {
     await signIn('credentials', { email, password, redirect: false });
     const user = await prisma.user.findUnique({ where: { email }, select: { role: true } });
-    const redirectTo = user?.role === 'ADMIN' ? '/admin/dashboard' : '/chat';
+    const redirectTo =
+      user?.role === 'ADMIN' ? '/admin/dashboard' :
+      user?.role === 'EXPERT' ? '/expert/dashboard' :
+      '/chat';
     return { success: true as const, data: { redirectTo } };
   } catch (error) {
     if (error instanceof AuthError) {
