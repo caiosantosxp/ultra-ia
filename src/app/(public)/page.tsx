@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -10,20 +11,21 @@ import { ChatHeroPreview } from '@/components/specialist/chat-hero-preview';
 import { SpecialistCard } from '@/components/specialist/specialist-card';
 import { cn } from '@/lib/utils';
 
-export const metadata: Metadata = {
-  title: 'ultra-ia | Votre Expert IA Spécialisé',
-  description:
-    'Accédez à des experts IA spécialisés disponibles 24h/24. Conseils personnalisés en gestion, finance, RH et plus encore.',
-  openGraph: {
-    title: 'ultra-ia | Votre Expert IA Spécialisé',
-    description: 'Accédez à des experts IA spécialisés disponibles 24h/24.',
-    url: APP_URL,
-    siteName: 'ultra-ia',
-    images: [{ url: '/images/og/landing.webp', width: 1200, height: 630 }],
-    type: 'website',
-    locale: 'fr_FR',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t.landing.metaTitle,
+    description: t.landing.metaDesc,
+    openGraph: {
+      title: t.landing.metaTitle,
+      description: t.landing.metaDesc,
+      url: APP_URL,
+      siteName: 'ultra-ia',
+      images: [{ url: '/images/og/landing.webp', width: 1200, height: 630 }],
+      type: 'website',
+    },
+  };
+}
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -48,6 +50,10 @@ async function getSpecialists() {
 
 export default async function HomePage() {
   const [specialists, session, t] = await Promise.all([getSpecialists(), auth(), getT()]);
+
+  if (session?.user?.role === 'EXPERT') {
+    redirect('/expert/dashboard');
+  }
 
   const userId = session?.user?.id;
   let activeSubscriptionIds = new Set<string>();

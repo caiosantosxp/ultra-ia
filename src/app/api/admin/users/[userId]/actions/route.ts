@@ -5,9 +5,11 @@ import { stripe } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 
-const actionSchema = z.object({
-  action: z.enum(['generate-portal-link', 'extend-grace-period']),
-});
+const actionSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('generate-portal-link') }),
+  z.object({ action: z.literal('extend-grace-period') }),
+  z.object({ action: z.literal('cancel-subscription'), subscriptionId: z.string() }),
+]);
 
 export async function POST(
   request: Request,
@@ -135,6 +137,44 @@ export async function POST(
     );
 
     return Response.json({ success: true, data: { subscription: updated } });
+  }
+
+  if (action === 'cancel-subscription') {
+    const { subscriptionId } = parsed.data;
+
+    const subscription = await prisma.subscription.findFirst({
+      where: { id: subscriptionId, userId },
+      select: { id: true, stripeSubscriptionId: true, status: true },
+    });
+
+    if (!subscription) {
+      return Response.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Assinatura não encontrada' } },
+        { status: 404 }
+      );
+    }
+
+    if (subscription.status !== 'ACTIVE' && subscription.status !== 'PAST_DUE') {
+      return Response.json(
+        { success: false, error: { code: 'CONFLICT', message: 'Assinatura não está ativa' } },
+        { status: 409 }
+      );
+    }
+
+    await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+
+    await prisma.subscription.update({
+      where: { id: subscriptionId },
+      data: { status: 'CANCELED', cancelAtPeriodEnd: false },
+    });
+
+    console.log(JSON.stringify({
+      audit: 'admin_action', action: 'cancel-subscription',
+      adminId: session.user.id, targetUserId: userId,
+      subscriptionId, timestamp: new Date().toISOString(),
+    }));
+
+    return Response.json({ success: true, data: { subscriptionId } });
   }
 
   return Response.json(

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME, CONTACT_EMAIL } from '@/lib/constants';
 import { useT } from '@/lib/i18n/use-t';
 
 export function Footer() {
@@ -19,10 +19,10 @@ export function Footer() {
             </Link>
             <p className="mt-2 text-sm text-muted-foreground">{t.footer.tagline}</p>
             <a
-              href="mailto:contact@ultra-ia.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="mt-3 block text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              contact@ultra-ia.com
+              {CONTACT_EMAIL}
             </a>
           </div>
 

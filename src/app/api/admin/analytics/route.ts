@@ -41,21 +41,58 @@ const getCachedAgentMetrics = unstable_cache(
     const conversationsPerWeek =
       totalConversations > 0 ? (totalConversations / (period / 7)).toFixed(1) : '0';
 
-    // Daily message data for line chart using $queryRaw (Prisma groupBy doesn't support DATE() truncation)
-    // Note: COUNT returns bigint by default in PostgreSQL; ::int cast + Number() ensures safe JSON serialization
+    // Daily message data for line chart
+    // Note: DB columns use camelCase (Prisma default without @map on fields)
     const rawDailyData = await prisma.$queryRaw<Array<{ date: string; count: unknown }>>`
       SELECT
-        DATE(m.created_at)::text AS date,
+        DATE(m."createdAt")::text AS date,
         COUNT(m.id)::int AS count
       FROM messages m
-      JOIN conversations c ON m.conversation_id = c.id
-      WHERE c.specialist_id = ${specialistId}
-        AND m.created_at >= ${startDate}
-        AND c.is_deleted = false
-      GROUP BY DATE(m.created_at)
+      JOIN conversations c ON m."conversationId" = c.id
+      WHERE c."specialistId" = ${specialistId}
+        AND m."createdAt" >= ${startDate}
+        AND c."isDeleted" = false
+      GROUP BY DATE(m."createdAt")
       ORDER BY date ASC
     `;
     const dailyData = rawDailyData.map((row) => ({ date: row.date, count: Number(row.count) }));
+
+    // Sessions by country (conversations grouped by country)
+    const rawCountryData = await prisma.$queryRaw<Array<{ country: string; count: unknown }>>`
+      SELECT
+        COALESCE(country, 'Autre') AS country,
+        COUNT(*)::int AS count
+      FROM conversations
+      WHERE "specialistId" = ${specialistId}
+        AND "createdAt" >= ${startDate}
+        AND "isDeleted" = false
+      GROUP BY COALESCE(country, 'Autre')
+      ORDER BY count DESC
+      LIMIT 10
+    `;
+    const totalConvForPct = rawCountryData.reduce((s, r) => s + Number(r.count), 0) || 1;
+    const countryData = rawCountryData.map((row) => ({
+      country: row.country,
+      count: Number(row.count),
+      percentage: Math.round((Number(row.count) / totalConvForPct) * 100),
+    }));
+
+    // Activity by hour of day (messages grouped by hour)
+    const rawHourlyData = await prisma.$queryRaw<Array<{ hour: unknown; count: unknown }>>`
+      SELECT
+        EXTRACT(HOUR FROM m."createdAt")::int AS hour,
+        COUNT(m.id)::int AS count
+      FROM messages m
+      JOIN conversations c ON m."conversationId" = c.id
+      WHERE c."specialistId" = ${specialistId}
+        AND m."createdAt" >= ${startDate}
+        AND c."isDeleted" = false
+      GROUP BY EXTRACT(HOUR FROM m."createdAt")
+      ORDER BY hour ASC
+    `;
+    // Fill in missing hours with 0
+    const hourMap = new Map(rawHourlyData.map((r) => [Number(r.hour), Number(r.count)]));
+    const hourlyData = Array.from({ length: 24 }, (_, h) => ({ hour: h, count: hourMap.get(h) ?? 0 }));
 
     return {
       totalMessages,
@@ -64,9 +101,11 @@ const getCachedAgentMetrics = unstable_cache(
       messagesPerDay,
       conversationsPerWeek,
       dailyData,
+      countryData,
+      hourlyData,
     };
   },
-  ['agent-metrics'],
+  ['agent-metrics-v2'],
   {
     revalidate: 300, // 5 minutes
     tags: ['analytics'],
@@ -120,7 +159,7 @@ const getPlatformMetrics = unstable_cache(
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
     const firstDayThisMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    const [activeSubscribersData, messagesTodayResult, messagesYesterdayResult, totalUsers] =
+    const [activeSubscribersData, messagesTodayResult, messagesYesterdayResult, totalUsers, totalExperts, totalAgents] =
       await Promise.all([
         // Fetch active subs with specialist price and createdAt for MRR + trend in one query
         prisma.subscription.findMany({
@@ -129,7 +168,9 @@ const getPlatformMetrics = unstable_cache(
         }),
         prisma.dailyUsage.aggregate({ _sum: { count: true }, where: { date: today } }),
         prisma.dailyUsage.aggregate({ _sum: { count: true }, where: { date: yesterday } }),
-        prisma.user.count({ where: { role: 'USER' } }),
+        prisma.user.count({ where: { deletedAt: null } }),
+        prisma.user.count({ where: { role: 'EXPERT', deletedAt: null } }),
+        prisma.specialist.count({ where: { isActive: true } }),
       ]);
 
     const activeSubscribers = activeSubscribersData.length;
@@ -161,6 +202,9 @@ const getPlatformMetrics = unstable_cache(
         : 0,
       retentionRate: totalUsers > 0 ? Math.round((activeSubscribers / totalUsers) * 100) : 0,
       retentionRateTrend: 0,
+      totalUsers,
+      totalExperts,
+      totalAgents,
     };
   },
   ['admin-platform-metrics'],
@@ -174,19 +218,37 @@ export async function GET(request: NextRequest) {
     return Response.json({ success: false, error: 'UNAUTHORIZED' }, { status: 401 });
   }
 
-  if (session.user.role !== 'ADMIN') {
-    return Response.json({ success: false, error: 'FORBIDDEN' }, { status: 403 });
-  }
-
   const { searchParams } = request.nextUrl;
   const type = searchParams.get('type');
   const specialistId = searchParams.get('specialistId') ?? null;
   const rawPeriod = parseInt(searchParams.get('period') ?? '30');
-  const period = Math.min(90, Math.max(7, isNaN(rawPeriod) ? 30 : rawPeriod)) as 7 | 30 | 90;
+  const period = Math.min(90, Math.max(7, isNaN(rawPeriod) ? 30 : rawPeriod)) as 7 | 15 | 30 | 90;
+
+  const isAdmin = session.user.role === 'ADMIN';
+  const isExpert = session.user.role === 'EXPERT';
+
+  // Experts may only access their own specialist's metrics
+  if (!isAdmin && !isExpert) {
+    return Response.json({ success: false, error: 'FORBIDDEN' }, { status: 403 });
+  }
+
+  if (isExpert && specialistId) {
+    const owned = await prisma.specialist.findFirst({
+      where: { id: specialistId, ownerId: session.user.id },
+      select: { id: true },
+    });
+    if (!owned) {
+      return Response.json({ success: false, error: 'FORBIDDEN' }, { status: 403 });
+    }
+  }
+
+  if (!isAdmin && !specialistId) {
+    return Response.json({ success: false, error: 'FORBIDDEN' }, { status: 403 });
+  }
 
   try {
-    // Platform dashboard metrics (Story 5.1)
-    if (type === 'platform' || (!specialistId && !searchParams.has('period'))) {
+    // Platform dashboard metrics (Story 5.1) — admin only
+    if (isAdmin && (type === 'platform' || (!specialistId && !searchParams.has('period')))) {
       const data = await getPlatformMetrics();
       return Response.json({ success: true, data });
     }

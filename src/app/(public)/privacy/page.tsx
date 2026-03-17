@@ -1,214 +1,126 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { APP_NAME, APP_URL } from '@/lib/constants';
+import { getT } from '@/lib/i18n/get-t';
 
-export const metadata: Metadata = {
-  title: 'Politique de Confidentialité',
-  description: `Politique de confidentialité de ${APP_NAME}. Découvrez comment nous protégeons vos données personnelles conformément au RGPD.`,
-  alternates: { canonical: `${APP_URL}/privacy` },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t.privacy.metaTitle,
+    description: t.privacy.metaDesc,
+    alternates: { canonical: `${APP_URL}/privacy` },
+  };
+}
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const t = await getT();
+  const p = t.privacy;
+
   return (
     <article className="mx-auto max-w-prose px-4 py-12 sm:px-6">
-      <h1 className="font-heading text-3xl font-bold text-foreground sm:text-4xl">
-        Politique de Confidentialité
-      </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Dernière mise à jour : 11 mars 2026
-      </p>
+      <h1 className="font-heading text-3xl font-bold text-foreground sm:text-4xl">{p.title}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{p.lastUpdated}</p>
 
       <section className="mt-10 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          1. Données Collectées
-        </h2>
-        <p className="text-foreground">
-          Dans le cadre de la fourniture de nos services, {APP_NAME} collecte les données suivantes :
-        </p>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s1Title}</h2>
+        <p className="text-foreground">{p.s1Intro.replace('{APP_NAME}', APP_NAME)}</p>
         <ul className="ml-6 list-disc space-y-1 text-foreground">
-          <li>
-            <strong>Données de compte :</strong> nom, adresse e-mail, mot de passe hashé
-          </li>
-          <li>
-            <strong>Données de conversation :</strong> historique des échanges avec les spécialistes IA
-            (anonymisées après suppression du compte)
-          </li>
-          <li>
-            <strong>Données de paiement :</strong> traitées exclusivement par Stripe — nous ne
-            stockons aucune donnée de carte bancaire
-          </li>
-          <li>
-            <strong>Cookies fonctionnels :</strong> préférences de thème (clair/sombre),
-            consentement aux cookies
-          </li>
+          <li><strong>{p.s1Item1Label}</strong> {p.s1Item1Text}</li>
+          <li><strong>{p.s1Item2Label}</strong> {p.s1Item2Text}</li>
+          <li><strong>{p.s1Item3Label}</strong> {p.s1Item3Text}</li>
+          <li><strong>{p.s1Item4Label}</strong> {p.s1Item4Text}</li>
         </ul>
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          2. Base Légale du Traitement
-        </h2>
-        <p className="text-foreground">
-          Le traitement de vos données personnelles est fondé sur les bases légales suivantes,
-          conformément au RGPD :
-        </p>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s2Title}</h2>
+        <p className="text-foreground">{p.s2Intro}</p>
         <ul className="ml-6 list-disc space-y-1 text-foreground">
-          <li>
-            <strong>Votre consentement (Art. 6.1.a RGPD) :</strong> pour les cookies non essentiels
-            et les communications marketing
-          </li>
-          <li>
-            <strong>{"L'exécution du contrat"} (Art. 6.1.b RGPD) :</strong> pour la fourniture du
-            service et la gestion de votre abonnement
-          </li>
-          <li>
-            <strong>{"L'intérêt légitime"} (Art. 6.1.f RGPD) :</strong> pour la sécurité de la
-            plateforme et la prévention des fraudes
-          </li>
+          <li><strong>{p.s2Item1Label}</strong> {p.s2Item1Text}</li>
+          <li><strong>{p.s2Item2Label}</strong> {p.s2Item2Text}</li>
+          <li><strong>{p.s2Item3Label}</strong> {p.s2Item3Text}</li>
         </ul>
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          3. Finalité du Traitement
-        </h2>
-        <p className="text-foreground">Vos données sont utilisées pour :</p>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s3Title}</h2>
+        <p className="text-foreground">{p.s3Intro}</p>
         <ul className="ml-6 list-disc space-y-1 text-foreground">
-          <li>Fournir et améliorer le service de consultation avec les spécialistes IA</li>
-          <li>Gérer votre compte et votre abonnement</li>
-          <li>Traiter les paiements via Stripe</li>
-          <li>{"Vous envoyer des communications transactionnelles (confirmations, factures)"}</li>
-          <li>Assurer la sécurité et prévenir les abus</li>
+          <li>{p.s3Item1}</li>
+          <li>{p.s3Item2}</li>
+          <li>{p.s3Item3}</li>
+          <li>{p.s3Item4}</li>
+          <li>{p.s3Item5}</li>
         </ul>
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          4. Vos Droits
-        </h2>
-        <p className="text-foreground">
-          Conformément au RGPD, vous disposez des droits suivants concernant vos données
-          personnelles :
-        </p>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s4Title}</h2>
+        <p className="text-foreground">{p.s4Intro}</p>
         <ul className="ml-6 list-disc space-y-1 text-foreground">
-          <li>
-            <strong>Droit {"d'accès"} (Art. 15) :</strong> obtenir une copie de vos données
-            personnelles
-          </li>
-          <li>
-            <strong>Droit de rectification (Art. 16) :</strong> corriger des données inexactes
-          </li>
-          <li>
-            <strong>Droit à {"l'effacement"} (Art. 17) :</strong> demander la suppression de vos
-            données
-          </li>
-          <li>
-            <strong>Droit à la portabilité (Art. 20) :</strong> recevoir vos données dans un format
-            structuré
-          </li>
-          <li>
-            <strong>Droit {"d'opposition"} (Art. 21) :</strong> vous opposer au traitement de vos
-            données
-          </li>
-          <li>
-            <strong>Droit à la limitation (Art. 18) :</strong> limiter le traitement de vos données
-          </li>
+          <li><strong>{p.s4Item1Label}</strong> {p.s4Item1Text}</li>
+          <li><strong>{p.s4Item2Label}</strong> {p.s4Item2Text}</li>
+          <li><strong>{p.s4Item3Label}</strong> {p.s4Item3Text}</li>
+          <li><strong>{p.s4Item4Label}</strong> {p.s4Item4Text}</li>
+          <li><strong>{p.s4Item5Label}</strong> {p.s4Item5Text}</li>
+          <li><strong>{p.s4Item6Label}</strong> {p.s4Item6Text}</li>
         </ul>
         <p className="text-foreground">
-          Pour exercer ces droits, contactez notre Délégué à la Protection des Données (DPO) à :{' '}
+          {p.s4DPOText}{' '}
           <a
-            href="mailto:dpo@ultra-ia.fr"
+            href={`mailto:${DPO_EMAIL}`}
             className="text-primary underline hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            dpo@ultra-ia.fr
+            {DPO_EMAIL}
           </a>
         </p>
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">5. Cookies</h2>
-        <p className="text-foreground">
-          {"Nous utilisons uniquement des cookies fonctionnels essentiels au bon fonctionnement de la plateforme :"}
-        </p>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s5Title}</h2>
+        <p className="text-foreground">{p.s5Intro}</p>
         <ul className="ml-6 list-disc space-y-1 text-foreground">
-          <li>
-            <strong>Préférence de thème :</strong> mémorisation du mode clair/sombre (localStorage)
-          </li>
-          <li>
-            <strong>Consentement aux cookies :</strong> mémorisation de votre choix (localStorage)
-          </li>
-          <li>
-            <strong>Session utilisateur :</strong> maintien de votre connexion (cookie sécurisé)
-          </li>
+          <li><strong>{p.s5Item1Label}</strong> {p.s5Item1Text}</li>
+          <li><strong>{p.s5Item2Label}</strong> {p.s5Item2Text}</li>
+          <li><strong>{p.s5Item3Label}</strong> {p.s5Item3Text}</li>
         </ul>
-        <p className="text-foreground">
-          Nous {"n'utilisons"} pas de cookies analytiques ou publicitaires dans cette version du
-          service.
-        </p>
+        <p className="text-foreground">{p.s5NoCookies}</p>
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          6. Durée de Conservation
-        </h2>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s6Title}</h2>
         <ul className="ml-6 list-disc space-y-1 text-foreground">
-          <li>
-            <strong>Données de compte :</strong> durée de {"l'abonnement"} + 1 an après résiliation
-          </li>
-          <li>
-            <strong>Données de conversation :</strong> anonymisées dans les 30 jours suivant la
-            suppression du compte
-          </li>
-          <li>
-            <strong>Données de facturation :</strong> 10 ans (obligation légale comptable)
-          </li>
-          <li>
-            <strong>Logs de sécurité :</strong> 12 mois
-          </li>
+          <li><strong>{p.s6Item1Label}</strong> {p.s6Item1Text}</li>
+          <li><strong>{p.s6Item2Label}</strong> {p.s6Item2Text}</li>
+          <li><strong>{p.s6Item3Label}</strong> {p.s6Item3Text}</li>
+          <li><strong>{p.s6Item4Label}</strong> {p.s6Item4Text}</li>
         </ul>
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          7. Transferts Internationaux
-        </h2>
-        <p className="text-foreground">
-          Vos données peuvent être traitées par nos sous-traitants dans les conditions suivantes :
-        </p>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s7Title}</h2>
+        <p className="text-foreground">{p.s7Intro}</p>
         <ul className="ml-6 list-disc space-y-1 text-foreground">
-          <li>
-            <strong>Stripe (paiements) :</strong> États-Unis — couvert par des clauses contractuelles
-            types (CCT) approuvées par la Commission européenne
-          </li>
-          <li>
-            <strong>Vercel (hébergement) :</strong> Région EU — conformité RGPD garantie
-          </li>
-          <li>
-            <strong>Neon (base de données) :</strong> Frankfurt, UE — aucun transfert hors UE
-          </li>
+          <li><strong>{p.s7Item1Label}</strong> {p.s7Item1Text}</li>
+          <li><strong>{p.s7Item2Label}</strong> {p.s7Item2Text}</li>
+          <li><strong>{p.s7Item3Label}</strong> {p.s7Item3Text}</li>
         </ul>
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          8. Contact DPO & Réclamations
-        </h2>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s8Title}</h2>
+        <p className="text-foreground">{p.s8Intro}</p>
         <p className="text-foreground">
-          Pour toute question relative à vos données personnelles ou pour exercer vos droits,
-          contactez notre Délégué à la Protection des Données :
-        </p>
-        <p className="text-foreground">
-          <strong>Email :</strong>{' '}
+          <strong>{p.s8Email}</strong>{' '}
           <a
-            href="mailto:dpo@ultra-ia.fr"
+            href={`mailto:${DPO_EMAIL}`}
             className="text-primary underline hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            dpo@ultra-ia.fr
+            {DPO_EMAIL}
           </a>
         </p>
         <p className="text-foreground">
-          Vous avez également le droit de déposer une réclamation auprès de la{' '}
-          <strong>CNIL</strong> (Commission Nationale de {"l'Informatique"} et des Libertés) :{' '}
+          {p.s8CNILText}{' '}
           <a
             href="https://www.cnil.fr"
             target="_blank"
@@ -221,25 +133,18 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mt-8 space-y-2">
-        <h2 className="font-heading text-xl font-semibold text-foreground">
-          9. Modifications de la Politique
-        </h2>
-        <p className="text-foreground">
-          Nous nous réservons le droit de modifier cette politique de confidentialité. En cas de
-          modification substantielle, vous serez notifié par email au moins 30 jours avant
-          {"l'entrée"} en vigueur des changements. La date de dernière mise à jour est indiquée en
-          haut de cette page.
-        </p>
+        <h2 className="font-heading text-xl font-semibold text-foreground">{p.s9Title}</h2>
+        <p className="text-foreground">{p.s9Text}</p>
       </section>
 
       <div className="mt-10 border-t pt-6">
         <p className="text-sm text-muted-foreground">
-          Voir également nos{' '}
+          {p.seeAlso}{' '}
           <Link
             href="/terms"
             className="text-primary underline hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            {"Conditions Générales d'Utilisation"}
+            {p.termsLink}
           </Link>
           .
         </p>

@@ -14,21 +14,21 @@ import {
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { buttonVariants } from '@/components/ui/button-variants';
 
-export const metadata: Metadata = {
-  title: 'Tarifs | ultra-ia',
-  description: 'Accédez à votre expert IA pour 99€/mois. Annulation à tout moment.',
-  alternates: {
-    canonical: `${APP_URL}/pricing`,
-  },
-  openGraph: {
-    title: 'Tarifs | ultra-ia',
-    description: 'Expert IA spécialisé disponible 24h/24 pour 99€/mois.',
-    url: `${APP_URL}/pricing`,
-    siteName: 'ultra-ia',
-    type: 'website',
-    locale: 'fr_FR',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t.pricing.metaTitle,
+    description: t.pricing.metaDesc,
+    alternates: { canonical: `${APP_URL}/pricing` },
+    openGraph: {
+      title: t.pricing.metaTitle,
+      description: t.pricing.metaDesc,
+      url: `${APP_URL}/pricing`,
+      siteName: 'ultra-ia',
+      type: 'website',
+    },
+  };
+}
 
 export default async function PricingPage() {
   const [session, t] = await Promise.all([auth(), getT()]);

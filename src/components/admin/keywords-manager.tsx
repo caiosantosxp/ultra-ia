@@ -7,6 +7,7 @@ import { addKeyword, removeKeyword, updateKeywordWeight } from '@/actions/expert
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/use-t';
 
 interface Keyword {
   id: string;
@@ -45,10 +46,12 @@ function getStyle(weight: number) {
 
 /** Simple 2-D tag-cloud visualization */
 function KeywordCloud({ keywords }: { keywords: Keyword[] }) {
+  const t = useT();
+
   if (keywords.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-muted-foreground">Adicione palavras-chave para visualizar</p>
+        <p className="text-sm text-muted-foreground">{t.keywordsManager.addToVisualize}</p>
       </div>
     );
   }
@@ -99,10 +102,12 @@ export function KeywordsManager({
   initialKeywords,
   maxKeywords = 50,
 }: KeywordsManagerProps) {
+  const t = useT();
   const [keywords, setKeywords] = useState<Keyword[]>(initialKeywords);
   const [newKw, setNewKw] = useState('');
   const [selectedMultiplier, setSelectedMultiplier] = useState<Multiplier>(1);
   const [urlInput, setUrlInput] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleAdd() {
@@ -110,38 +115,59 @@ export function KeywordsManager({
     if (!name || keywords.length >= maxKeywords) return;
     if (keywords.some((k) => k.name.toLowerCase() === name.toLowerCase())) return;
 
-    const optimisticId = `temp-${Date.now()}`;
-    setKeywords((prev) => [
-      ...prev,
-      { id: optimisticId, name, weight: selectedMultiplier },
-    ]);
+    setError(null);
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: Keyword = { id: tempId, name, weight: selectedMultiplier };
+    setKeywords((prev) => [...prev, optimistic]);
     setNewKw('');
 
     startTransition(async () => {
-      await addKeyword(specialistId, name, selectedMultiplier);
+      try {
+        const saved = await addKeyword(specialistId, name, selectedMultiplier);
+        // Replace temp entry with real one from DB
+        setKeywords((prev) =>
+          prev.map((k) => (k.id === tempId ? { id: saved.id, name: saved.name, weight: saved.weight } : k))
+        );
+      } catch (err) {
+        // Rollback optimistic update
+        setKeywords((prev) => prev.filter((k) => k.id !== tempId));
+        setError(err instanceof Error ? err.message : t.keywordsManager.errorAdd);
+      }
     });
   }
 
-  function handleRemove(id: string, name: string) {
+  function handleRemove(id: string) {
+    setError(null);
     setKeywords((prev) => prev.filter((k) => k.id !== id));
+    if (id.startsWith('temp-')) return;
+
     startTransition(async () => {
-      if (!id.startsWith('temp-')) {
+      try {
         await removeKeyword(id, specialistId);
-      } else {
-        // If still temp (race condition), just remove from UI
+      } catch {
+        // Rollback: re-fetch would be ideal but we don't have the keyword data anymore
+        setError(t.keywordsManager.errorRemove);
       }
     });
   }
 
   function handleWeightChange(id: string, weight: number) {
-    setKeywords((prev) =>
-      prev.map((k) => (k.id === id ? { ...k, weight } : k))
-    );
-    if (!id.startsWith('temp-')) {
-      startTransition(async () => {
+    setKeywords((prev) => prev.map((k) => (k.id === id ? { ...k, weight } : k)));
+    if (id.startsWith('temp-')) return;
+
+    startTransition(async () => {
+      try {
         await updateKeywordWeight(id, weight, specialistId);
-      });
-    }
+      } catch {
+        setError(t.keywordsManager.errorWeight);
+      }
+    });
+  }
+
+  function handleAnalyze() {
+    const url = urlInput.trim();
+    if (!url) return;
+    setError(t.keywordsManager.urlComingSoon);
   }
 
   return (
@@ -151,15 +177,15 @@ export function KeywordsManager({
         {/* Header */}
         <div className="flex items-start justify-between border-b px-5 py-4">
           <div>
-            <h3 className="text-sm font-semibold">Suas palavras-chave</h3>
+            <h3 className="text-sm font-semibold">{t.keywordsManager.yourKeywords}</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Gerencie as palavras-chave para geração de leads
+              {t.keywordsManager.manageKeywords}
             </p>
           </div>
           <span className="text-xs text-muted-foreground">
             {keywords.length}/{maxKeywords}
             <br />
-            <span className="text-[10px]">palavras-chave</span>
+            <span className="text-[10px]">{t.keywordsManager.keywords}</span>
           </span>
         </div>
 
@@ -179,7 +205,7 @@ export function KeywordsManager({
                 )}
                 {kw.name}
                 <button
-                  onClick={() => handleRemove(kw.id, kw.name)}
+                  onClick={() => handleRemove(kw.id)}
                   className="ml-0.5 rounded-full hover:opacity-70 transition-opacity"
                 >
                   <X className="h-3 w-3" />
@@ -189,28 +215,41 @@ export function KeywordsManager({
           </div>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="px-4 py-2">
+            <p className="text-xs text-red-500">{error}</p>
+          </div>
+        )}
+
         {/* URL analyzer */}
         <div className="border-t px-4 py-3 space-y-2">
           <div className="flex gap-2">
             <Input
-              placeholder="Analisar uma página web para extrair..."
+              placeholder={t.keywordsManager.analyzeUrlPlaceholder}
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               className="h-8 text-xs"
             />
-            <Button size="sm" variant="default" className="h-8 px-3 text-xs shrink-0">
-              Analisar
+            <Button
+              size="sm"
+              variant="default"
+              className="h-8 px-3 text-xs shrink-0"
+              onClick={handleAnalyze}
+              disabled={!urlInput.trim()}
+            >
+              {t.keywordsManager.analyze}
             </Button>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">ou</span>
+            <span className="text-xs text-muted-foreground">{t.keywordsManager.or}</span>
             <div className="h-px flex-1 bg-border" />
           </div>
           {/* Manual add */}
           <div className="flex gap-2">
             <Input
-              placeholder="Adicionar uma palavra-chave..."
+              placeholder={t.keywordsManager.addKeywordPlaceholder}
               value={newKw}
               onChange={(e) => setNewKw(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
@@ -223,12 +262,12 @@ export function KeywordsManager({
               className="h-8 px-3 text-xs shrink-0 gap-1"
             >
               <Plus className="h-3 w-3" />
-              Adicionar
+              {t.keywordsManager.add}
             </Button>
           </div>
           {/* Multiplier selector */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-muted-foreground">Multiplicador:</span>
+            <span className="text-[10px] text-muted-foreground">{t.keywordsManager.multiplier}</span>
             {MULTIPLIERS.map((m) => (
               <button
                 key={m}

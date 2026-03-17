@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useT } from '@/lib/i18n/use-t';
 
 function generateSlug(name: string): string {
   return name
@@ -43,6 +44,7 @@ interface AgentFormProps {
 }
 
 export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: AgentFormProps) {
+  const t = useT();
   const router = useRouter();
   const isEdit = !!specialistId;
 
@@ -74,11 +76,11 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
       : await createSpecialist(data);
 
     if (result.success) {
-      toast.success(isEdit ? 'Agent mis à jour' : 'Agent créé avec succès');
+      toast.success(isEdit ? t.agentForm.updateSuccess : t.agentForm.createSuccess);
       onSuccess?.();
       router.refresh();
     } else {
-      toast.error(result.error?.message ?? 'Une erreur est survenue');
+      toast.error(result.error?.message ?? t.agentForm.errorDefault);
     }
   }
 
@@ -91,11 +93,11 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nom</FormLabel>
+                <FormLabel>{t.agentForm.nameLabel}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Ex: Expert Juridique"
+                    placeholder={t.agentForm.namePlaceholder}
                     onChange={(e) => {
                       field.onChange(e); // Ensure RHF tracks the change
                       if (!isEdit || !form.getValues('slug')) {
@@ -116,9 +118,9 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             name="slug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Slug</FormLabel>
+                <FormLabel>{t.agentForm.slugLabel}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="expert-juridique" />
+                  <Input {...field} placeholder={t.agentForm.slugPlaceholder} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -132,9 +134,9 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             name="domain"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Domaine</FormLabel>
+                <FormLabel>{t.agentForm.domainLabel}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ex: Droit des affaires" />
+                  <Input {...field} placeholder={t.agentForm.domainPlaceholder} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -146,7 +148,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prix (centimes)</FormLabel>
+                <FormLabel>{t.agentForm.priceLabel}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -166,16 +168,16 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           name="language"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Idioma do agente</FormLabel>
+              <FormLabel>{t.agentForm.languageLabel}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o idioma" />
+                    <SelectValue placeholder={t.agentForm.languagePlaceholder} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="fr">Français</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="fr">{t.agentForm.languageFr}</SelectItem>
+                  <SelectItem value="en">{t.agentForm.languageEn}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -188,9 +190,9 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t.agentForm.descriptionLabel}</FormLabel>
               <FormControl>
-                <Textarea {...field} rows={3} placeholder="Description de l'agent..." />
+                <Textarea {...field} rows={3} placeholder={t.agentForm.descriptionPlaceholder} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -203,7 +205,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             name="accentColor"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{"Couleur d'accent"}</FormLabel>
+                <FormLabel>{t.agentForm.accentColorLabel}</FormLabel>
                 <FormControl>
                   <div className="flex gap-2">
                     <input
@@ -225,7 +227,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             name="avatarUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL de l'avatar</FormLabel>
+                <FormLabel>{t.agentForm.avatarUrlLabel}</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="https://..." type="url" />
                 </FormControl>
@@ -241,19 +243,19 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tags (séparés par des virgules)</FormLabel>
+              <FormLabel>{t.agentForm.tagsLabel}</FormLabel>
               <FormControl>
                 <Input
                   value={field.value?.join(', ') ?? ''}
                   onChange={(e) => {
                     const tags = e.target.value
                       .split(',')
-                      .map((t) => t.trim())
+                      .map((tag) => tag.trim())
                       .filter(Boolean);
                     field.onChange(tags);
                   }}
                   onBlur={field.onBlur}
-                  placeholder="droit, contrats, entreprises"
+                  placeholder={t.agentForm.tagsPlaceholder}
                 />
               </FormControl>
               <FormMessage />
@@ -267,7 +269,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           name="quickPrompts"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Suggestions rapides (une par ligne)</FormLabel>
+              <FormLabel>{t.agentForm.quickPromptsLabel}</FormLabel>
               <FormControl>
                 <Textarea
                   value={field.value?.join('\n') ?? ''}
@@ -280,7 +282,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
                   }}
                   onBlur={field.onBlur}
                   rows={3}
-                  placeholder={"Comment rédiger un contrat ?\nQuelles sont mes obligations légales ?"}
+                  placeholder={t.agentForm.quickPromptsPlaceholder}
                 />
               </FormControl>
               <FormMessage />
@@ -293,12 +295,12 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           name="systemPrompt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>System prompt</FormLabel>
+              <FormLabel>{t.agentForm.systemPromptLabel}</FormLabel>
               <FormControl>
                 <Textarea
                   {...field}
                   rows={6}
-                  placeholder="Instructions système pour l'agent IA..."
+                  placeholder={t.agentForm.systemPromptPlaceholder}
                   className="font-mono text-xs"
                 />
               </FormControl>
@@ -312,12 +314,12 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           name="scopeLimits"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Limites de portée</FormLabel>
+              <FormLabel>{t.agentForm.scopeLimitsLabel}</FormLabel>
               <FormControl>
                 <Textarea
                   {...field}
                   rows={3}
-                  placeholder="Définissez les limites du domaine de l'agent..."
+                  placeholder={t.agentForm.scopeLimitsPlaceholder}
                 />
               </FormControl>
               <FormMessage />
@@ -329,15 +331,15 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
         <div className="flex justify-end gap-3 pt-2">
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Annuler
+              {t.agentForm.cancel}
             </Button>
           )}
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting
-              ? 'Enregistrement...'
+              ? t.agentForm.saving
               : isEdit
-                ? 'Enregistrer'
-                : "Créer l'agent"}
+                ? t.agentForm.save
+                : t.agentForm.create}
           </Button>
         </div>
       </form>

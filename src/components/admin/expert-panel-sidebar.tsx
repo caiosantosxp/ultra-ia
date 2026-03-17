@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -7,20 +8,26 @@ import {
   BarChart2,
   BookOpen,
   ChevronRight,
+  Globe,
   LayoutDashboard,
   LogOut,
   Mic,
+  Moon,
   Settings,
   Settings2,
+  Sun,
   TrendingUp,
   User,
   Users,
   Users2,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
-import { useT } from '@/lib/i18n/use-t';
+import { fr, en } from '@/lib/i18n';
+import { useLanguageStore } from '@/stores/language-store';
+import type { Locale } from '@/lib/i18n';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +44,7 @@ interface ExpertPanelSidebarProps {
   accentColor: string;
   /** Override base path. Defaults to /admin/agents/${specialistId} */
   basePath?: string;
+  initialLocale?: string;
   user?: {
     name?: string | null;
     email?: string | null;
@@ -49,16 +57,30 @@ export function ExpertPanelSidebar({
   specialistName,
   accentColor,
   basePath,
+  initialLocale = 'fr',
   user,
 }: ExpertPanelSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const t = useT();
+  const [locale, setLocaleState] = useState<Locale>(initialLocale as Locale);
+  const storeLocale = useLanguageStore((s) => s.locale);
+  const setLocale = useLanguageStore((s) => s.setLocale);
+
+  // After Zustand hydrates from localStorage, sync to local state
+  useEffect(() => {
+    setLocaleState(storeLocale);
+  }, [storeLocale]);
+
+  const t = locale === 'en' ? en : fr;
+  const { theme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const base = basePath ?? `/admin/agents/${specialistId}`;
 
   function isActive(segment: string) {
     return pathname.startsWith(`${base}/${segment}`);
   }
+
+  const onSettingsPage = pathname?.startsWith('/settings');
 
   function NavItem({
     href,
@@ -265,10 +287,34 @@ export function ExpertPanelSidebar({
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push('/settings')}>
-                <Settings className="mr-2 h-4 w-4" />
-                {t.admin.expertSidebar.accountSettings}
+              {onSettingsPage ? (
+                <DropdownMenuItem onClick={() => router.push(`${base}/dashboard`)}>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  {t.admin.expertSidebar.backToDashboard}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => router.push('/settings')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  {t.admin.expertSidebar.accountSettings}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                onClick={() => { const next = locale === 'fr' ? 'en' : 'fr'; setLocaleState(next); setLocale(next); router.refresh(); }}
+              >
+                <Globe className="mr-2 h-4 w-4" />
+                <span className="flex-1">{t.admin.expertSidebar.language}</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  {locale === 'fr' ? 'EN' : 'FR'}
+                </span>
               </DropdownMenuItem>
+              {mounted && (
+                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                  {theme === 'dark'
+                    ? <Sun className="mr-2 h-4 w-4" />
+                    : <Moon className="mr-2 h-4 w-4" />}
+                  {theme === 'dark' ? t.admin.expertSidebar.lightMode : t.admin.expertSidebar.darkMode}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"

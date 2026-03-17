@@ -5,10 +5,13 @@ import { AdminSidebar, AdminMobileSidebar } from '@/components/admin/admin-sideb
 import { Breadcrumbs } from '@/components/admin/breadcrumbs';
 import { getT } from '@/lib/i18n/get-t';
 
-export const metadata: Metadata = {
-  title: 'Dashboard | Admin Ultra-IA',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t.admin.metaTitle,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();

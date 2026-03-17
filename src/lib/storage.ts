@@ -14,10 +14,14 @@ export async function saveFile(buffer: Buffer, fileName: string): Promise<string
 }
 
 export async function deleteFile(fileUrl: string): Promise<void> {
-  const filePath = path.join(process.cwd(), 'public', fileUrl);
+  // Validate path stays within uploads directory (prevent path traversal)
+  if (!fileUrl.startsWith('/uploads/knowledge/')) return;
+  const fileName = path.basename(fileUrl);
+  const filePath = path.join(UPLOAD_DIR, fileName);
+  if (!filePath.startsWith(UPLOAD_DIR)) return;
   try {
     await fs.unlink(filePath);
   } catch {
-    // Fichier peut ne pas exister, ignorer l'erreur
+    // File may not exist, ignore error
   }
 }

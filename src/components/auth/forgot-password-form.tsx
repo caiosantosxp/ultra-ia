@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validations/auth';
 import { requestPasswordReset } from '@/actions/auth-actions';
+import { useT } from '@/lib/i18n/use-t';
 
 export function ForgotPasswordForm() {
+  const t = useT();
   const [isPending, startTransition] = useTransition();
   const [submitted, setSubmitted] = useState(false);
 
@@ -36,13 +38,13 @@ export function ForgotPasswordForm() {
       <div className="rounded-lg border border-border bg-card p-6 text-center">
         <CheckCircle className="mx-auto mb-3 size-10 text-blue-500" aria-hidden="true" />
         <p className="text-sm text-foreground">
-          Si cet email existe, un lien de réinitialisation a été envoyé
+          {t.forgotPasswordForm.successMessage}
         </p>
         <Link
           href="/login"
           className="mt-4 inline-block text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          Retour à la connexion
+          {t.forgotPasswordForm.successBackToLogin}
         </Link>
       </div>
     );
@@ -61,7 +63,7 @@ export function ForgotPasswordForm() {
           id="email"
           type="email"
           autoComplete="email"
-          placeholder="votre@email.com"
+          placeholder={t.forgotPasswordForm.emailPlaceholder}
           aria-required="true"
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? 'email-error' : undefined}
@@ -80,7 +82,7 @@ export function ForgotPasswordForm() {
         className="min-h-11 w-full"
         disabled={isPending}
       >
-        {isPending ? 'Envoi en cours...' : 'Envoyer le lien'}
+        {isPending ? t.forgotPasswordForm.sending : t.forgotPasswordForm.send}
       </Button>
 
       <div className="text-center">
@@ -88,7 +90,7 @@ export function ForgotPasswordForm() {
           href="/login"
           className="text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          ← Retour à la connexion
+          {t.forgotPasswordForm.backToLogin}
         </Link>
       </div>
     </form>

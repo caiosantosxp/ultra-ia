@@ -1,0 +1,118 @@
+import { Users2 } from 'lucide-react';
+
+import { prisma } from '@/lib/prisma';
+import { requireExpert } from '@/lib/expert-helpers';
+import { getT } from '@/lib/i18n/get-t';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+export default async function ExpertSubscribersPage() {
+  const { specialist } = await requireExpert();
+  const t = await getT();
+
+  const subscriptions = await prisma.subscription.findMany({
+    where: { specialistId: specialist.id },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const activeCount = subscriptions.filter((s) => s.status === 'ACTIVE').length;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <Users2 className="h-5 w-5 text-muted-foreground" />
+          <h1 className="font-heading text-2xl font-bold">{t.admin.subscribersPage.title}</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {specialist.name} —{' '}
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+            {activeCount} {t.admin.subscribersPage.activeCount}
+          </Badge>
+          {' '}/ {subscriptions.length} {t.admin.subscribersPage.total}
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t.admin.subscribersPage.listTitle}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t.admin.subscribersPage.colName}</TableHead>
+                <TableHead>{t.admin.subscribersPage.colEmail}</TableHead>
+                <TableHead>{t.admin.subscribersPage.colStatus}</TableHead>
+                <TableHead>{t.admin.subscribersPage.colSince}</TableHead>
+                <TableHead>{t.admin.subscribersPage.colPeriodEnd}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {subscriptions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                    {t.admin.subscribersPage.noSubscribers}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                subscriptions.map((sub) => (
+                  <TableRow key={sub.id}>
+                    <TableCell className="font-medium">{sub.user?.name ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{sub.user?.email ?? '—'}</TableCell>
+                    <TableCell>
+                      <SubscriptionStatusBadge status={sub.status} t={t} />
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {new Date(sub.createdAt).toLocaleDateString(t.dateLocale)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {sub.currentPeriodEnd
+                        ? new Date(sub.currentPeriodEnd).toLocaleDateString(t.dateLocale)
+                        : '—'}
+                      {sub.cancelAtPeriodEnd && (
+                        <span className="ml-1 text-orange-600 text-xs">
+                          {t.admin.subscribersPage.scheduledCancellation}
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function SubscriptionStatusBadge({ status, t }: { status: string; t: Awaited<ReturnType<typeof getT>> }) {
+  switch (status) {
+    case 'ACTIVE':
+      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{t.admin.subscribersPage.statusActive}</Badge>;
+    case 'PAST_DUE':
+      return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">{t.admin.subscribersPage.statusPastDue}</Badge>;
+    case 'CANCELED':
+      return <Badge variant="secondary">{t.admin.subscribersPage.statusCanceled}</Badge>;
+    case 'EXPIRED':
+      return <Badge variant="secondary">{t.admin.subscribersPage.statusExpired}</Badge>;
+    case 'PENDING':
+      return <Badge variant="outline">{t.admin.subscribersPage.statusPending}</Badge>;
+    default:
+      return <Badge variant="outline">{status}</Badge>;
+  }
+}

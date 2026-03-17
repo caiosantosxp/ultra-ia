@@ -31,6 +31,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { useT } from '@/lib/i18n/use-t';
 
 interface BillingCardProps {
   subscription: {
@@ -53,38 +54,33 @@ function StatusBadge({
   status: SubscriptionStatus;
   cancelAtPeriodEnd: boolean;
 }) {
+  const t = useT();
+
   if (status === 'ACTIVE' && !cancelAtPeriodEnd) {
     return (
       <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-        Actif
+        {t.billingCard.statusActive}
       </Badge>
     );
   }
   if (status === 'ACTIVE' && cancelAtPeriodEnd) {
     return (
       <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-        Annulation planifiée
+        {t.billingCard.statusScheduled}
       </Badge>
     );
   }
   if (status === 'PAST_DUE') {
-    return <Badge variant="destructive">Paiement échoué</Badge>;
+    return <Badge variant="destructive">{t.billingCard.statusPaymentFailed}</Badge>;
   }
   if (status === 'CANCELED' || status === 'EXPIRED') {
-    return <Badge variant="outline">Annulé</Badge>;
+    return <Badge variant="outline">{t.billingCard.statusCanceled}</Badge>;
   }
-  return <Badge variant="secondary">En attente</Badge>;
-}
-
-// M1: Dynamic title based on subscription status
-function getCardTitle(status: SubscriptionStatus, cancelAtPeriodEnd: boolean): string {
-  if (status === 'CANCELED' || status === 'EXPIRED') return 'Abonnement annulé';
-  if (status === 'PAST_DUE') return 'Paiement en échec';
-  if (cancelAtPeriodEnd) return 'Annulation planifiée';
-  return 'Abonnement actif';
+  return <Badge variant="secondary">{t.billingCard.statusPending}</Badge>;
 }
 
 export function BillingCard({ subscription, paymentMethod }: BillingCardProps) {
+  const t = useT();
   const router = useRouter();
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
@@ -94,15 +90,20 @@ export function BillingCard({ subscription, paymentMethod }: BillingCardProps) {
     subscription?.cancelAtPeriodEnd ?? false
   );
 
+  function getCardTitle(status: SubscriptionStatus, cancelAtPeriodEnd: boolean): string {
+    if (status === 'CANCELED' || status === 'EXPIRED') return t.billingCard.titleCanceled;
+    if (status === 'PAST_DUE') return t.billingCard.titlePaymentFailed;
+    if (cancelAtPeriodEnd) return t.billingCard.titleScheduled;
+    return t.billingCard.titleActive;
+  }
+
   if (!subscription) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12 gap-4 text-center">
-          <p className="font-medium">Aucun abonnement actif</p>
-          <p className="text-sm text-muted-foreground">
-            Abonnez-vous à un spécialiste IA pour commencer à utiliser la plateforme.
-          </p>
-          <Button onClick={() => router.push('/')}>Découvrir les spécialistes</Button>
+          <p className="font-medium">{t.billingCard.noSubscription}</p>
+          <p className="text-sm text-muted-foreground">{t.billingCard.noSubscriptionDesc}</p>
+          <Button onClick={() => router.push('/')}>{t.billingCard.discover}</Button>
         </CardContent>
       </Card>
     );
@@ -116,10 +117,10 @@ export function BillingCard({ subscription, paymentMethod }: BillingCardProps) {
       if (data.success && data.data?.url) {
         window.location.href = data.data.url;
       } else {
-        toast.error("Impossible d'ouvrir le portail de paiement.");
+        toast.error(t.billingCard.portalError);
       }
     } catch {
-      toast.error('Une erreur est survenue. Veuillez réessayer.');
+      toast.error(t.billingCard.generalError);
     } finally {
       setIsLoadingPortal(false);
     }
@@ -137,16 +138,14 @@ export function BillingCard({ subscription, paymentMethod }: BillingCardProps) {
       if (data.success) {
         // M3: Optimistic update — badge and button change immediately without waiting for refresh
         setLocalCancelAtPeriodEnd(true);
-        toast.success(
-          "Votre abonnement a été annulé. L'accès reste actif jusqu'à la fin de la période."
-        );
+        toast.success(t.billingCard.cancelSuccess);
         setIsCancelDialogOpen(false);
         router.refresh();
       } else {
-        toast.error("Impossible d'annuler l'abonnement.");
+        toast.error(t.billingCard.cancelError);
       }
     } catch {
-      toast.error('Une erreur est survenue. Veuillez réessayer.');
+      toast.error(t.billingCard.generalError);
     } finally {
       setIsCanceling(false);
     }
@@ -158,8 +157,8 @@ export function BillingCard({ subscription, paymentMethod }: BillingCardProps) {
 
   const dateLabel = formattedDate
     ? localCancelAtPeriodEnd
-      ? `Accès jusqu'au ${formattedDate}`
-      : `Renouvellement le ${formattedDate}`
+      ? `${t.billingCard.accessUntil} ${formattedDate}`
+      : `${t.billingCard.renewalOn} ${formattedDate}`
     : null;
 
   const brandDisplay = paymentMethod?.brand
@@ -189,7 +188,7 @@ export function BillingCard({ subscription, paymentMethod }: BillingCardProps) {
         {dateLabel && <p className="text-sm text-muted-foreground">{dateLabel}</p>}
         {brandDisplay && paymentMethod?.last4 && (
           <p className="text-sm text-muted-foreground">
-            Carte : {brandDisplay} **** {paymentMethod.last4}
+            {t.billingCard.cardLabel} {brandDisplay} **** {paymentMethod.last4}
           </p>
         )}
       </CardContent>
@@ -200,37 +199,37 @@ export function BillingCard({ subscription, paymentMethod }: BillingCardProps) {
           size="sm"
           onClick={handleOpenPortal}
           disabled={isLoadingPortal}
-          aria-label="Ouvrir le portail de gestion du paiement Stripe"
+          aria-label={t.billingCard.managePortalAria}
         >
           {isLoadingPortal ? (
             <Loader2Icon className="size-3.5 animate-spin" />
           ) : (
             <ExternalLinkIcon className="size-3.5" />
           )}
-          Gérer le paiement
+          {t.billingCard.managePayment}
         </Button>
 
         {canCancel && (
           <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
             <DialogTrigger render={<Button variant="destructive" size="sm" />}>
-              Annuler l&apos;abonnement
+              {t.billingCard.cancelSubscription}
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Annuler votre abonnement ?</DialogTitle>
+                <DialogTitle>{t.billingCard.cancelDialogTitle}</DialogTitle>
                 <DialogDescription>
-                  Votre accès restera actif jusqu&apos;au{' '}
-                  {formattedDate ?? 'la fin de la période'}.{' '}
-                  Après cette date, vous perdrez l&apos;accès à votre spécialiste IA.
+                  {t.billingCard.cancelDialogDescDate}{' '}
+                  {formattedDate ?? t.billingCard.cancelDialogDescFallback}.{' '}
+                  {t.billingCard.cancelDialogDescSuffix}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <DialogClose render={<Button variant="outline" />}>
-                  Conserver mon abonnement
+                  {t.billingCard.keepSubscription}
                 </DialogClose>
                 <Button variant="destructive" onClick={handleCancel} disabled={isCanceling}>
                   {isCanceling && <Loader2Icon className="size-3.5 animate-spin" />}
-                  Annuler l&apos;abonnement
+                  {t.billingCard.cancelSubscription}
                 </Button>
               </DialogFooter>
             </DialogContent>

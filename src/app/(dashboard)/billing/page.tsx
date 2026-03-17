@@ -8,13 +8,18 @@ import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 import { BillingCard } from '@/components/dashboard/billing-card';
 import { PaymentBanner } from '@/components/dashboard/payment-banner';
+import { getT } from '@/lib/i18n/get-t';
 
-export const metadata: Metadata = {
-  title: 'Mon abonnement',
-  description: 'Gérez votre abonnement Ultra IA',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t.billingPage.metaTitle,
+    description: t.billingPage.metaDesc,
+  };
+}
 
 export default async function BillingPage() {
+  const t = await getT();
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
@@ -59,10 +64,8 @@ export default async function BillingPage() {
   return (
     <div className="container max-w-2xl mx-auto py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-heading">Mon abonnement</h1>
-        <p className="text-muted-foreground">
-          Gérez votre abonnement et vos informations de paiement.
-        </p>
+        <h1 className="text-2xl font-bold font-heading">{t.billingPage.title}</h1>
+        <p className="text-muted-foreground">{t.billingPage.description}</p>
       </div>
 
       {isPastDue && <PaymentBanner />}

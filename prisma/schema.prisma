@@ -17,6 +17,7 @@ model User {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   stripeCustomerId String?        @unique
+  deletedAt        DateTime?
   accounts         Account[]
   conversations    Conversation[]
   dailyUsage       DailyUsage[]
@@ -126,11 +127,12 @@ model Conversation {
   title        String?
   userId       String?
   specialistId String
+  country      String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   isDeleted    Boolean    @default(false)
-  specialist   Specialist @relation(fields: [specialistId], references: [id])
-  user         User?      @relation(fields: [userId], references: [id])
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   messages     Message[]
 
   @@index([userId])
@@ -188,7 +190,7 @@ model Lead {
   leadType     LeadType   @default(LEAD)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  specialist   Specialist? @relation(fields: [specialistId], references: [id])
+  specialist   Specialist? @relation(fields: [specialistId], references: [id], onDelete: SetNull)
 
   @@index([specialistId])
   @@map("leads")

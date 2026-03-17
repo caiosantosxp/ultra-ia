@@ -25,15 +25,21 @@ export async function GET(request: Request) {
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'));
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '20')));
   const skip = (page - 1) * limit;
+  const roleFilter = searchParams.get('role') as 'USER' | 'EXPERT' | 'ADMIN' | null;
+  const includeDeleted = searchParams.get('includeDeleted') === 'true';
 
-  const where = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' as const } },
-          { email: { contains: search, mode: 'insensitive' as const } },
-        ],
-      }
-    : {};
+  const where = {
+    ...(includeDeleted ? {} : { deletedAt: null }),
+    ...(roleFilter ? { role: roleFilter } : {}),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+  };
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({
@@ -47,6 +53,7 @@ export async function GET(request: Request) {
         email: true,
         role: true,
         createdAt: true,
+        deletedAt: true,
         subscriptions: {
           orderBy: { createdAt: 'desc' },
           take: 1,

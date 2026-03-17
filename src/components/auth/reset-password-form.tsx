@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { resetPasswordSchema } from '@/lib/validations/auth';
 import { resetPassword } from '@/actions/auth-actions';
+import { useT } from '@/lib/i18n/use-t';
 
 interface ResetPasswordFormProps {
   token: string;
@@ -20,6 +21,7 @@ interface FormValues {
 }
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const t = useT();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -42,7 +44,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         return;
       }
 
-      toast.success('Mot de passe mis à jour avec succès');
+      toast.success(t.resetPasswordForm.successToast);
       router.push('/login');
     });
   };
@@ -59,7 +61,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             href="/forgot-password"
             className="mt-1 inline-block font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Demander un nouveau lien →
+            {t.resetPasswordForm.requestNewLink}
           </Link>
         </div>
       )}
@@ -69,7 +71,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           htmlFor="password"
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
-          Nouveau mot de passe *
+          {t.resetPasswordForm.passwordLabel}
         </label>
         <Input
           id="password"
@@ -94,7 +96,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         className="min-h-11 w-full"
         disabled={isPending}
       >
-        {isPending ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+        {isPending ? t.resetPasswordForm.updating : t.resetPasswordForm.update}
       </Button>
     </form>
   );

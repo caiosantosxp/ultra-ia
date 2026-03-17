@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChevronRight, LogOut, Menu, Settings, User } from 'lucide-react';
+import { ChevronRight, Globe, LayoutDashboard, LogOut, Menu, Moon, Settings, Sun, User } from 'lucide-react';
 import { signOut } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
 import { adminNavItems } from '@/lib/admin-nav';
 import { useT } from '@/lib/i18n/use-t';
+import { useLanguageStore } from '@/stores/language-store';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -89,7 +91,13 @@ function SidebarFooter() {
 
 function SidebarUserSection({ user }: { user: SidebarUser }) {
   const router = useRouter();
+  const pathname = usePathname();
   const t = useT();
+  const locale = useLanguageStore((s) => s.locale);
+  const setLocale = useLanguageStore((s) => s.setLocale);
+  const { theme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const onSettingsPage = pathname?.startsWith('/settings');
 
   return (
     <div className="border-t px-2 py-3">
@@ -128,10 +136,34 @@ function SidebarUserSection({ user }: { user: SidebarUser }) {
             </DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/settings')}>
-            <Settings className="mr-2 h-4 w-4" />
-            {t.admin.sidebar.accountSettings}
+          {onSettingsPage ? (
+            <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              {t.admin.sidebar.backToDashboard}
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={() => router.push('/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              {t.admin.sidebar.accountSettings}
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem
+            onClick={() => { setLocale(locale === 'fr' ? 'en' : 'fr'); router.refresh(); }}
+          >
+            <Globe className="mr-2 h-4 w-4" />
+            <span className="flex-1">{t.admin.sidebar.language}</span>
+            <span className="text-xs text-muted-foreground font-medium">
+              {locale === 'fr' ? 'EN' : 'FR'}
+            </span>
           </DropdownMenuItem>
+          {mounted && (
+            <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+              {theme === 'dark'
+                ? <Sun className="mr-2 h-4 w-4" />
+                : <Moon className="mr-2 h-4 w-4" />}
+              {theme === 'dark' ? t.admin.sidebar.lightMode : t.admin.sidebar.darkMode}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"

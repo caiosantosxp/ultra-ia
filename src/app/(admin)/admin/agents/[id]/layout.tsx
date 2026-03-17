@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 
 import { auth } from '@/lib/auth';
@@ -21,12 +22,15 @@ export default async function ExpertPanelLayout({ params, children }: Props) {
 
   if (!specialist) notFound();
 
+  const lang = (await cookies()).get('LANG')?.value ?? 'fr';
+
   return (
     <div className="-m-6 flex min-h-[calc(100vh-3.5rem)] lg:min-h-screen">
       <ExpertPanelSidebar
         specialistId={specialist.id}
         specialistName={specialist.name}
         accentColor={specialist.accentColor}
+        initialLocale={lang}
         user={session.user}
       />
       <div className="flex-1 overflow-auto p-6">

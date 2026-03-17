@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/lib/auth';
@@ -17,6 +18,8 @@ export default async function ExpertLayout({ children }: { children: React.React
 
   if (!specialist) redirect('/chat');
 
+  const lang = (await cookies()).get('LANG')?.value ?? 'fr';
+
   return (
     <div className="flex min-h-screen">
       <ExpertPanelSidebar
@@ -24,6 +27,7 @@ export default async function ExpertLayout({ children }: { children: React.React
         specialistName={specialist.name}
         accentColor={specialist.accentColor}
         basePath="/expert"
+        initialLocale={lang}
         user={session.user}
       />
       <div className="flex-1 overflow-auto p-6">

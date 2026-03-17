@@ -173,6 +173,50 @@ export async function deleteKnowledgeDocument(documentId: string) {
   }
 }
 
+export async function assignSpecialistOwner(specialistId: string, userId: string | null) {
+  const auth = await requireAdmin();
+  if ('error' in auth) {
+    return { success: false, error: auth.error };
+  }
+
+  if (userId !== null) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true, ownedSpecialist: { select: { id: true } } },
+    });
+
+    if (!user) {
+      return { success: false, error: { code: 'NOT_FOUND', message: 'Usuário não encontrado' } };
+    }
+    if (user.role !== 'EXPERT') {
+      return {
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'O usuário deve ter role EXPERT' },
+      };
+    }
+    if (user.ownedSpecialist && user.ownedSpecialist.id !== specialistId) {
+      return {
+        success: false,
+        error: { code: 'CONFLICT', message: 'Este usuário já é proprietário de outro especialista' },
+      };
+    }
+  }
+
+  try {
+    const specialist = await prisma.specialist.update({
+      where: { id: specialistId },
+      data: { ownerId: userId },
+      select: { id: true, ownerId: true },
+    });
+    return { success: true, data: specialist };
+  } catch {
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Falha ao atualizar proprietário' },
+    };
+  }
+}
+
 export async function deleteSpecialist(id: string) {
   const auth = await requireAdmin();
   if ('error' in auth) {

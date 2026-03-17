@@ -15,4 +15,7 @@ export interface PlatformMetrics {
   mrrTrend: number;
   retentionRate: number;
   retentionRateTrend: number;
+  totalUsers: number;
+  totalExperts: number;
+  totalAgents: number;
 }

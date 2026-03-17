@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { prisma } from '@/lib/prisma';
 import { requireExpert } from '@/lib/expert-helpers';
+import { getT } from '@/lib/i18n/get-t';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExpertSubscriptionsChart } from '@/components/admin/expert-subscriptions-chart';
@@ -11,6 +12,7 @@ const MESSAGE_LIMIT = 30_000;
 
 export default async function ExpertDashboardPage() {
   const { specialist } = await requireExpert();
+  const t = await getT();
   const id = specialist.id;
 
   const now = new Date();
@@ -69,19 +71,19 @@ export default async function ExpertDashboardPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <h1 className="text-2xl font-bold font-heading">
-          Bienvenue {fullSpecialist.name}&nbsp;!
+          {t.admin.agentDashboard.welcome} {fullSpecialist.name}&nbsp;!
         </h1>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
             <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
-            {fullSpecialist.isActive ? 'Votre IA est publique' : 'Votre IA est privée'}
+            {fullSpecialist.isActive ? t.admin.agentDashboard.aiPublic : t.admin.agentDashboard.aiPrivate}
           </div>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Share2 className="h-3.5 w-3.5" />
-            Partager
+            {t.admin.agentDashboard.share}
           </Button>
           <Button size="sm" className="gap-1.5" style={{ backgroundColor: fullSpecialist.accentColor }}>
-            Votre clone <ArrowRight className="h-3.5 w-3.5" />
+            {t.admin.agentDashboard.yourClone} <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
@@ -91,17 +93,17 @@ export default async function ExpertDashboardPage() {
         <div className="space-y-4">
           {/* Utilisation */}
           <div className="rounded-xl border bg-card p-5 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Votre utilisation</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.admin.agentDashboard.yourUsage}</p>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Messages ce mois-ci</span>
+                <span className="text-muted-foreground">{t.admin.agentDashboard.messagesThisMonth}</span>
                 <Badge variant="outline" className="text-xs" style={{ color: usagePct > 80 ? '#dc2626' : '#16a34a', borderColor: 'currentColor' }}>
                   {usagePct}%
                 </Badge>
               </div>
               <div className="flex items-baseline gap-1.5 text-sm text-muted-foreground">
-                <span className="text-xl font-bold text-foreground">{messagesThisMonth.toLocaleString('fr-FR')}</span>
-                <span>/ {MESSAGE_LIMIT.toLocaleString('fr-FR')}</span>
+                <span className="text-xl font-bold text-foreground">{messagesThisMonth.toLocaleString(t.dateLocale)}</span>
+                <span>/ {MESSAGE_LIMIT.toLocaleString(t.dateLocale)}</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${usagePct}%` }} />
@@ -111,19 +113,19 @@ export default async function ExpertDashboardPage() {
 
           {/* Statistiques */}
           <div className="rounded-xl border bg-card p-5 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Vos statistiques</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.admin.agentDashboard.yourStats}</p>
             <div className="divide-y">
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-muted-foreground">Conversations</span>
-                <span className="text-sm font-semibold">{totalConversations.toLocaleString('fr-FR')}</span>
+                <span className="text-sm text-muted-foreground">{t.admin.agentDashboard.conversations}</span>
+                <span className="text-sm font-semibold">{totalConversations.toLocaleString(t.dateLocale)}</span>
               </div>
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-muted-foreground">Messages échangés</span>
-                <span className="text-sm font-semibold">{totalMessages.toLocaleString('fr-FR')}</span>
+                <span className="text-sm text-muted-foreground">{t.admin.agentDashboard.messagesExchanged}</span>
+                <span className="text-sm font-semibold">{totalMessages.toLocaleString(t.dateLocale)}</span>
               </div>
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-muted-foreground">Utilisateurs uniques</span>
-                <span className="text-sm font-semibold">{uniqueUsers.toLocaleString('fr-FR')}</span>
+                <span className="text-sm text-muted-foreground">{t.admin.agentDashboard.uniqueUsers}</span>
+                <span className="text-sm font-semibold">{uniqueUsers.toLocaleString(t.dateLocale)}</span>
               </div>
             </div>
           </div>
@@ -132,12 +134,12 @@ export default async function ExpertDashboardPage() {
           <div className="rounded-xl border bg-card p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Revenus</p>
-                <p className="mt-0.5 text-sm font-medium">Nouveaux abonnements</p>
-                <p className="text-xs text-muted-foreground">90 derniers jours</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.admin.agentDashboard.revenue}</p>
+                <p className="mt-0.5 text-sm font-medium">{t.admin.agentDashboard.newSubscriptions}</p>
+                <p className="text-xs text-muted-foreground">{t.admin.agentDashboard.last90Days}</p>
               </div>
               <Link href="/expert/monetizacao/rendas" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-                Voir tout <ArrowRight className="h-3 w-3" />
+                {t.admin.agentDashboard.seeAll} <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
             <ExpertSubscriptionsChart data={subsChartData} />
@@ -157,7 +159,7 @@ export default async function ExpertDashboardPage() {
             )}
             <div className="absolute bottom-3 left-3 right-3">
               <div className="flex items-center gap-2 rounded-xl bg-black/70 px-3 py-2 text-white backdrop-blur-sm">
-                <span className="flex-1 text-xs font-medium">Vos insights et thèmes abordés</span>
+                <span className="flex-1 text-xs font-medium">{t.admin.agentDashboard.insights}</span>
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold">1</span>
               </div>
             </div>
@@ -166,7 +168,7 @@ export default async function ExpertDashboardPage() {
           <Link href="/expert/identidade/treinamento" className="flex w-full items-center justify-between gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-muted-foreground" />
-              <span>{knowledgeDocsCount} ressources entraînées</span>
+              <span>{knowledgeDocsCount} {t.admin.agentDashboard.trainedResources}</span>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </Link>

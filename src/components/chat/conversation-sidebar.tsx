@@ -1,17 +1,31 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { Plus, Search } from 'lucide-react';
+import { ChevronRight, Globe, LogOut, MessageSquare, Moon, Plus, Search, Settings, Sun, User } from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 
 import { createConversation, deleteConversation } from '@/actions/chat-actions';
 import { useConversations } from '@/hooks/use-conversations';
+import { useLanguageStore } from '@/stores/language-store';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,10 +35,15 @@ import { ConversationListSkeleton } from '@/components/chat/conversation-list-sk
 import { useT } from '@/lib/i18n/use-t';
 
 interface ConversationSidebarProps {
-  specialistId: string;
-  specialistName: string;
-  specialistAvatarUrl: string;
-  specialistDomain: string;
+  specialistId?: string;
+  specialistName?: string;
+  specialistAvatarUrl?: string;
+  specialistDomain?: string;
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
 }
 
 export function ConversationSidebar({
@@ -32,6 +51,7 @@ export function ConversationSidebar({
   specialistName,
   specialistAvatarUrl,
   specialistDomain,
+  user,
 }: ConversationSidebarProps) {
   const router = useRouter();
   const t = useT();
@@ -42,6 +62,11 @@ export function ConversationSidebar({
   const [isCreating, setIsCreating] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const locale = useLanguageStore((s) => s.locale);
+  const setLocale = useLanguageStore((s) => s.setLocale);
+  const { theme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
   const { conversations, hasMore, isLoading, loadMore, mutate } = useConversations();
 
@@ -80,6 +105,7 @@ export function ConversationSidebar({
     : conversations;
 
   async function handleNewConversation() {
+    if (!specialistId) return;
     setIsCreating(true);
     try {
       const result = await createConversation({ specialistId });
@@ -104,71 +130,163 @@ export function ConversationSidebar({
 
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="border-b px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <Avatar className="h-9 w-9 shrink-0">
-              <AvatarImage src={specialistAvatarUrl} alt={specialistName} />
-              <AvatarFallback className="text-xs">
-                {specialistName.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{specialistName}</p>
-              <p className="truncate text-xs text-muted-foreground">{specialistDomain}</p>
+      {specialistId && specialistName ? (
+        <SidebarHeader className="border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar className="h-9 w-9 shrink-0">
+                <AvatarImage src={specialistAvatarUrl} alt={specialistName} />
+                <AvatarFallback className="text-xs">
+                  {specialistName.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{specialistName}</p>
+                <p className="truncate text-xs text-muted-foreground">{specialistDomain}</p>
+              </div>
+            </div>
+            <SidebarTrigger className="shrink-0" aria-label={t.sidebar.toggleAria} />
+          </div>
+        </SidebarHeader>
+      ) : (
+        <SidebarHeader className="border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <span className="font-heading text-sm font-bold text-primary">ultra-ia</span>
+            <SidebarTrigger className="shrink-0" aria-label={t.sidebar.toggleAria} />
+          </div>
+        </SidebarHeader>
+      )}
+
+      {specialistId && (
+        <>
+          <div className="space-y-2 px-3 py-2">
+            <Button
+              onClick={handleNewConversation}
+              disabled={isCreating}
+              className="w-full justify-start gap-2"
+              size="sm"
+              aria-label={t.sidebar.newConversation}
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {isCreating ? t.sidebar.creating : t.sidebar.newConversation}
+            </Button>
+
+            {/* Search bar — Ctrl+K (AC5) */}
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                ref={searchInputRef}
+                type="search"
+                placeholder={t.sidebar.search}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 pl-8 text-sm"
+                aria-label={t.sidebar.searchAria}
+              />
             </div>
           </div>
-          <SidebarTrigger className="shrink-0" aria-label={t.sidebar.toggleAria} />
-        </div>
-      </SidebarHeader>
 
-      <div className="space-y-2 px-3 py-2">
-        <Button
-          onClick={handleNewConversation}
-          disabled={isCreating}
-          className="w-full justify-start gap-2"
-          size="sm"
-          aria-label={t.sidebar.newConversation}
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          {isCreating ? t.sidebar.creating : t.sidebar.newConversation}
-        </Button>
+          <Separator />
 
-        {/* Search bar — Ctrl+K (AC5) */}
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            ref={searchInputRef}
-            type="search"
-            placeholder={t.sidebar.search}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-8 text-sm"
-            aria-label={t.sidebar.searchAria}
-          />
-        </div>
-      </div>
+          <SidebarContent>
+            <nav aria-label={t.sidebar.navAria} className="flex h-full flex-col">
+              {isLoading ? (
+                <ConversationListSkeleton />
+              ) : (
+                <ConversationList
+                  conversations={filteredConversations}
+                  currentConversationId={currentConversationId}
+                  onDelete={handleDeleteConversation}
+                />
+              )}
+              {/* Sentinel for infinite scroll (AC6) */}
+              <div ref={bottomRef} className="h-1" aria-hidden="true" />
+            </nav>
+          </SidebarContent>
+        </>
+      )}
 
-      <Separator />
-
-      <SidebarContent>
-        <nav aria-label={t.sidebar.navAria} className="flex h-full flex-col">
-          {isLoading ? (
-            <ConversationListSkeleton />
-          ) : (
-            <ConversationList
-              conversations={filteredConversations}
-              currentConversationId={currentConversationId}
-              onDelete={handleDeleteConversation}
-            />
-          )}
-          {/* Sentinel for infinite scroll (AC6) */}
-          <div ref={bottomRef} className="h-1" aria-hidden="true" />
-        </nav>
-      </SidebarContent>
+      {/* User account section */}
+      {user && (
+        <SidebarFooter className="border-t px-2 py-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted/60 focus:outline-none bg-transparent border-0">
+              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt={user.name ?? ''}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-muted text-xs font-semibold text-muted-foreground">
+                    {user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
+                  </div>
+                )}
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col text-left">
+                <span className="truncate text-xs font-medium text-foreground">
+                  {user.name ?? t.admin.sidebar.myAccount}
+                </span>
+                {user.email && (
+                  <span className="truncate text-[10px] text-muted-foreground">
+                    {user.email}
+                  </span>
+                )}
+              </div>
+              <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-40" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-52">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                  {user.email}
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              {pathname?.startsWith('/settings') ? (
+                <DropdownMenuItem onClick={() => router.push('/chat')}>
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  {t.admin.sidebar.backToChat}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => router.push('/settings')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  {t.admin.sidebar.accountSettings}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                onClick={() => { setLocale(locale === 'fr' ? 'en' : 'fr'); router.refresh(); }}
+              >
+                <Globe className="mr-2 h-4 w-4" />
+                <span className="flex-1">{t.admin.sidebar.language}</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  {locale === 'fr' ? 'EN' : 'FR'}
+                </span>
+              </DropdownMenuItem>
+              {mounted && (
+                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                  {theme === 'dark'
+                    ? <Sun className="mr-2 h-4 w-4" />
+                    : <Moon className="mr-2 h-4 w-4" />}
+                  {theme === 'dark' ? t.admin.sidebar.lightMode : t.admin.sidebar.darkMode}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => signOut({ callbackUrl: '/login' })}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                {t.admin.sidebar.signOut}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }

@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 import { uploadKnowledgeDocument, deleteKnowledgeDocument } from '@/actions/admin-actions';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/lib/i18n/use-t';
 
 type KnowledgeDoc = {
   id: string;
@@ -32,6 +33,7 @@ interface KnowledgeUploadProps {
 }
 
 export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUploadProps) {
+  const t = useT();
   const [documents, setDocuments] = useState<KnowledgeDoc[]>(initialDocuments);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -39,10 +41,10 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
 
   function validateFile(file: File): string | null {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      return 'Formats acceptés: PDF, TXT, DOCX';
+      return t.knowledgeUpload.acceptedFormats;
     }
     if (file.size > MAX_SIZE) {
-      return 'Taille maximum: 5 Mo';
+      return t.knowledgeUpload.maxSize;
     }
     return null;
   }
@@ -79,9 +81,9 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
           fileSize: file.size,
         },
       ]);
-      toast.success('Document téléchargé avec succès');
+      toast.success(t.knowledgeUpload.uploadSuccess);
     } else {
-      toast.error(result.error?.message ?? "Échec de l'upload");
+      toast.error(result.error?.message ?? t.knowledgeUpload.uploadFailed);
     }
 
     setUploading(false);
@@ -90,13 +92,13 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
   }
 
   async function handleDelete(docId: string) {
-    if (!confirm('Supprimer ce document ?')) return;
+    if (!confirm(t.knowledgeUpload.deleteConfirm)) return;
     const result = await deleteKnowledgeDocument(docId);
     if (result.success) {
       setDocuments((prev) => prev.filter((d) => d.id !== docId));
-      toast.success('Document supprimé');
+      toast.success(t.knowledgeUpload.deleteSuccess);
     } else {
-      toast.error(result.error?.message ?? 'Échec de la suppression');
+      toast.error(result.error?.message ?? t.knowledgeUpload.deleteFailed);
     }
   }
 
@@ -112,7 +114,7 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
           disabled={uploading}
           className="hidden"
           id={`knowledge-upload-${specialistId}`}
-          aria-label="Sélectionner un fichier"
+          aria-label={t.knowledgeUpload.selectFile}
         />
         <label htmlFor={`knowledge-upload-${specialistId}`}>
           <Button
@@ -121,13 +123,13 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
             disabled={uploading}
             className="gap-2 cursor-pointer"
             onClick={() => inputRef.current?.click()}
-            aria-label="Télécharger un document"
+            aria-label={t.knowledgeUpload.uploadDocumentAria}
           >
             <UploadIcon className="h-4 w-4" />
-            {uploading ? 'Téléchargement...' : 'Ajouter un document'}
+            {uploading ? t.knowledgeUpload.uploading : t.knowledgeUpload.addDocument}
           </Button>
         </label>
-        <span className="text-xs text-muted-foreground">PDF, TXT, DOCX — max 5 Mo</span>
+        <span className="text-xs text-muted-foreground">{t.knowledgeUpload.formats}</span>
       </div>
 
       {/* Progress bar */}
@@ -143,7 +145,7 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
       {/* Documents list */}
       {documents.length === 0 ? (
         <p className="text-sm text-muted-foreground py-3">
-          Aucun document. Ajoutez des fichiers pour enrichir la base de connaissances.
+          {t.knowledgeUpload.noDocuments}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -167,7 +169,7 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
                 size="icon"
                 className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
                 onClick={() => handleDelete(doc.id)}
-                aria-label={`Supprimer ${doc.fileName}`}
+                aria-label={`${t.knowledgeUpload.deleteAria} ${doc.fileName}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
