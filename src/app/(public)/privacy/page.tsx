@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { APP_NAME, APP_URL } from '@/lib/constants';
+import { APP_NAME, APP_URL, DPO_EMAIL } from '@/lib/constants';
 import { getT } from '@/lib/i18n/get-t';
 
 export async function generateMetadata(): Promise<Metadata> {
