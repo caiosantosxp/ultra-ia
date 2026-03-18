@@ -40,6 +40,7 @@ interface Specialist {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  firstMessage?: string | null;
 }
 
 interface ChatAreaProps {
@@ -165,8 +166,10 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
                 <h2 className="text-base font-semibold">{specialist.name}</h2>
                 <p className="text-sm text-muted-foreground">{specialist.domain}</p>
               </div>
-              <p className="max-w-sm text-sm text-muted-foreground">
-                {t.chatArea.greeting} {specialist.domain}{t.chatArea.greetingSuffix}
+              <p className="max-w-sm text-sm text-muted-foreground whitespace-pre-wrap">
+                {specialist.firstMessage
+                  ? specialist.firstMessage
+                  : `${t.chatArea.greeting} ${specialist.domain}${t.chatArea.greetingSuffix}`}
               </p>
             </div>
 

@@ -89,6 +89,7 @@ model Specialist {
   language         String              @default("fr")
   scopeLimits      String?
   systemPrompt     String?
+  firstMessage     String?
   // Security settings
   showSources      Boolean             @default(false)
   showBranding     Boolean             @default(true)

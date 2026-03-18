@@ -14,12 +14,13 @@ export const createSpecialistSchema = z.object({
     .max(2000),
   price: z.number().int().min(100, 'Le prix minimum est 1€').max(100000),
   accentColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Couleur hexadécimale invalide'),
-  avatarUrl: z.string().url('URL invalide'),
+  avatarUrl: z.string().url('URL invalide').optional().or(z.literal('')),
   tags: z.array(z.string().min(1).max(50)).max(10),
   quickPrompts: z.array(z.string().min(1).max(200)).max(8),
   language: z.enum(['fr', 'en']),
   systemPrompt: z.string().max(10000).optional(),
   scopeLimits: z.string().max(5000).optional(),
+  firstMessage: z.string().max(2000).optional(),
 });
 
 export const updateSpecialistSchema = createSpecialistSchema.partial();

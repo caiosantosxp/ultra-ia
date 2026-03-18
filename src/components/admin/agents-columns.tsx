@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { ArrowUpDown, MessageSquare, MoreHorizontal, Pencil, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { toggleSpecialistActive, deleteSpecialist } from '@/actions/admin-actions';
@@ -29,6 +29,8 @@ export type AgentRow = {
   slug: string;
   price: number;
   isActive: boolean;
+  accentColor: string;
+  avatarUrl: string;
   createdAt: Date;
   owner?: { id: string; name: string | null; email: string | null } | null;
   _count: { subscriptions: number; conversations: number };
@@ -123,25 +125,29 @@ export function getAgentColumns(t: Translation): ColumnDef<AgentRow>[] {
           <ArrowUpDown className="h-3 w-3" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/agents/${row.original.id}`}
-          className="font-medium hover:underline"
-        >
-          {row.getValue('name')}
-        </Link>
-      ),
-    },
-    {
-      accessorKey: 'domain',
-      header: t.admin.agentsPage.colDomain,
-    },
-    {
-      accessorKey: 'slug',
-      header: 'Slug',
-      cell: ({ row }) => (
-        <span className="font-mono text-xs text-muted-foreground">{row.getValue('slug')}</span>
-      ),
+      cell: ({ row }) => {
+        const agent = row.original;
+        return (
+          <Link
+            href={`/admin/agents/${agent.id}`}
+            className="flex items-center gap-3 group"
+          >
+            <span
+              className="h-8 w-8 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm"
+              style={{ backgroundColor: agent.accentColor || '#6366f1' }}
+            >
+              {agent.name.charAt(0).toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <p className="font-medium group-hover:underline leading-none">{agent.name}</p>
+              <p className="text-xs text-muted-foreground mt-1 truncate max-w-[180px]">
+                {agent.domain}
+                <span className="ml-1.5 font-mono opacity-60">{agent.slug}</span>
+              </p>
+            </div>
+          </Link>
+        );
+      },
     },
     {
       accessorKey: 'price',
@@ -158,7 +164,7 @@ export function getAgentColumns(t: Translation): ColumnDef<AgentRow>[] {
       ),
       cell: ({ row }) => {
         const price = row.getValue<number>('price');
-        return <span>{(price / 100).toFixed(2)} €</span>;
+        return <span className="font-medium tabular-nums">{(price / 100).toFixed(2)} €</span>;
       },
     },
     {
@@ -169,7 +175,7 @@ export function getAgentColumns(t: Translation): ColumnDef<AgentRow>[] {
         return (
           <div className="flex items-center gap-2">
             <ActiveToggle id={row.original.id} isActive={isActive} />
-            <Badge variant={isActive ? 'default' : 'secondary'}>
+            <Badge variant={isActive ? 'default' : 'secondary'} className="text-xs">
               {isActive ? t.admin.agentsPage.statusActive : t.admin.agentsPage.statusInactive}
             </Badge>
           </div>
@@ -181,12 +187,14 @@ export function getAgentColumns(t: Translation): ColumnDef<AgentRow>[] {
       header: t.admin.agentsPage.colOwner,
       cell: ({ row }) => {
         const owner = row.original.owner;
-        if (!owner) return <Badge variant="outline" className="text-muted-foreground text-xs">{t.admin.agentsPage.noOwner}</Badge>;
+        if (!owner)
+          return (
+            <Badge variant="outline" className="text-muted-foreground text-xs">
+              {t.admin.agentsPage.noOwner}
+            </Badge>
+          );
         return (
-          <Link
-            href={`/admin/users/${owner.id}`}
-            className="text-xs hover:underline text-foreground"
-          >
+          <Link href={`/admin/users/${owner.id}`} className="text-xs hover:underline text-foreground">
             {owner.name ?? owner.email ?? owner.id}
           </Link>
         );
@@ -195,7 +203,21 @@ export function getAgentColumns(t: Translation): ColumnDef<AgentRow>[] {
     {
       accessorKey: '_count',
       header: t.admin.agentsPage.colSubscribers,
-      cell: ({ row }) => row.original._count.subscriptions,
+      cell: ({ row }) => {
+        const { subscriptions, conversations } = row.original._count;
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span className="flex items-center gap-1 text-sm font-medium">
+              <Users className="h-3 w-3 text-muted-foreground" />
+              {subscriptions}
+            </span>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MessageSquare className="h-3 w-3" />
+              {conversations}
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'createdAt',

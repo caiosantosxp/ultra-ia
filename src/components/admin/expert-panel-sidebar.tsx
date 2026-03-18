@@ -11,7 +11,6 @@ import {
   Globe,
   LayoutDashboard,
   LogOut,
-  Mic,
   Moon,
   Settings,
   Settings2,
@@ -173,13 +172,7 @@ export function ExpertPanelSidebar({
             pathname.endsWith('/identidade')
           }
         />
-        <NavItem
-          href={`${base}/identidade/voz`}
-          icon={Mic}
-          label={t.admin.expertSidebar.voice}
-          active={pathname.includes('/identidade/voz')}
-        />
-        <NavItem
+<NavItem
           href={`${base}/identidade/instrucoes`}
           icon={Settings}
           label={t.admin.expertSidebar.instructions}

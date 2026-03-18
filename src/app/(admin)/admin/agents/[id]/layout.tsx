@@ -25,7 +25,7 @@ export default async function ExpertPanelLayout({ params, children }: Props) {
   const lang = (await cookies()).get('LANG')?.value ?? 'fr';
 
   return (
-    <div className="-m-6 flex min-h-[calc(100vh-3.5rem)] lg:min-h-screen">
+    <div className="-m-6 flex h-[calc(100vh-3.5rem)] overflow-hidden lg:h-screen">
       <ExpertPanelSidebar
         specialistId={specialist.id}
         specialistName={specialist.name}
@@ -33,7 +33,7 @@ export default async function ExpertPanelLayout({ params, children }: Props) {
         initialLocale={lang}
         user={session.user}
       />
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6">
         {children}
       </div>
     </div>

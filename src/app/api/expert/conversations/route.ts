@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await auth();
 
   if (!session?.user) {
@@ -22,6 +22,10 @@ export async function GET() {
   if (!specialist) {
     return NextResponse.json({ error: 'No specialist linked' }, { status: 404 });
   }
+
+  const { searchParams } = new URL(req.url);
+  const period = Math.max(1, Number(searchParams.get('period') ?? '30'));
+  const sinceDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
 
   const leads = await prisma.lead.findMany({
     where: { specialistId: specialist.id },
@@ -47,6 +51,7 @@ export async function GET() {
       specialistId: specialist.id,
       userId: { in: leadUsers.map((u) => u.id) },
       isDeleted: false,
+      updatedAt: { gte: sinceDate },
     },
     include: {
       messages: {

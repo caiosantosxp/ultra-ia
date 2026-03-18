@@ -1,8 +1,11 @@
+'use client';
+
 import type { LucideIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricsCardSkeleton } from '@/components/dashboard/metrics-card-skeleton';
+import { useT } from '@/lib/i18n/use-t';
 
 interface MetricsCardProps {
   icon: LucideIcon;
@@ -16,10 +19,11 @@ interface MetricsCardProps {
 }
 
 function TrendIndicator({ trend }: { trend: number }) {
+  const t = useT();
   const isPositive = trend >= 0;
   return (
     <p className={cn('mt-1 text-xs', isPositive ? 'text-green-600' : 'text-red-600')}>
-      {isPositive ? '↑' : '↓'} {Math.abs(trend)}% vs período anterior
+      {isPositive ? '↑' : '↓'} {Math.abs(trend)}% {t.common.vsPrevious}
     </p>
   );
 }
@@ -58,4 +62,3 @@ export function MetricsCard({
     </Card>
   );
 }
-

@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, MessageCircle, Phone, Star, Volume2, Send } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { ArrowLeft, MessageCircle, Star, Send } from 'lucide-react';
 import type { Specialist } from '@prisma/client';
 
 import { Badge } from '@/components/ui/badge';
@@ -41,8 +43,23 @@ export function SpecialistProfile({
     .slice(0, 2);
 
   const t = useT();
+  const router = useRouter();
+  const [inputValue, setInputValue] = useState('');
+  const [imageError, setImageError] = useState(false);
   const priceFormatted = formatPrice(price);
   const firstName = name.split(' ')[0];
+
+  function handleSendPrompt() {
+    const text = inputValue.trim();
+    if (!text) return;
+    if (hasActiveSubscription) {
+      router.push(`/chat?prompt=${encodeURIComponent(text)}`);
+    } else if (isAuthenticated) {
+      router.push(`/specialist/${slug}?checkout=true`);
+    } else {
+      router.push(`/register?callbackUrl=/specialist/${slug}&prompt=${encodeURIComponent(text)}`);
+    }
+  }
 
   const chatHref = hasActiveSubscription
     ? '/chat'
@@ -93,14 +110,6 @@ export function SpecialistProfile({
                 <MessageCircle className="h-3.5 w-3.5" />
                 {t.profile.chat}
               </Link>
-              <button
-                type="button"
-                aria-label={t.profile.callSoon}
-                className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow transition hover:bg-white/90"
-              >
-                <Phone className="h-3.5 w-3.5" />
-                {t.profile.call}
-              </button>
             </div>
           </div>
 
@@ -120,20 +129,21 @@ export function SpecialistProfile({
             </div>
 
             {/* Avatar */}
-            <div className="relative h-28 w-24 overflow-hidden rounded-xl shadow-lg">
-              {avatarUrl ? (
+            <div
+              className="relative h-28 w-24 overflow-hidden rounded-xl shadow-lg"
+              style={{ backgroundColor: `${accentColor}99` }}
+            >
+              {avatarUrl && !imageError ? (
                 <Image
                   src={avatarUrl}
                   alt={`${name} - ${domain}`}
                   fill
                   className="object-cover"
                   priority
+                  onError={() => setImageError(true)}
                 />
               ) : (
-                <div
-                  className="flex h-full w-full items-center justify-center text-2xl font-bold text-white"
-                  style={{ backgroundColor: `${accentColor}99` }}
-                >
+                <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
                   {initials}
                 </div>
               )}
@@ -157,18 +167,6 @@ export function SpecialistProfile({
         <p className="font-serif text-xl italic leading-snug">{description.split('.')[0]}.</p>
       </div>
 
-      {/* ── Listen button ── */}
-      <button
-        type="button"
-        className="flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        aria-label={t.profile.listenAria}
-      >
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <Volume2 className="h-4 w-4" />
-        </span>
-        {t.profile.listen}
-      </button>
-
       {/* ── Bio ── */}
       <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
 
@@ -189,7 +187,7 @@ export function SpecialistProfile({
           {priceFormatted}
           <span className="text-base font-normal text-muted-foreground">{t.profile.perMonth}</span>
         </p>
-        <p className="mt-1 text-sm text-muted-foreground">{t.profile.unlimitedAccess} {firstName}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t.profile.unlimitedAccess} {name}</p>
       </div>
 
       {/* ── Quick prompts ── */}
@@ -228,23 +226,45 @@ export function SpecialistProfile({
         />
       )}
 
-      {/* ── Chat input preview ── */}
-      <div className="flex items-center gap-3 rounded-full border bg-card px-4 py-2.5 shadow-sm">
-        <div className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-full bg-muted">
-          {avatarUrl && (
-            <Image src={avatarUrl} alt={name} width={28} height={28} className="object-cover" />
+      {/* ── Chat input ── */}
+      <form
+        onSubmit={(e) => { e.preventDefault(); handleSendPrompt(); }}
+        className="flex items-center gap-3 rounded-full border bg-card px-4 py-2.5 shadow-sm"
+      >
+        <div
+          className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-full"
+          style={{ backgroundColor: `${accentColor}99` }}
+        >
+          {avatarUrl && !imageError ? (
+            <Image
+              src={avatarUrl}
+              alt={name}
+              width={28}
+              height={28}
+              className="object-cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center text-[9px] font-bold text-white">
+              {initials}
+            </span>
           )}
         </div>
-        <span className="flex-1 truncate text-sm text-muted-foreground">
-          {quickPrompts[0] ?? `${t.profile.askQuestion} ${firstName}…`}
-        </span>
-        <span
-          aria-hidden="true"
-          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder={quickPrompts[0] ?? `${t.profile.askQuestion} ${firstName}…`}
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+        />
+        <button
+          type="submit"
+          aria-label={t.profile.chat}
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary/90"
         >
           <Send className="h-3.5 w-3.5" />
-        </span>
-      </div>
+        </button>
+      </form>
     </article>
   );
 }

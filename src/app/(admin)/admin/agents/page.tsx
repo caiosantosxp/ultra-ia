@@ -13,9 +13,18 @@ export default async function AgentsPage() {
   const t = await getT();
 
   const agents = await prisma.specialist.findMany({
-    include: {
-      _count: { select: { subscriptions: true, conversations: true } },
+    select: {
+      id: true,
+      name: true,
+      domain: true,
+      slug: true,
+      price: true,
+      isActive: true,
+      accentColor: true,
+      avatarUrl: true,
+      createdAt: true,
       owner: { select: { id: true, name: true, email: true } },
+      _count: { select: { subscriptions: true, conversations: true } },
     },
     orderBy: { createdAt: 'desc' },
   });

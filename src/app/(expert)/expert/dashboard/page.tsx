@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Share2 } from 'lucide-react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 import { prisma } from '@/lib/prisma';
@@ -6,7 +6,9 @@ import { requireExpert } from '@/lib/expert-helpers';
 import { getT } from '@/lib/i18n/get-t';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ShareButton } from '@/components/expert/share-button';
 import { ExpertSubscriptionsChart } from '@/components/admin/expert-subscriptions-chart';
+import { AvatarCard } from '@/components/expert/avatar-card';
 
 const MESSAGE_LIMIT = 30_000;
 
@@ -30,7 +32,7 @@ export default async function ExpertDashboardPage() {
   ] = await Promise.all([
     prisma.specialist.findUnique({
       where: { id },
-      select: { id: true, name: true, avatarUrl: true, accentColor: true, isActive: true },
+      select: { id: true, name: true, avatarUrl: true, accentColor: true, isActive: true, slug: true },
     }),
     prisma.message.count({
       where: { conversation: { specialistId: id, isDeleted: false }, createdAt: { gte: firstDayOfMonth } },
@@ -66,6 +68,24 @@ export default async function ExpertDashboardPage() {
     []
   );
 
+  // TODO: remove mock data — only for UI testing
+  const chartData = (() => {
+    const days = Array.from({ length: 90 }, (_, i) => {
+      const d = new Date(now.getTime() - (89 - i) * 24 * 60 * 60 * 1000);
+      return d.toISOString().split('T')[0];
+    });
+    if (subsChartData.length > 0) {
+      const realByDay = Object.fromEntries(subsChartData.map(p => [p.date, p.count]));
+      return days.map(date => ({ date, count: realByDay[date] ?? 0 }));
+    }
+    const mockByIndex: Record<number, number> = {
+      5:2, 8:1, 12:3, 15:1, 18:2, 22:4, 25:1, 28:3, 30:2, 33:1,
+      36:5, 40:2, 43:1, 46:3, 50:2, 53:4, 56:1, 59:2, 62:3, 65:1,
+      68:5, 71:2, 74:3, 77:1, 80:4, 83:2, 85:1, 87:3, 88:2, 89:1,
+    };
+    return days.map((date, i) => ({ date, count: mockByIndex[i] ?? 0 }));
+  })();
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -78,13 +98,20 @@ export default async function ExpertDashboardPage() {
             <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
             {fullSpecialist.isActive ? t.admin.agentDashboard.aiPublic : t.admin.agentDashboard.aiPrivate}
           </div>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Share2 className="h-3.5 w-3.5" />
-            {t.admin.agentDashboard.share}
-          </Button>
-          <Button size="sm" className="gap-1.5" style={{ backgroundColor: fullSpecialist.accentColor }}>
+          <ShareButton
+            slug={fullSpecialist.slug}
+            label={t.admin.agentDashboard.share}
+            copiedLabel={t.admin.agentDashboard.linkCopied}
+          />
+          <Link
+            href={`/specialist/${fullSpecialist.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-primary-foreground transition-all"
+            style={{ backgroundColor: fullSpecialist.accentColor }}
+          >
             {t.admin.agentDashboard.yourClone} <ArrowRight className="h-3.5 w-3.5" />
-          </Button>
+          </Link>
         </div>
       </div>
 
@@ -142,28 +169,18 @@ export default async function ExpertDashboardPage() {
                 {t.admin.agentDashboard.seeAll} <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
-            <ExpertSubscriptionsChart data={subsChartData} />
+            <ExpertSubscriptionsChart data={chartData} />
           </div>
         </div>
 
         {/* Right column */}
         <div className="space-y-3">
-          <div className="relative overflow-hidden rounded-xl border bg-card">
-            {fullSpecialist.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={fullSpecialist.avatarUrl} alt={fullSpecialist.name} className="h-72 w-full object-cover object-top" />
-            ) : (
-              <div className="flex h-72 w-full items-center justify-center text-5xl font-bold text-white" style={{ backgroundColor: fullSpecialist.accentColor }}>
-                {fullSpecialist.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="absolute bottom-3 left-3 right-3">
-              <div className="flex items-center gap-2 rounded-xl bg-black/70 px-3 py-2 text-white backdrop-blur-sm">
-                <span className="flex-1 text-xs font-medium">{t.admin.agentDashboard.insights}</span>
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold">1</span>
-              </div>
-            </div>
-          </div>
+          <AvatarCard
+            avatarUrl={fullSpecialist.avatarUrl}
+            name={fullSpecialist.name}
+            accentColor={fullSpecialist.accentColor}
+            insightsLabel={t.admin.agentDashboard.insights}
+          />
 
           <Link href="/expert/identidade/treinamento" className="flex w-full items-center justify-between gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50">
             <div className="flex items-center gap-2">

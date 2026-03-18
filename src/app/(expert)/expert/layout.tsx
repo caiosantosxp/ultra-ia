@@ -21,7 +21,7 @@ export default async function ExpertLayout({ children }: { children: React.React
   const lang = (await cookies()).get('LANG')?.value ?? 'fr';
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <ExpertPanelSidebar
         specialistId={specialist.id}
         specialistName={specialist.name}
@@ -30,7 +30,7 @@ export default async function ExpertLayout({ children }: { children: React.React
         initialLocale={lang}
         user={session.user}
       />
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6">
         {children}
       </div>
     </div>

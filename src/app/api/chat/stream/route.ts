@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/nextjs';
 
 import { auth } from '@/lib/auth';
+import { recalculateLeadScore } from '@/lib/lead-scoring';
 import { callN8NStream, N8NCircuitOpenError } from '@/lib/n8n';
 import { prisma } from '@/lib/prisma';
 import { checkAndIncrementDailyUsage } from '@/lib/rate-limit';
@@ -188,6 +189,9 @@ export async function POST(req: Request) {
           await prisma.message.create({
             data: { conversationId, userId, content: fullContent.trim(), role: 'ASSISTANT' },
           });
+
+          // Recalculate lead score based on keyword matches (fire-and-forget)
+          recalculateLeadScore(conversation.specialistId, userId).catch(() => {});
         }
 
         // Send done event

@@ -3,15 +3,13 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
 import useSWR from 'swr';
-import { BarChart2, Calendar, MessageSquare, Mic, ThumbsUp, TrendingUp, Users } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
+import { BarChart2, Calendar, MessageSquare, TrendingUp, Users } from 'lucide-react';
+import { Cell, XAxis, YAxis, BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
 
 import { AnalyticsChart } from '@/components/admin/analytics-chart';
 import { MetricsCard } from '@/components/dashboard/metrics-card';
 import { LeadConversationsPanel } from '@/components/expert/lead-conversations-panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import type { ChartConfig } from '@/components/ui/chart';
 
 type Period = 7 | 15 | 30;
 
@@ -42,14 +40,6 @@ const COUNTRY_LABELS: Record<string, string> = {
   Autre: '🌍 Autre',
 };
 
-const countryChartConfig: ChartConfig = {
-  count: { label: 'Sessions', color: 'hsl(var(--primary))' },
-};
-
-const hourlyChartConfig: ChartConfig = {
-  count: { label: 'Messages', color: 'hsl(var(--primary))' },
-};
-
 const HOUR_COLORS = (h: number) => {
   if (h >= 8 && h < 12)  return 'hsl(var(--primary))';
   if (h >= 12 && h < 14) return 'hsl(220 70% 60%)';
@@ -57,6 +47,23 @@ const HOUR_COLORS = (h: number) => {
   if (h >= 18 && h < 22) return 'hsl(280 60% 55%)';
   return 'hsl(var(--muted-foreground))';
 };
+
+function HourlyTooltip({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: HourlyStat }> }) {
+  if (!active || !payload?.length) return null;
+  const { hour, count } = payload[0].payload;
+  if (count === 0) return null;
+  const h = String(hour).padStart(2, '0');
+  const h1 = String(hour + 1).padStart(2, '0');
+  return (
+    <div style={{ background: '#1c1c1f', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
+      <p style={{ fontSize: 11, color: '#a1a1aa', marginBottom: 2 }}>{h}:00 – {h1}:00</p>
+      <p style={{ fontSize: 14, fontWeight: 600, color: '#fafafa' }}>
+        {count}{' '}
+        <span style={{ fontSize: 12, fontWeight: 400, color: '#a1a1aa' }}>mensagem{count !== 1 ? 's' : ''}</span>
+      </p>
+    </div>
+  );
+}
 
 export default function ExpertAnalyticsPage() {
   const [specialistId, setSpecialistId] = useState<string | null>(null);
@@ -83,8 +90,6 @@ export default function ExpertAnalyticsPage() {
         <TabsList>
           <TabsTrigger value="metricas">Métricas</TabsTrigger>
           <TabsTrigger value="conversas">Conversas</TabsTrigger>
-          <TabsTrigger value="chamadas">Chamadas</TabsTrigger>
-          <TabsTrigger value="opiniao">Opinião</TabsTrigger>
         </TabsList>
 
         <TabsContent value="metricas" className="mt-6 space-y-6">
@@ -127,44 +132,21 @@ export default function ExpertAnalyticsPage() {
                   <p className="text-sm text-muted-foreground">Nenhum dado para este período</p>
                 </div>
               ) : (
-                <div className="grid gap-6 lg:grid-cols-2">
-                  {/* Bar chart */}
-                  <ChartContainer config={countryChartConfig} className="h-64 w-full">
-                    <BarChart data={metrics.countryData} layout="vertical" margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                      <XAxis type="number" tick={{ fontSize: 11 }} className="text-xs text-muted-foreground" />
-                      <YAxis
-                        type="category"
-                        dataKey="country"
-                        width={80}
-                        tick={{ fontSize: 11 }}
-                        tickFormatter={(v: string) => COUNTRY_LABELS[v] ?? v}
-                        className="text-xs text-muted-foreground"
-                      />
-                      <ChartTooltip
-                        content={<ChartTooltipContent formatter={(v, _n, p) => [`${v} sessions (${(p.payload as CountryStat).percentage}%)`, COUNTRY_LABELS[(p.payload as CountryStat).country] ?? (p.payload as CountryStat).country]} />}
-                      />
-                      <Bar dataKey="count" radius={[0, 4, 4, 0]} fill="hsl(var(--primary))" />
-                    </BarChart>
-                  </ChartContainer>
-
-                  {/* Table */}
-                  <div className="space-y-2">
-                    {metrics.countryData.map((row) => (
-                      <div key={row.country} className="flex items-center gap-3">
-                        <span className="w-28 text-sm">{COUNTRY_LABELS[row.country] ?? row.country}</span>
-                        <div className="flex-1 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-2 rounded-full bg-primary transition-all"
-                            style={{ width: `${row.percentage}%` }}
-                          />
-                        </div>
-                        <span className="w-16 text-right text-xs text-muted-foreground">
-                          {row.count} sess. ({row.percentage}%)
-                        </span>
+                <div className="rounded-xl border bg-card p-5 space-y-3">
+                  {metrics.countryData.map((row, i) => (
+                    <div key={row.country} className="flex items-center gap-4">
+                      <span className="w-5 text-xs text-muted-foreground text-right">{i + 1}</span>
+                      <span className="w-32 text-sm font-medium truncate">{COUNTRY_LABELS[row.country] ?? row.country}</span>
+                      <div className="flex-1 overflow-hidden rounded-full bg-muted h-2">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all"
+                          style={{ width: `${row.percentage}%` }}
+                        />
                       </div>
-                    ))}
-                  </div>
+                      <span className="w-10 text-right text-sm font-semibold tabular-nums">{row.count}</span>
+                      <span className="w-10 text-right text-xs text-muted-foreground tabular-nums">{row.percentage}%</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </TabsContent>
@@ -179,29 +161,36 @@ export default function ExpertAnalyticsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">Distribuição de mensagens por hora do dia (UTC)</p>
-                  <ChartContainer config={hourlyChartConfig} className="h-64 w-full">
-                    <BarChart data={metrics.hourlyData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
-                      <XAxis
-                        dataKey="hour"
-                        tick={{ fontSize: 10 }}
-                        tickFormatter={(h: number) => `${String(h).padStart(2, '0')}h`}
-                        className="text-xs text-muted-foreground"
-                        interval={1}
-                      />
-                      <YAxis tick={{ fontSize: 11 }} className="text-xs text-muted-foreground" />
-                      <ChartTooltip
-                        content={<ChartTooltipContent formatter={(v, _n, p) => [`${v} mensagens`, `${String((p.payload as HourlyStat).hour).padStart(2, '0')}:00 – ${String((p.payload as HourlyStat).hour + 1).padStart(2, '0')}:00`]} />}
-                      />
-                      <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                        {metrics.hourlyData.map((entry) => (
-                          <Cell key={entry.hour} fill={HOUR_COLORS(entry.hour)} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ChartContainer>
-                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground text-center">Distribuição de mensagens por hora do dia (UTC)</p>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={metrics.hourlyData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" vertical={false} />
+                        <XAxis
+                          dataKey="hour"
+                          tick={{ fontSize: 11, fill: '#71717a' }}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(h: number) => `${String(h).padStart(2, '0')}h`}
+                          interval={1}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 11, fill: '#71717a' }}
+                          tickLine={false}
+                          axisLine={false}
+                          allowDecimals={false}
+                          width={28}
+                        />
+                        <Tooltip content={<HourlyTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                        <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                          {metrics.hourlyData.map((entry) => (
+                            <Cell key={entry.hour} fill={HOUR_COLORS(entry.hour)} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
                     <span><span className="mr-1 inline-block h-2 w-3 rounded-sm bg-primary" />Manhã (8h–12h)</span>
                     <span><span className="mr-1 inline-block h-2 w-3 rounded-sm" style={{ background: 'hsl(220 70% 60%)' }} />Almoço (12h–14h)</span>
                     <span><span className="mr-1 inline-block h-2 w-3 rounded-sm bg-primary" />Tarde (14h–18h)</span>
@@ -216,16 +205,7 @@ export default function ExpertAnalyticsPage() {
         <TabsContent value="conversas" className="mt-6">
           <LeadConversationsPanel />
         </TabsContent>
-        <TabsContent value="chamadas" className="mt-6">
-          <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
-            <div className="flex flex-col items-center gap-2 text-muted-foreground"><Mic className="h-8 w-8" /><p className="text-sm">Historique des appels disponible prochainement</p></div>
-          </div>
-        </TabsContent>
-        <TabsContent value="opiniao" className="mt-6">
-          <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
-            <div className="flex flex-col items-center gap-2 text-muted-foreground"><ThumbsUp className="h-8 w-8" /><p className="text-sm">Avis et opinions disponibles prochainement</p></div>
-          </div>
-        </TabsContent>
+
       </Tabs>
     </div>
   );

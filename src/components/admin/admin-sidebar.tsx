@@ -75,19 +75,6 @@ function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
   );
 }
 
-function SidebarFooter() {
-  const t = useT();
-  return (
-    <div className="border-t p-3">
-      <Link
-        href="/chat"
-        className="flex items-center gap-2 rounded-md px-3 py-2 text-xs text-muted-foreground hover:text-foreground"
-      >
-        {t.admin.sidebar.backToChat}
-      </Link>
-    </div>
-  );
-}
 
 function SidebarUserSection({ user }: { user: SidebarUser }) {
   const router = useRouter();
@@ -195,7 +182,7 @@ export function AdminSidebar({ user }: { user?: SidebarUser }) {
     <aside className="hidden lg:flex sticky top-0 h-screen w-60 flex-col overflow-y-auto border-r bg-background">
       <SidebarLogo />
       <SidebarNav />
-      <SidebarFooter />
+
       {user && <SidebarUserSection user={user} />}
     </aside>
   );
@@ -222,7 +209,7 @@ export function AdminMobileSidebar({ user }: { user?: SidebarUser }) {
           </SheetTitle>
         </SheetHeader>
         <SidebarNav onNavClick={() => setOpen(false)} />
-        <SidebarFooter />
+  
         {user && <SidebarUserSection user={user} />}
       </SheetContent>
     </Sheet>

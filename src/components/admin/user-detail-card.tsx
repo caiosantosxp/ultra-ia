@@ -45,7 +45,7 @@ function SubscriptionStatusBadge({ status }: { status: SubscriptionStatus }) {
   const t = useT();
   switch (status) {
     case 'ACTIVE':
-      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{t.admin.userSubscriptions.statusActive}</Badge>;
+      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400">{t.admin.userSubscriptions.statusActive}</Badge>;
     case 'PAST_DUE':
       return (
         <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">{t.admin.userSubscriptions.statusPastDue}</Badge>

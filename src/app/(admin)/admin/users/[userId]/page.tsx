@@ -77,7 +77,7 @@ export default async function AdminUserDetailPage({
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2">
-        <Link href="/admin/users" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+        <Link href="/admin/users" className="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t.admin.userDetailPage.backLabel}
         </Link>

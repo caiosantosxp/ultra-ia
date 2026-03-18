@@ -13,13 +13,81 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { SubscribersFilters } from '@/components/expert/subscribers-filters';
 
-export default async function ExpertSubscribersPage() {
+type StatusFilter = 'all' | 'active' | 'new' | 'past_due' | 'canceled' | 'expired' | 'pending';
+type PeriodFilter = 'all' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year';
+
+function getPeriodDate(period: PeriodFilter): Date | null {
+  const now = new Date();
+  switch (period) {
+    case 'this_month':
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    case 'last_month':
+      return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    case 'last_3_months':
+      return new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    case 'last_6_months':
+      return new Date(now.getFullYear(), now.getMonth() - 6, 1);
+    case 'this_year':
+      return new Date(now.getFullYear(), 0, 1);
+    default:
+      return null;
+  }
+}
+
+function getPeriodEndDate(period: PeriodFilter): Date | null {
+  const now = new Date();
+  if (period === 'last_month') {
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  return null;
+}
+
+export default async function ExpertSubscribersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; period?: string }>;
+}) {
   const { specialist } = await requireExpert();
   const t = await getT();
+  const params = await searchParams;
+
+  const statusFilter = (params.status ?? 'all') as StatusFilter;
+  const periodFilter = (params.period ?? 'all') as PeriodFilter;
+
+  // Build date filter
+  const periodStart = getPeriodDate(periodFilter);
+  const periodEnd = getPeriodEndDate(periodFilter);
+
+  // Build status filter for Prisma
+  const isNewFilter = statusFilter === 'new';
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const statusMap: Record<string, string> = {
+    active: 'ACTIVE',
+    past_due: 'PAST_DUE',
+    canceled: 'CANCELED',
+    expired: 'EXPIRED',
+    pending: 'PENDING',
+  };
 
   const subscriptions = await prisma.subscription.findMany({
-    where: { specialistId: specialist.id },
+    where: {
+      specialistId: specialist.id,
+      ...(statusFilter !== 'all' && !isNewFilter
+        ? { status: statusMap[statusFilter] }
+        : {}),
+      ...(isNewFilter ? { createdAt: { gte: thirtyDaysAgo } } : {}),
+      ...(periodStart
+        ? {
+            createdAt: {
+              gte: periodStart,
+              ...(periodEnd ? { lt: periodEnd } : {}),
+            },
+          }
+        : {}),
+    },
     include: {
       user: {
         select: { id: true, name: true, email: true },
@@ -47,8 +115,9 @@ export default async function ExpertSubscribersPage() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">{t.admin.subscribersPage.listTitle}</CardTitle>
+          <SubscribersFilters />
         </CardHeader>
         <CardContent className="p-0">
           <Table>

@@ -169,7 +169,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t.agentForm.languageLabel}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder={t.agentForm.languagePlaceholder} />

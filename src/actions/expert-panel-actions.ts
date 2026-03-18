@@ -32,9 +32,12 @@ export async function updateLeadStatus(
   leadId: string,
   status: 'NEW' | 'CONTACTED' | 'CONVERTED' | 'LOST'
 ) {
-  await requireAdmin();
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { specialistId: true } });
+  if (!lead) throw new Error('Lead not found');
+  await requireAdminOrOwner(lead.specialistId);
   await prisma.lead.update({ where: { id: leadId }, data: { status } });
   revalidatePath('/admin/agents', 'layout');
+  revalidatePath('/expert', 'layout');
 }
 
 // ─── Keyword actions ─────────────────────────────────────────────────────────
@@ -83,6 +86,18 @@ export async function updateSecuritySettings(
     where: { id: specialistId },
     data: settings,
   });
+  revalidatePath(`/admin/agents/${specialistId}/personalizacao`);
+}
+
+// ─── First message action ─────────────────────────────────────────────────────
+
+export async function updateFirstMessage(specialistId: string, firstMessage: string) {
+  await requireAdminOrOwner(specialistId);
+  await prisma.specialist.update({
+    where: { id: specialistId },
+    data: { firstMessage: firstMessage || null },
+  });
+  revalidatePath(`/expert/personalizacao`);
   revalidatePath(`/admin/agents/${specialistId}/personalizacao`);
 }
 

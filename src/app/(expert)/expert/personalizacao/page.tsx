@@ -1,6 +1,7 @@
 import { AgentForm } from '@/components/admin/agent-form';
 import { SecuritySettingsForm } from '@/components/admin/security-settings-form';
 import { TeamMembersManager } from '@/components/admin/team-members-manager';
+import { FirstMessageForm } from '@/components/expert/first-message-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { requireExpert } from '@/lib/expert-helpers';
 import { prisma } from '@/lib/prisma';
@@ -65,11 +66,10 @@ export default async function ExpertPersonalizacaoPage() {
             </TabsContent>
 
             <TabsContent value="primeira-mensagem" className="mt-6">
-              <div className="flex h-48 items-center justify-center rounded-lg border border-dashed max-w-3xl">
-                <p className="text-sm text-muted-foreground">
-                  Configuração da primeira mensagem disponível em breve
-                </p>
-              </div>
+              <FirstMessageForm
+                specialistId={specialist.id}
+                initialValue={specialist.firstMessage ?? null}
+              />
             </TabsContent>
 
             <TabsContent value="cenarios" className="mt-6">

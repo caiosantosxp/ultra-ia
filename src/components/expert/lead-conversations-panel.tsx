@@ -117,15 +117,20 @@ function ChatThread({ convId, onBack }: { convId: string; onBack: () => void }) 
   );
 }
 
+type Period = 7 | 15 | 30;
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function LeadConversationsPanel() {
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>(30);
 
-  const { data, isLoading } = useSWR<{ leads: LeadItem[] }>('/api/expert/conversations', fetcher, {
-    refreshInterval: 300_000,
-  });
+  const { data, isLoading } = useSWR<{ leads: LeadItem[] }>(
+    `/api/expert/conversations?period=${period}`,
+    fetcher,
+    { refreshInterval: 300_000 }
+  );
 
   const leads = data?.leads ?? [];
   const selectedLead = leads.find((l) => l.email === selectedEmail) ?? null;
@@ -135,33 +140,63 @@ export function LeadConversationsPanel() {
     setSelectedConvId(null);
   }
 
+  function handlePeriod(p: Period) {
+    setPeriod(p);
+    setSelectedEmail(null);
+    setSelectedConvId(null);
+  }
+
+  const PeriodFilter = (
+    <div className="flex items-center gap-1.5">
+      {([7, 15, 30] as Period[]).map((p) => (
+        <button
+          key={p}
+          onClick={() => handlePeriod(p)}
+          className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+            period === p ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          }`}
+        >
+          {p} dias
+        </button>
+      ))}
+    </div>
+  );
+
   if (isLoading) {
     return (
-      <div className="flex h-[520px] gap-px overflow-hidden rounded-lg border">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex-1 space-y-3 p-4">
-            {[1, 2, 3].map((j) => (
-              <div key={j} className="h-14 animate-pulse rounded-lg bg-muted" />
-            ))}
-          </div>
-        ))}
+      <div className="space-y-3">
+        <div className="flex items-center justify-end">{PeriodFilter}</div>
+        <div className="flex h-[calc(100dvh-160px)] gap-px overflow-hidden rounded-lg border">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex-1 space-y-3 p-4">
+              {[1, 2, 3].map((j) => (
+                <div key={j} className="h-14 animate-pulse rounded-lg bg-muted" />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (leads.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
-        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          <MessageCircle className="h-8 w-8" />
-          <p className="text-sm">Aucune conversation de leads pour le moment</p>
+      <div className="space-y-3">
+        <div className="flex items-center justify-end">{PeriodFilter}</div>
+        <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            <MessageCircle className="h-8 w-8" />
+            <p className="text-sm">Aucune conversation de leads pour le moment</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-[520px] overflow-hidden rounded-lg border text-sm">
+    <div className="space-y-3">
+      <div className="flex items-center justify-end">{PeriodFilter}</div>
+    <div className="flex h-[calc(100dvh-160px)] overflow-hidden rounded-lg border text-sm">
       {/* Panel 1 — Lead list */}
       <div className="w-56 shrink-0 overflow-y-auto border-r">
         <div className="sticky top-0 border-b bg-muted/40 px-3 py-2.5">
@@ -255,6 +290,7 @@ export function LeadConversationsPanel() {
           <ChatThread convId={selectedConvId} onBack={() => setSelectedConvId(null)} />
         )}
       </div>
+    </div>
     </div>
   );
 }

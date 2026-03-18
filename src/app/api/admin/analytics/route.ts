@@ -100,6 +100,7 @@ const getCachedAgentMetrics = unstable_cache(
       retentionRate,
       messagesPerDay,
       conversationsPerWeek,
+      totalConversations,
       dailyData,
       countryData,
       hourlyData,
@@ -152,62 +153,109 @@ const getCachedComparativeMetrics = unstable_cache(
   }
 );
 
-// Platform-wide metrics for admin dashboard (Story 5.1)
-const getPlatformMetrics = unstable_cache(
-  async (): Promise<PlatformMetrics> => {
-    const today = new Date().toISOString().split('T')[0];
+// Platform-wide metrics for admin dashboard
+const getCachedPlatformMetrics = unstable_cache(
+  async (period: number): Promise<PlatformMetrics> => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const firstDayThisMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [activeSubscribersData, messagesTodayResult, messagesYesterdayResult, totalUsers, totalExperts, totalAgents] =
-      await Promise.all([
-        // Fetch active subs with specialist price and createdAt for MRR + trend in one query
-        prisma.subscription.findMany({
-          where: { status: 'ACTIVE' },
-          select: { createdAt: true, specialist: { select: { price: true } } },
-        }),
-        prisma.dailyUsage.aggregate({ _sum: { count: true }, where: { date: today } }),
-        prisma.dailyUsage.aggregate({ _sum: { count: true }, where: { date: yesterday } }),
-        prisma.user.count({ where: { deletedAt: null } }),
-        prisma.user.count({ where: { role: 'EXPERT', deletedAt: null } }),
-        prisma.specialist.count({ where: { isActive: true } }),
-      ]);
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - period);
+    startDate.setHours(0, 0, 0, 0);
+
+    const prevStartDate = new Date(startDate);
+    prevStartDate.setDate(prevStartDate.getDate() - period);
+
+    const [
+      activeSubscribersData,
+      messagesTodayResult,
+      messagesYesterdayResult,
+      totalUsers,
+      totalExperts,
+      totalAgents,
+      newUsersThisPeriod,
+      newSubscriptionsThisPeriod,
+      prevPeriodSubscriptions,
+      totalConversationsThisPeriod,
+      totalMessagesThisPeriod,
+    ] = await Promise.all([
+      prisma.subscription.findMany({
+        where: { status: 'ACTIVE' },
+        select: { createdAt: true, specialist: { select: { price: true } } },
+      }),
+      prisma.dailyUsage.aggregate({ _sum: { count: true }, where: { date: today } }),
+      prisma.dailyUsage.aggregate({ _sum: { count: true }, where: { date: yesterday } }),
+      prisma.user.count({ where: { deletedAt: null } }),
+      prisma.user.count({ where: { role: 'EXPERT', deletedAt: null } }),
+      prisma.specialist.count({ where: { isActive: true } }),
+      prisma.user.count({ where: { deletedAt: null, createdAt: { gte: startDate } } }),
+      prisma.subscription.count({ where: { createdAt: { gte: startDate } } }),
+      prisma.subscription.count({ where: { createdAt: { gte: prevStartDate, lt: startDate } } }),
+      prisma.conversation.count({ where: { isDeleted: false, createdAt: { gte: startDate } } }),
+      prisma.message.count({ where: { createdAt: { gte: startDate } } }),
+    ]);
 
     const activeSubscribers = activeSubscribersData.length;
-    // Real MRR: sum of each active subscriber's specialist price (in cents)
     const mrr = activeSubscribersData.reduce((sum, s) => sum + s.specialist.price, 0);
-
-    // Trend approximation: compare current total vs subscribers that existed before this month
     const preExistingSubs = activeSubscribersData.filter((s) => s.createdAt < firstDayThisMonth);
     const subscribersBeforeThisMonth = preExistingSubs.length;
     const lastMonthMrr = preExistingSubs.reduce((sum, s) => sum + s.specialist.price, 0);
-
     const messagesToday = messagesTodayResult._sum.count ?? 0;
     const messagesYesterday = messagesYesterdayResult._sum.count ?? 0;
+    const avgMessagesPerConversation =
+      totalConversationsThisPeriod > 0
+        ? Math.round((totalMessagesThisPeriod / totalConversationsThisPeriod) * 10) / 10
+        : 0;
+
+    const rawDailySubscriptions = await prisma.$queryRaw<Array<{ date: string; count: unknown }>>`
+      SELECT DATE("createdAt")::text AS date, COUNT(*)::int AS count
+      FROM subscriptions
+      WHERE "createdAt" >= ${startDate}
+      GROUP BY DATE("createdAt")
+      ORDER BY date ASC
+    `;
+
+    const rawDailyMessages = await prisma.$queryRaw<Array<{ date: string; count: unknown }>>`
+      SELECT DATE(m."createdAt")::text AS date, COUNT(m.id)::int AS count
+      FROM messages m
+      JOIN conversations c ON m."conversationId" = c.id
+      WHERE m."createdAt" >= ${startDate}
+        AND c."isDeleted" = false
+      GROUP BY DATE(m."createdAt")
+      ORDER BY date ASC
+    `;
 
     return {
       activeSubscribers,
       activeSubscribersTrend: subscribersBeforeThisMonth
-        ? Math.round(
-            ((activeSubscribers - subscribersBeforeThisMonth) / subscribersBeforeThisMonth) * 100
-          )
+        ? Math.round(((activeSubscribers - subscribersBeforeThisMonth) / subscribersBeforeThisMonth) * 100)
         : 0,
       messagesToday,
       messagesTodayTrend: messagesYesterday
         ? Math.round(((messagesToday - messagesYesterday) / messagesYesterday) * 100)
         : 0,
       mrr,
-      mrrTrend: lastMonthMrr
-        ? Math.round(((mrr - lastMonthMrr) / lastMonthMrr) * 100)
-        : 0,
+      mrrTrend: lastMonthMrr ? Math.round(((mrr - lastMonthMrr) / lastMonthMrr) * 100) : 0,
       retentionRate: totalUsers > 0 ? Math.round((activeSubscribers / totalUsers) * 100) : 0,
       retentionRateTrend: 0,
       totalUsers,
       totalExperts,
       totalAgents,
+      newUsersThisPeriod,
+      newSubscribersThisPeriod: newSubscriptionsThisPeriod,
+      newSubscribersTrend: prevPeriodSubscriptions > 0
+        ? Math.round(((newSubscriptionsThisPeriod - prevPeriodSubscriptions) / prevPeriodSubscriptions) * 100)
+        : 0,
+      totalConversationsThisPeriod,
+      totalMessagesThisPeriod,
+      avgMessagesPerConversation,
+      dailySubscriptions: rawDailySubscriptions.map((r) => ({ date: r.date, count: Number(r.count) })),
+      dailyMessages: rawDailyMessages.map((r) => ({ date: r.date, count: Number(r.count) })),
     };
   },
-  ['admin-platform-metrics'],
+  ['admin-platform-metrics-v2'],
   { revalidate: 300, tags: ['analytics'] }
 );
 
@@ -247,9 +295,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Platform dashboard metrics (Story 5.1) — admin only
-    if (isAdmin && (type === 'platform' || (!specialistId && !searchParams.has('period')))) {
-      const data = await getPlatformMetrics();
+    // Platform dashboard metrics — admin only
+    if (isAdmin && type === 'platform') {
+      const data = await getCachedPlatformMetrics(period);
       return Response.json({ success: true, data });
     }
 

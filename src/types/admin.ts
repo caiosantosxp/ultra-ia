@@ -18,4 +18,12 @@ export interface PlatformMetrics {
   totalUsers: number;
   totalExperts: number;
   totalAgents: number;
+  newUsersThisPeriod: number;
+  newSubscribersThisPeriod: number;
+  newSubscribersTrend: number;
+  totalConversationsThisPeriod: number;
+  totalMessagesThisPeriod: number;
+  avgMessagesPerConversation: number;
+  dailySubscriptions: Array<{ date: string; count: number }>;
+  dailyMessages: Array<{ date: string; count: number }>;
 }

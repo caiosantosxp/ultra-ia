@@ -173,7 +173,28 @@
       "Bash(find \"e:/projetos-caio/ultra-ia/src/app/\\(admin\\)\" -name \"*.tsx\")",
       "Bash(npm run db:seed)",
       "Bash(npm run)",
-      "Bash(npm run prisma:seed)"
+      "Bash(npm run prisma:seed)",
+      "Bash(ls e:/projetos-caio/ultra-ia/src/app/\\\\\\(admin\\\\\\)/admin/)",
+      "Bash(ls e:/projetos-caio/ultra-ia/src/app/\\\\\\(admin\\\\\\)/admin/users/[userId]/edit/)",
+      "Bash(ls e:/projetos-caio/ultra-ia/src/app/\\\\\\(admin\\\\\\)/admin/agents/[id]/subscribers/)",
+      "Bash(xargs grep -l \"signIn\\\\|callbackUrl\")",
+      "Bash(npx ts-node --project tsconfig.json prisma/seed.ts)",
+      "Bash(xargs grep -l \"accountSettings\\\\|account-settings\")",
+      "Bash(find \"e:/projetos-caio/ultra-ia/src/app/\\(expert\\)/expert\" -type f -name \"*.tsx\" -o -name \"*.ts\")",
+      "Bash(find \"e:/projetos-caio/ultra-ia/src/app/\\(expert\\)/expert\" -name \"*usage*\" -o -name \"*stats*\" -o -name \"*analytics*\")",
+      "Bash(grep -n \"missing\\\\|TODO\\\\|FIXME\" /e/projetos-caio/ultra-ia/prisma/schema.prisma /e/projetos-caio/ultra-ia/src/lib/*.ts)",
+      "Bash(grep -n \"TODO\\\\|FIXME\\\\|HACK\\\\|BUG\" /e/projetos-caio/ultra-ia/src/app/api/**/*.ts)",
+      "Bash(head -10 \"e:/projetos-caio/ultra-ia/src/app/\\(public\\)/pricing/page.tsx\")",
+      "Bash(node /tmp/fix_theme_toggle.js)",
+      "Bash(ls \"e:/projetos-caio/ultra-ia/src/app/\\(expert\\)/expert/subscribers/\")",
+      "Bash(node -e \"const p = require\\(''./node_modules/@prisma/client/package.json''\\); console.log\\(p.version\\)\")",
+      "Bash(curl -s \"http://localhost:3000/api/expert/specialist-id\" -H \"Cookie: next-auth.session-token=\")",
+      "Bash(node -e \"console.log\\(require\\(''./node_modules/next/package.json''\\).version\\)\")",
+      "Bash(ls -la /e/projetos-caio/ultra-ia/src/app/\\\\\\(expert\\\\\\)/expert/personalizacao/)",
+      "Bash(grep -n \"updateSpecialist\\\\|createSpecialist\" /e/projetos-caio/ultra-ia/src/actions/*.ts)",
+      "Bash(ls -la /e/projetos-caio/ultra-ia/src/app/\\\\\\(expert\\\\\\)/expert/identidade/)",
+      "Bash(xargs grep -l \"Lead\\\\|lead\")",
+      "Bash(npm run seed)"
     ]
   }
 }

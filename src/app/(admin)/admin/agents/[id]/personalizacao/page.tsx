@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { AgentForm } from '@/components/admin/agent-form';
 import { SecuritySettingsForm } from '@/components/admin/security-settings-form';
 import { TeamMembersManager } from '@/components/admin/team-members-manager';
+import { FirstMessageForm } from '@/components/expert/first-message-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type Props = { params: Promise<{ id: string }> };
@@ -73,11 +74,10 @@ export default async function PersonalizacaoPage({ params }: Props) {
             </TabsContent>
 
             <TabsContent value="primeira-mensagem" className="mt-6">
-              <div className="flex h-48 items-center justify-center rounded-lg border border-dashed max-w-3xl">
-                <p className="text-sm text-muted-foreground">
-                  Configuração da primeira mensagem disponível em breve
-                </p>
-              </div>
+              <FirstMessageForm
+                specialistId={specialist.id}
+                initialValue={specialist.firstMessage ?? null}
+              />
             </TabsContent>
 
             <TabsContent value="cenarios" className="mt-6">

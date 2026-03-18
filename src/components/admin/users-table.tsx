@@ -6,9 +6,18 @@ import { Search } from 'lucide-react';
 import type { SubscriptionStatus } from '@prisma/client';
 import useSWR from 'swr';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -25,6 +34,7 @@ interface UserRow {
   name: string | null;
   email: string | null;
   role: string;
+  image: string | null;
   createdAt: string;
   deletedAt: string | null;
   subscriptions: Array<{
@@ -51,6 +61,13 @@ type RoleFilter = '' | 'USER' | 'EXPERT' | 'ADMIN';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
+function getUserInitials(name: string | null, email: string | null): string {
+  if (name) {
+    return name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+  }
+  return (email?.[0] ?? '?').toUpperCase();
+}
+
 function SubscriptionBadge({ status }: { status: SubscriptionStatus | undefined }) {
   const t = useT();
 
@@ -60,10 +77,14 @@ function SubscriptionBadge({ status }: { status: SubscriptionStatus | undefined 
 
   switch (status) {
     case 'ACTIVE':
-      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{t.admin.usersPage.statusActive}</Badge>;
+      return (
+        <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400">
+          {t.admin.usersPage.statusActive}
+        </Badge>
+      );
     case 'PAST_DUE':
       return (
-        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400">
           {t.admin.usersPage.statusPastDue}
         </Badge>
       );
@@ -137,27 +158,30 @@ export function UsersTable() {
           />
         </div>
 
-        <select
+        <Select
           value={roleFilter}
-          onChange={(e) => { setRoleFilter(e.target.value as RoleFilter); setPage(1); }}
-          className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          aria-label={t.admin.usersPage.filterRoleAria}
+          onValueChange={(val) => { setRoleFilter(val as RoleFilter); setPage(1); }}
         >
-          <option value="">{t.admin.usersPage.allRoles}</option>
-          <option value="USER">USER</option>
-          <option value="EXPERT">EXPERT</option>
-          <option value="ADMIN">ADMIN</option>
-        </select>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder={t.admin.usersPage.allRoles} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">{t.admin.usersPage.allRoles}</SelectItem>
+            <SelectItem value="USER">USER</SelectItem>
+            <SelectItem value="EXPERT">EXPERT</SelectItem>
+            <SelectItem value="ADMIN">ADMIN</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+        <Label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer font-normal">
           <input
             type="checkbox"
             checked={includeDeleted}
             onChange={(e) => { setIncludeDeleted(e.target.checked); setPage(1); }}
-            className="rounded"
+            className="h-4 w-4 rounded border-input accent-primary cursor-pointer"
           />
           {t.admin.usersPage.showInactive}
-        </label>
+        </Label>
       </div>
 
       {/* Table */}
@@ -201,11 +225,19 @@ export function UsersTable() {
                 return (
                   <TableRow key={user.id} className={isInactive ? 'opacity-50' : ''}>
                     <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {user.name ?? '—'}
-                        {isInactive && (
-                          <Badge variant="outline" className="text-[10px] text-muted-foreground">{t.admin.usersPage.inactiveBadge}</Badge>
-                        )}
+                      <div className="flex items-center gap-2.5">
+                        <Avatar size="sm">
+                          {user.image && <AvatarImage src={user.image} alt={user.name ?? ''} />}
+                          <AvatarFallback>{getUserInitials(user.name, user.email)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex items-center gap-2">
+                          {user.name ?? '—'}
+                          {isInactive && (
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                              {t.admin.usersPage.inactiveBadge}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{user.email ?? '—'}</TableCell>
@@ -250,7 +282,7 @@ export function UsersTable() {
               {t.admin.usersPage.previous}
             </Button>
             <span>
-              {t.admin.usersPage.page} {page} / {totalPages}
+              {t.admin.usersPage.page} {page} {t.admin.usersPage.of} {totalPages}
             </span>
             <Button
               variant="outline"
