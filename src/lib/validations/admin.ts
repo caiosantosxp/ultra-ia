@@ -43,3 +43,12 @@ export const fileUploadSchema = z.object({
 
 export type CreateSpecialistInput = z.infer<typeof createSpecialistSchema>;
 export type UpdateSpecialistInput = z.infer<typeof updateSpecialistSchema>;
+
+export const updatePlatformSettingsSchema = z.object({
+  openRegistration: z.boolean().optional(),
+  requireExpertApproval: z.boolean().optional(),
+  maintenanceMode: z.boolean().optional(),
+  defaultLanguage: z.enum(['fr', 'en']).optional(),
+});
+
+export type UpdatePlatformSettingsInput = z.infer<typeof updatePlatformSettingsSchema>;

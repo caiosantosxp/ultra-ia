@@ -11,6 +11,7 @@ export const fr = {
     mobileMenu: 'Ouvrir le menu',
     mobileNav: 'Navigation mobile',
     mobileTitle: 'Menu de navigation',
+    switchLanguageAriaLabel: 'Passer en anglais',
   },
   userMenu: {
     ariaLabel: "Menu de l'utilisateur",
@@ -305,7 +306,36 @@ export const fr = {
   adminSettings: {
     metaTitle: 'Paramètres — Admin',
     title: 'Paramètres',
+    subtitle: 'Configurez les paramètres globaux de la plateforme.',
     description: 'Cette section est en cours de développement.',
+    save: 'Enregistrer',
+    saving: 'Enregistrement...',
+    saveSuccess: 'Paramètres mis à jour',
+    saveError: 'Erreur lors de la sauvegarde',
+    generalTitle: 'Général',
+    generalDescription: 'Paramètres généraux de la plateforme.',
+    defaultLanguageLabel: 'Langue par défaut',
+    defaultLanguageDescription: 'Langue utilisée par défaut pour les nouveaux utilisateurs.',
+    accessTitle: 'Accès & Inscription',
+    accessDescription: "Contrôlez qui peut s'inscrire et accéder à la plateforme.",
+    openRegistrationLabel: 'Inscription ouverte',
+    openRegistrationDescription:
+      'Autoriser les nouveaux utilisateurs à créer un compte librement.',
+    requireApprovalLabel: 'Approbation manuelle des experts',
+    requireApprovalDescription:
+      "Les nouvelles demandes d'inscription en tant qu'expert nécessitent une approbation admin.",
+    maintenanceModeLabel: 'Mode maintenance',
+    maintenanceModeDescription:
+      'Bloquer l\'accès à la plateforme pour les utilisateurs non-admin.',
+    maintenanceModeWarning:
+      'Attention : le mode maintenance est activé. Les utilisateurs non-admin ne peuvent pas accéder à la plateforme.',
+    integrationsTitle: 'Intégrations',
+    integrationsDescription:
+      'Statut des services externes configurés via les variables d\'environnement.',
+    configured: 'Configuré',
+    notConfigured: 'Non configuré',
+    languageFr: 'Français',
+    languageEn: 'Anglais',
   },
   instructionsPage: {
     title: 'Instructions',

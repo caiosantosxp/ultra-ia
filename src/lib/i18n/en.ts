@@ -13,6 +13,7 @@ export const en: Translation = {
     mobileMenu: 'Open menu',
     mobileNav: 'Mobile navigation',
     mobileTitle: 'Navigation menu',
+    switchLanguageAriaLabel: 'Switch to French',
   },
   userMenu: {
     ariaLabel: 'User menu',
@@ -306,7 +307,34 @@ export const en: Translation = {
   adminSettings: {
     metaTitle: 'Settings — Admin',
     title: 'Settings',
+    subtitle: 'Configure global platform settings.',
     description: 'This section is under development.',
+    save: 'Save',
+    saving: 'Saving...',
+    saveSuccess: 'Settings updated',
+    saveError: 'Error saving settings',
+    generalTitle: 'General',
+    generalDescription: 'General platform settings.',
+    defaultLanguageLabel: 'Default language',
+    defaultLanguageDescription: 'Language used by default for new users.',
+    accessTitle: 'Access & Registration',
+    accessDescription: 'Control who can register and access the platform.',
+    openRegistrationLabel: 'Open registration',
+    openRegistrationDescription: 'Allow new users to create an account freely.',
+    requireApprovalLabel: 'Manual expert approval',
+    requireApprovalDescription:
+      'New expert sign-up requests require admin approval.',
+    maintenanceModeLabel: 'Maintenance mode',
+    maintenanceModeDescription: 'Block platform access for non-admin users.',
+    maintenanceModeWarning:
+      'Warning: maintenance mode is active. Non-admin users cannot access the platform.',
+    integrationsTitle: 'Integrations',
+    integrationsDescription:
+      'Status of external services configured via environment variables.',
+    configured: 'Configured',
+    notConfigured: 'Not configured',
+    languageFr: 'French',
+    languageEn: 'English',
   },
   instructionsPage: {
     title: 'Instructions',

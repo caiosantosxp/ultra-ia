@@ -2,10 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { useLanguageStore } from '@/stores/language-store';
+import { useT } from '@/lib/i18n/use-t';
 
 export function LanguageSwitcher() {
   const locale = useLanguageStore((s) => s.locale);
   const setLocale = useLanguageStore((s) => s.setLocale);
+  const t = useT();
   const router = useRouter();
 
   function toggle() {
@@ -16,7 +18,7 @@ export function LanguageSwitcher() {
   return (
     <button
       onClick={toggle}
-      aria-label={locale === 'fr' ? 'Switch to English' : 'Passer en français'}
+      aria-label={t.nav.switchLanguageAriaLabel}
       className="flex h-9 w-14 items-center justify-center gap-0.5 rounded-md border bg-background text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       <span className={locale === 'fr' ? 'text-foreground' : 'text-muted-foreground/50'}>FR</span>

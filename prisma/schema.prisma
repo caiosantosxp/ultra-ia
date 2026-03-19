@@ -249,6 +249,17 @@ model ProcessedStripeEvent {
   @@map("processed_stripe_events")
 }
 
+model PlatformSettings {
+  id                    String   @id @default("global")
+  openRegistration      Boolean  @default(true)
+  requireExpertApproval Boolean  @default(false)
+  maintenanceMode       Boolean  @default(false)
+  defaultLanguage       String   @default("fr")
+  updatedAt             DateTime @updatedAt
+
+  @@map("platform_settings")
+}
+
 enum Role {
   USER
   ADMIN
