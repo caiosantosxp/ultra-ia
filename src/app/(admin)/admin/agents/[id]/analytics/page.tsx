@@ -8,6 +8,7 @@ import { BarChart2, Calendar, MessageCircle, MessageSquare, Mic, ThumbsUp, Trend
 import { AnalyticsChart } from '@/components/admin/analytics-chart';
 import { MetricsCard } from '@/components/dashboard/metrics-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useT } from '@/lib/i18n/use-t';
 
 type Period = 7 | 30 | 90;
 
@@ -27,6 +28,7 @@ const fetcher = (url: string) =>
   });
 
 export default function ExpertAnalyticsPage() {
+  const ap = useT().admin.analyticsPage;
   const params = useParams();
   const specialistId = params.id as string;
   const [period, setPeriod] = useState<Period>(30);
@@ -43,17 +45,17 @@ export default function ExpertAnalyticsPage() {
     <div className="space-y-4">
       <Tabs defaultValue="metricas">
         <TabsList>
-          <TabsTrigger value="metricas">Métricas</TabsTrigger>
-          <TabsTrigger value="conversas">Conversas</TabsTrigger>
-          <TabsTrigger value="chamadas">Chamadas</TabsTrigger>
-          <TabsTrigger value="opiniao">Opinião</TabsTrigger>
+          <TabsTrigger value="metricas">{ap.tabMetrics}</TabsTrigger>
+          <TabsTrigger value="conversas">{ap.tabConversations}</TabsTrigger>
+          <TabsTrigger value="chamadas">{ap.tabCalls}</TabsTrigger>
+          <TabsTrigger value="opiniao">{ap.tabOpinions}</TabsTrigger>
         </TabsList>
 
-        {/* ── Métricas ── */}
+        {/* ── Metrics ── */}
         <TabsContent value="metricas" className="mt-6 space-y-6">
           {/* Period selector */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Período:</span>
+            <span className="text-sm text-muted-foreground">{ap.periodLabel}</span>
             {([7, 30, 90] as Period[]).map((p) => (
               <button
                 key={p}
@@ -64,62 +66,61 @@ export default function ExpertAnalyticsPage() {
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
-                {p} dias
+                {ap.periodDaysShort.replace('{period}', String(p))}
               </button>
             ))}
           </div>
 
           {error && (
-            <p className="text-sm text-destructive">Erro ao carregar métricas.</p>
+            <p className="text-sm text-destructive">{ap.fetchError}</p>
           )}
 
           {/* Sub-tabs */}
           <Tabs defaultValue="atividade-detalhada">
             <TabsList>
-              <TabsTrigger value="atividade-detalhada">Atividade detalhada</TabsTrigger>
-              <TabsTrigger value="sessao-por-pais">Sessão por país</TabsTrigger>
-              <TabsTrigger value="atividade-por-hora">Atividade por hora</TabsTrigger>
+              <TabsTrigger value="atividade-detalhada">{ap.tabActivityDetail}</TabsTrigger>
+              <TabsTrigger value="sessao-por-pais">{ap.tabSessionByCountry}</TabsTrigger>
+              <TabsTrigger value="atividade-por-hora">{ap.tabActivityByHour}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="atividade-detalhada" className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
                 <MetricsCard
                   icon={MessageSquare}
-                  label="Total de mensagens"
+                  label={ap.cardTotalMessages}
                   value={metrics?.totalMessages ?? 0}
-                  description={`Últimos ${period} dias`}
+                  description={ap.periodDays.replace('{period}', String(period))}
                   isLoading={isLoading}
                 />
                 <MetricsCard
                   icon={BarChart2}
-                  label="Msgs/dia"
-                  value={metrics ? `${metrics.messagesPerDay}/dia` : '—'}
-                  description={`Média ${period} dias`}
+                  label={ap.cardMsgsPerDay}
+                  value={metrics ? `${metrics.messagesPerDay}` : '—'}
                   isLoading={isLoading}
                 />
                 <MetricsCard
                   icon={Users}
-                  label="Assinantes ativos"
+                  label={ap.cardSubscribers}
                   value={metrics?.activeSubscribers ?? 0}
                   isLoading={isLoading}
                 />
                 <MetricsCard
                   icon={TrendingUp}
-                  label="Retenção"
+                  label={ap.cardRetention}
                   value={metrics ? `${metrics.retentionRate}%` : '—'}
                   isLoading={isLoading}
                 />
                 <MetricsCard
                   icon={Calendar}
-                  label="Conversas/semana"
-                  value={metrics ? `${metrics.conversationsPerWeek}/sem` : '—'}
+                  label={ap.cardConvsPerWeek}
+                  value={metrics ? `${metrics.conversationsPerWeek}` : '—'}
                   isLoading={isLoading}
                 />
               </div>
 
               <div>
                 <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-                  Mensagens por dia (últimos {period} dias)
+                  {ap.dailyChartDesc.replace('{period}', String(period))}
                 </h3>
                 <AnalyticsChart data={metrics?.dailyData ?? []} isLoading={isLoading} />
               </div>
@@ -128,7 +129,7 @@ export default function ExpertAnalyticsPage() {
             <TabsContent value="sessao-por-pais" className="mt-4">
               <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
                 <p className="text-sm text-muted-foreground">
-                  Dados de geolocalização disponíveis em breve
+                  {ap.geoComingSoon}
                 </p>
               </div>
             </TabsContent>
@@ -136,39 +137,39 @@ export default function ExpertAnalyticsPage() {
             <TabsContent value="atividade-por-hora" className="mt-4">
               <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
                 <p className="text-sm text-muted-foreground">
-                  Análise por hora disponível em breve
+                  {ap.hourlyComingSoon}
                 </p>
               </div>
             </TabsContent>
           </Tabs>
         </TabsContent>
 
-        {/* ── Conversas ── */}
+        {/* ── Conversations ── */}
         <TabsContent value="conversas" className="mt-6">
           <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <MessageCircle className="h-8 w-8" />
-              <p className="text-sm">Lista de conversas disponível em breve</p>
+              <p className="text-sm">{ap.conversationsComingSoon}</p>
             </div>
           </div>
         </TabsContent>
 
-        {/* ── Chamadas ── */}
+        {/* ── Calls ── */}
         <TabsContent value="chamadas" className="mt-6">
           <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Mic className="h-8 w-8" />
-              <p className="text-sm">Histórico de chamadas disponível em breve</p>
+              <p className="text-sm">{ap.callsComingSoon}</p>
             </div>
           </div>
         </TabsContent>
 
-        {/* ── Opinião ── */}
+        {/* ── Opinions ── */}
         <TabsContent value="opiniao" className="mt-6">
           <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <ThumbsUp className="h-8 w-8" />
-              <p className="text-sm">Avaliações e opiniões disponíveis em breve</p>
+              <p className="text-sm">{ap.opinionsComingSoon}</p>
             </div>
           </div>
         </TabsContent>

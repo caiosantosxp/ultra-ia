@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { DollarSign, TrendingUp, Users } from 'lucide-react';
 
 import { requireExpert } from '@/lib/expert-helpers';
@@ -5,13 +6,13 @@ import { getT } from '@/lib/i18n/get-t';
 import { prisma } from '@/lib/prisma';
 import { RevenueFilters } from '@/components/expert/revenue-filters';
 
-function formatCurrency(cents: number) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+function formatCurrency(cents: number, locale: string) {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(cents / 100);
 }
 
-function formatDate(date: Date | null) {
+function formatDate(date: Date | null, locale: string) {
   if (!date) return '—';
-  return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -53,6 +54,8 @@ type Props = {
 export default async function ExpertRendasPage({ searchParams }: Props) {
   const { specialist: base } = await requireExpert();
   const t = await getT();
+  const lang = (await cookies()).get('LANG')?.value ?? 'fr';
+  const locale = lang === 'en' ? 'en-GB' : 'fr-FR';
   const { period = 'all' } = await searchParams;
 
   const dateRange = getPeriodRange(period);
@@ -103,7 +106,7 @@ export default async function ExpertRendasPage({ searchParams }: Props) {
               {t.admin.revenuePage.mrr}
             </p>
           </div>
-          <p className="text-2xl font-bold">{formatCurrency(mrr)}</p>
+          <p className="text-2xl font-bold">{formatCurrency(mrr, locale)}</p>
           <p className="text-xs text-muted-foreground mt-1">{t.admin.revenuePage.mrrLabel}</p>
         </div>
 
@@ -116,7 +119,7 @@ export default async function ExpertRendasPage({ searchParams }: Props) {
           </div>
           <p className="text-2xl font-bold">{activeSubscriptions}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {formatCurrency(specialist.price)} {t.admin.revenuePage.perMonthEach}
+            {formatCurrency(specialist.price, locale)} {t.admin.revenuePage.perMonthEach}
           </p>
         </div>
 
@@ -175,10 +178,10 @@ export default async function ExpertRendasPage({ searchParams }: Props) {
                       </span>
                     </td>
                     <td className="px-5 py-3 text-muted-foreground">
-                      {formatDate(sub.createdAt)}
+                      {formatDate(sub.createdAt, locale)}
                     </td>
                     <td className="px-5 py-3 text-right font-medium tabular-nums">
-                      {formatCurrency(specialist.price)}
+                      {formatCurrency(specialist.price, locale)}
                     </td>
                   </tr>
                 ))}

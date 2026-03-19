@@ -10,6 +10,7 @@ import { AnalyticsChart } from '@/components/admin/analytics-chart';
 import { MetricsCard } from '@/components/dashboard/metrics-card';
 import { LeadConversationsPanel } from '@/components/expert/lead-conversations-panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useT } from '@/lib/i18n/use-t';
 
 type Period = 7 | 15 | 30;
 
@@ -49,6 +50,7 @@ const HOUR_COLORS = (h: number) => {
 };
 
 function HourlyTooltip({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: HourlyStat }> }) {
+  const ap = useT().admin.analyticsPage;
   if (!active || !payload?.length) return null;
   const { hour, count } = payload[0].payload;
   if (count === 0) return null;
@@ -59,13 +61,14 @@ function HourlyTooltip({ active, payload }: { active?: boolean; payload?: Array<
       <p style={{ fontSize: 11, color: '#a1a1aa', marginBottom: 2 }}>{h}:00 – {h1}:00</p>
       <p style={{ fontSize: 14, fontWeight: 600, color: '#fafafa' }}>
         {count}{' '}
-        <span style={{ fontSize: 12, fontWeight: 400, color: '#a1a1aa' }}>mensagem{count !== 1 ? 's' : ''}</span>
+        <span style={{ fontSize: 12, fontWeight: 400, color: '#a1a1aa' }}>{ap.hourlyMsgWord}{count !== 1 ? 's' : ''}</span>
       </p>
     </div>
   );
 }
 
 export default function ExpertAnalyticsPage() {
+  const ap = useT().admin.analyticsPage;
   const [specialistId, setSpecialistId] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>(30);
 
@@ -88,48 +91,48 @@ export default function ExpertAnalyticsPage() {
     <div className="space-y-4">
       <Tabs defaultValue="metricas">
         <TabsList>
-          <TabsTrigger value="metricas">Métricas</TabsTrigger>
-          <TabsTrigger value="conversas">Conversas</TabsTrigger>
+          <TabsTrigger value="metricas">{ap.tabMetrics}</TabsTrigger>
+          <TabsTrigger value="conversas">{ap.tabConversations}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="metricas" className="mt-6 space-y-6">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Período:</span>
+            <span className="text-sm text-muted-foreground">{ap.periodLabel}</span>
             {([7, 15, 30] as Period[]).map((p) => (
               <button key={p} onClick={() => setPeriod(p)}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${period === p ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
-                {p} dias
+                {ap.periodDaysShort.replace('{period}', String(p))}
               </button>
             ))}
           </div>
-          {error && <p className="text-sm text-destructive">Erro ao carregar métricas.</p>}
+          {error && <p className="text-sm text-destructive">{ap.fetchError}</p>}
 
           <Tabs defaultValue="atividade-detalhada">
             <TabsList>
-              <TabsTrigger value="atividade-detalhada">Atividade detalhada</TabsTrigger>
-              <TabsTrigger value="sessao-por-pais">Sessão por país</TabsTrigger>
-              <TabsTrigger value="atividade-por-hora">Atividade por hora</TabsTrigger>
+              <TabsTrigger value="atividade-detalhada">{ap.tabActivityDetail}</TabsTrigger>
+              <TabsTrigger value="sessao-por-pais">{ap.tabSessionByCountry}</TabsTrigger>
+              <TabsTrigger value="atividade-por-hora">{ap.tabActivityByHour}</TabsTrigger>
             </TabsList>
 
-            {/* ── Atividade detalhada ─────────────────────────────────────── */}
+            {/* ── Detailed activity ─────────────────────────────────────── */}
             <TabsContent value="atividade-detalhada" className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
-                <MetricsCard icon={MessageSquare} label="Total mensagens" value={metrics?.totalMessages ?? 0} description={`Últimos ${period} dias`} isLoading={isLoading} />
-                <MetricsCard icon={BarChart2}     label="Msgs/dia"         value={metrics ? `${metrics.messagesPerDay}/dia` : '—'} isLoading={isLoading} />
-                <MetricsCard icon={Users}         label="Assinantes ativos" value={metrics?.activeSubscribers ?? 0} isLoading={isLoading} />
-                <MetricsCard icon={TrendingUp}    label="Retenção"          value={metrics ? `${metrics.retentionRate}%` : '—'} isLoading={isLoading} />
-                <MetricsCard icon={Calendar}      label="Conversas/sem"     value={metrics ? `${metrics.conversationsPerWeek}/sem` : '—'} isLoading={isLoading} />
+                <MetricsCard icon={MessageSquare} label={ap.cardTotalMessages} value={metrics?.totalMessages ?? 0} description={ap.periodDays.replace('{period}', String(period))} isLoading={isLoading} />
+                <MetricsCard icon={BarChart2}     label={ap.cardMsgsPerDay}    value={metrics ? `${metrics.messagesPerDay}/j` : '—'} isLoading={isLoading} />
+                <MetricsCard icon={Users}         label={ap.cardSubscribers}   value={metrics?.activeSubscribers ?? 0} isLoading={isLoading} />
+                <MetricsCard icon={TrendingUp}    label={ap.cardRetention}     value={metrics ? `${metrics.retentionRate}%` : '—'} isLoading={isLoading} />
+                <MetricsCard icon={Calendar}      label={ap.cardConvsPerWeek}  value={metrics ? `${metrics.conversationsPerWeek}` : '—'} isLoading={isLoading} />
               </div>
               <AnalyticsChart data={metrics?.dailyData ?? []} isLoading={isLoading} />
             </TabsContent>
 
-            {/* ── Sessão por país ─────────────────────────────────────────── */}
+            {/* ── Session by country ─────────────────────────────────────── */}
             <TabsContent value="sessao-por-pais" className="mt-4 space-y-4">
               {isLoading ? (
                 <div className="h-64 animate-pulse rounded-lg bg-muted" />
               ) : !metrics?.countryData?.length ? (
                 <div className="flex h-64 items-center justify-center rounded-lg border border-dashed">
-                  <p className="text-sm text-muted-foreground">Nenhum dado para este período</p>
+                  <p className="text-sm text-muted-foreground">{ap.noPeriodData}</p>
                 </div>
               ) : (
                 <div className="rounded-xl border bg-card p-5 space-y-3">
@@ -151,17 +154,17 @@ export default function ExpertAnalyticsPage() {
               )}
             </TabsContent>
 
-            {/* ── Atividade por hora ──────────────────────────────────────── */}
+            {/* ── Activity by hour ──────────────────────────────────────── */}
             <TabsContent value="atividade-por-hora" className="mt-4 space-y-4">
               {isLoading ? (
                 <div className="h-64 animate-pulse rounded-lg bg-muted" />
               ) : !metrics?.hourlyData?.some((h) => h.count > 0) ? (
                 <div className="flex h-64 items-center justify-center rounded-lg border border-dashed">
-                  <p className="text-sm text-muted-foreground">Nenhum dado para este período</p>
+                  <p className="text-sm text-muted-foreground">{ap.noPeriodData}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground text-center">Distribuição de mensagens por hora do dia (UTC)</p>
+                  <p className="text-xs text-muted-foreground text-center">{ap.hourlyDistribution}</p>
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={metrics.hourlyData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -191,10 +194,10 @@ export default function ExpertAnalyticsPage() {
                     </ResponsiveContainer>
                   </div>
                   <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm bg-primary" />Manhã (8h–12h)</span>
-                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm" style={{ background: 'hsl(220 70% 60%)' }} />Almoço (12h–14h)</span>
-                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm bg-primary" />Tarde (14h–18h)</span>
-                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm" style={{ background: 'hsl(280 60% 55%)' }} />Noite (18h–22h)</span>
+                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm bg-primary" />{ap.hourlyMorning}</span>
+                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm" style={{ background: 'hsl(220 70% 60%)' }} />{ap.hourlyLunch}</span>
+                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm bg-primary" />{ap.hourlyAfternoon}</span>
+                    <span><span className="mr-1 inline-block h-2 w-3 rounded-sm" style={{ background: 'hsl(280 60% 55%)' }} />{ap.hourlyEvening}</span>
                   </div>
                 </div>
               )}
