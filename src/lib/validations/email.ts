@@ -38,12 +38,19 @@ export const passwordResetSchema = baseEmailVariablesSchema.extend({
   resetUrl: z.string().url(),
 })
 
+// Expert invite
+export const expertInviteSchema = baseEmailVariablesSchema.extend({
+  specialistName: z.string().min(1),
+  inviteUrl: z.string().url(),
+})
+
 export const EMAIL_TEMPLATES = {
   WELCOME: 'welcome',
   SUBSCRIPTION_CONFIRMATION: 'subscription-confirmation',
   PAYMENT_FAILED: 'payment-failed',
   PAYMENT_UPDATED: 'payment-updated',
   PASSWORD_RESET: 'password-reset',
+  EXPERT_INVITE: 'expert-invite',
 } as const
 
 export type EmailTemplate = (typeof EMAIL_TEMPLATES)[keyof typeof EMAIL_TEMPLATES]
@@ -54,4 +61,5 @@ export const emailSchemaMap: Record<EmailTemplate, z.ZodSchema> = {
   [EMAIL_TEMPLATES.PAYMENT_FAILED]: paymentFailedSchema,
   [EMAIL_TEMPLATES.PAYMENT_UPDATED]: paymentUpdatedSchema,
   [EMAIL_TEMPLATES.PASSWORD_RESET]: passwordResetSchema,
+  [EMAIL_TEMPLATES.EXPERT_INVITE]: expertInviteSchema,
 }

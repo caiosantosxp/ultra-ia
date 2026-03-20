@@ -89,6 +89,22 @@ export async function sendEmail({ to, template, variables }: SendEmailInput): Pr
   }
 }
 
+export async function sendExpertInviteEmail(
+  email: string,
+  inviteUrl: string,
+  specialistName: string,
+  userName = 'Expert',
+): Promise<void> {
+  const result = await sendEmail({
+    to: email,
+    template: EMAIL_TEMPLATES.EXPERT_INVITE,
+    variables: { userName, specialistName, inviteUrl },
+  })
+  if (!result.success) {
+    throw new Error(`Failed to send expert invite email: ${result.error?.message}`)
+  }
+}
+
 export async function sendPasswordResetEmail(
   email: string,
   resetUrl: string,

@@ -3,10 +3,11 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, UserMinus, UserPlus, Search } from 'lucide-react';
+import { Mail, RefreshCw, Search, User, UserMinus, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { assignSpecialistOwner } from '@/actions/admin-actions';
+import { resendExpertInvite, sendExpertInvite } from '@/actions/admin-invite-actions';
 import { useT } from '@/lib/i18n/use-t';
 import {
   AlertDialog,
@@ -43,23 +44,33 @@ interface ExpertUser {
   email: string | null;
 }
 
+interface PendingInvite {
+  email: string;
+  expiresAt: Date;
+  isExpired: boolean;
+}
+
 interface SpecialistOwnerCardProps {
   specialistId: string;
   owner: Owner | null;
   availableExperts: ExpertUser[];
+  pendingInvite?: PendingInvite | null;
 }
 
 export function SpecialistOwnerCard({
   specialistId,
   owner,
   availableExperts,
+  pendingInvite,
 }: SpecialistOwnerCardProps) {
   const router = useRouter();
   const t = useT();
   const [isPending, startTransition] = useTransition();
+  const [isInvitePending, startInviteTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [inviteEmail, setInviteEmail] = useState('');
 
   const filteredExperts = availableExperts.filter((u) => {
     const q = search.toLowerCase();
@@ -91,6 +102,32 @@ export function SpecialistOwnerCard({
         router.refresh();
       } else {
         toast.error(result.error?.message ?? t.admin.ownerCard.linkError);
+      }
+    });
+  }
+
+  function handleSendInvite() {
+    if (!inviteEmail.trim()) return;
+    startInviteTransition(async () => {
+      const result = await sendExpertInvite(specialistId, inviteEmail.trim());
+      if (result.success) {
+        toast.success(t.admin.inviteExpert.inviteSuccess);
+        setInviteEmail('');
+        router.refresh();
+      } else {
+        toast.error(result.error?.message ?? t.admin.inviteExpert.inviteError);
+      }
+    });
+  }
+
+  function handleResendInvite() {
+    startInviteTransition(async () => {
+      const result = await resendExpertInvite(specialistId);
+      if (result.success) {
+        toast.success(t.admin.inviteExpert.resendSuccess);
+        router.refresh();
+      } else {
+        toast.error(result.error?.message ?? t.admin.inviteExpert.inviteError);
       }
     });
   }
@@ -213,12 +250,64 @@ export function SpecialistOwnerCard({
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-muted-foreground">{t.admin.ownerCard.noOwner}</Badge>
               <p className="text-xs text-muted-foreground">{t.admin.ownerCard.noOwnerDesc}</p>
             </div>
 
+            {/* ── Invite section ── */}
+            <div className="space-y-2 border rounded-lg p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t.admin.inviteExpert.sectionTitle}
+              </p>
+
+              {pendingInvite ? (
+                <div className="space-y-2">
+                  <Badge
+                    variant="outline"
+                    className={pendingInvite.isExpired ? 'text-destructive border-destructive' : 'text-emerald-600 border-emerald-500'}
+                  >
+                    <Mail className="mr-1.5 h-3 w-3" />
+                    {pendingInvite.isExpired
+                      ? t.admin.inviteExpert.inviteExpired.replace('{email}', pendingInvite.email)
+                      : t.admin.inviteExpert.invitePending.replace('{email}', pendingInvite.email)
+                    }
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResendInvite}
+                    disabled={isInvitePending}
+                    className="w-full"
+                  >
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                    {isInvitePending ? t.admin.inviteExpert.resending : t.admin.inviteExpert.resendInvite}
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder={t.admin.inviteExpert.emailPlaceholder}
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    disabled={isInvitePending}
+                    aria-label={t.admin.inviteExpert.emailLabel}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSendInvite}
+                    disabled={!inviteEmail.trim() || isInvitePending}
+                  >
+                    <Mail className="mr-1.5 h-3.5 w-3.5" />
+                    {isInvitePending ? t.admin.inviteExpert.sending : t.admin.inviteExpert.sendInvite}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* ── Link existing expert ── */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger
                 className={buttonVariants({ variant: 'outline', size: 'sm' })}

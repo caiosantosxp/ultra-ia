@@ -34,6 +34,7 @@ export default async function ExpertDashboardPage({ params }: Props) {
     newSubsData,
     knowledgeDocsCount,
     availableExperts,
+    pendingInviteRaw,
   ] = await Promise.all([
     prisma.specialist.findUnique({
       where: { id },
@@ -78,9 +79,23 @@ export default async function ExpertDashboardPage({ params }: Props) {
       select: { id: true, name: true, email: true },
       orderBy: { name: 'asc' },
     }),
+    prisma.expertInviteToken.findFirst({
+      where: { specialistId: id },
+      orderBy: { createdAt: 'desc' },
+      select: { email: true, expiresAt: true, usedAt: true },
+    }),
   ]);
 
   if (!specialist) redirect('/admin/agents');
+
+  const pendingInvite =
+    pendingInviteRaw && !pendingInviteRaw.usedAt
+      ? {
+          email: pendingInviteRaw.email,
+          expiresAt: pendingInviteRaw.expiresAt,
+          isExpired: pendingInviteRaw.expiresAt < new Date(),
+        }
+      : null
 
   const uniqueUsers = uniqueUsersResult.length;
   const usagePct = Math.min(100, Math.round((messagesThisMonth / MESSAGE_LIMIT) * 100));
@@ -255,6 +270,7 @@ export default async function ExpertDashboardPage({ params }: Props) {
             specialistId={id}
             owner={specialist.owner ?? null}
             availableExperts={availableExperts}
+            pendingInvite={pendingInvite}
           />
         </div>
       </div>

@@ -199,6 +199,35 @@ export function passwordResetTemplate(vars: {
   }
 }
 
+export function expertInviteTemplate(vars: {
+  userName: string
+  specialistName: string
+  inviteUrl: string
+}): { subject: string; html: string } {
+  const safeUserName = escapeHtml(vars.userName)
+  const safeSpecialistName = escapeHtml(vars.specialistName)
+  const content = `
+    <h1 style="${EMAIL_STYLES.heading}">Vous avez été invité comme Expert !</h1>
+    <p style="${EMAIL_STYLES.body}">
+      Bonjour ${safeUserName},<br><br>
+      Vous avez été invité à gérer le spécialiste IA
+      <strong>${safeSpecialistName}</strong> sur ultra-ia.
+      Cliquez sur le bouton ci-dessous pour créer votre compte expert.
+      Ce lien expire dans <strong>7 jours</strong>.
+    </p>
+    <p style="text-align: center; margin: 32px 0;">
+      <a href="${vars.inviteUrl}" style="${EMAIL_STYLES.button}">Accepter l'invitation</a>
+    </p>
+    <p style="${EMAIL_STYLES.muted}">
+      Si vous n'attendiez pas cette invitation, ignorez cet email.
+    </p>
+  `
+  return {
+    subject: `Invitation Expert — ${safeSpecialistName}`,
+    html: wrapLayout(content),
+  }
+}
+
 // Mapa template → função geradora
 export const templateFunctions: Record<
   string,
@@ -217,6 +246,10 @@ export const templateFunctions: Record<
     html: string
   },
   'password-reset': passwordResetTemplate as (vars: Record<string, string>) => {
+    subject: string
+    html: string
+  },
+  'expert-invite': expertInviteTemplate as (vars: Record<string, string>) => {
     subject: string
     html: string
   },
