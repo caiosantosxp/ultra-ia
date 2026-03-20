@@ -274,13 +274,16 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
                 <Textarea
                   value={field.value?.join('\n') ?? ''}
                   onChange={(e) => {
+                    field.onChange(e.target.value.split('\n'));
+                  }}
+                  onBlur={(e) => {
                     const prompts = e.target.value
                       .split('\n')
                       .map((p) => p.trim())
                       .filter(Boolean);
                     field.onChange(prompts);
+                    field.onBlur();
                   }}
-                  onBlur={field.onBlur}
                   rows={3}
                   placeholder={t.agentForm.quickPromptsPlaceholder}
                 />
