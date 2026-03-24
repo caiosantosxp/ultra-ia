@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { SubscriptionStatus } from '@prisma/client';
+import type { SubscriptionStatus } from '@/generated/prisma';
 
 interface SubscriptionState {
   status: SubscriptionStatus | 'none' | null;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
-import type { SubscriptionStatus } from '@prisma/client';
+import type { SubscriptionStatus } from '@/generated/prisma';
 import useSWR from 'swr';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

@@ -3,7 +3,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import bcrypt from 'bcrypt';
-import type { Role } from '@prisma/client';
+import type { Role } from '@/generated/prisma';
 
 import { prisma } from '@/lib/prisma';
 import { loginSchema } from '@/lib/validations/auth';

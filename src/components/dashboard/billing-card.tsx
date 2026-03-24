@@ -8,7 +8,7 @@ import { fr } from 'date-fns/locale';
 import { ExternalLinkIcon, Loader2Icon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import type { SubscriptionStatus } from '@prisma/client';
+import type { SubscriptionStatus } from '@/generated/prisma';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

@@ -7,8 +7,8 @@
  */
 
 import * as Sentry from '@sentry/nextjs';
-import type { Prisma } from '@prisma/client';
-import type { Conversation, Message } from '@prisma/client';
+import type { Prisma } from '@/generated/prisma';
+import type { Conversation, Message } from '@/generated/prisma';
 
 import { prisma } from '@/lib/prisma';
 

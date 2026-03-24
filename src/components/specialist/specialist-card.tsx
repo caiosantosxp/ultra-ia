@@ -1,12 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button-variants';
-import { QuickPrompt } from '@/components/specialist/quick-prompt';
 import { SubscribeButton } from '@/components/specialist/subscribe-button';
-import { cn } from '@/lib/utils';
 import { useT } from '@/lib/i18n/use-t';
 
 interface SpecialistCardProps {
@@ -23,12 +20,14 @@ interface SpecialistCardProps {
   };
   isAuthenticated?: boolean;
   hasActiveSubscription?: boolean;
+  index?: number;
 }
 
 export function SpecialistCard({
   specialist,
   isAuthenticated = false,
   hasActiveSubscription = false,
+  index = 0,
 }: SpecialistCardProps) {
   const t = useT();
   const initials = specialist.name
@@ -37,106 +36,101 @@ export function SpecialistCard({
     .join('')
     .slice(0, 2);
 
-  return (
-    <article className="group relative overflow-hidden rounded-2xl border-4 border-white shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-      {/* Gradient background using accent color */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(135deg, ${specialist.accentColor}cc 0%, ${specialist.accentColor}88 100%)`,
-        }}
-      />
-      {/* Subtle SVG decoration lines */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <svg
-          className="absolute -left-16 -top-16 h-[70%] w-[300px] opacity-20"
-          preserveAspectRatio="none"
-          viewBox="0 0 780 1140"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ transform: 'scaleX(-1) scaleY(-1)' }}
-        >
-          <path
-            className="animate-[drawPath_2.5s_ease-out_0.3s_forwards]"
-            d="M 225 0 C 1294.95 653.314 277.058 726.558 60 509.5 C -157.058 292.442 605.769 575.033 399 1140"
-            fill="transparent"
-            stroke="white"
-            strokeDasharray="2420"
-            strokeDashoffset="2420"
-            strokeWidth="1.5"
-          />
-        </svg>
-      </div>
-      {/* Inset highlight border */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-[1.1rem] z-10"
-        style={{
-          boxShadow:
-            'rgba(255,255,255,0.5) 0px 2px 4px 0px inset, rgba(255,255,255,0.3) 0px -2px 4px 0px inset',
-        }}
-      />
+  const isReversed = index % 2 === 1;
 
-      {/* Card content */}
-      <div className="relative z-20 flex flex-col items-center gap-4 p-5">
-        {/* Avatar */}
-        <div className="relative flex-shrink-0">
-          <div
-            className="overflow-hidden avatar-xl-shadow"
-            style={{ width: 80, height: 80, borderRadius: 20 }}
-          >
-            <Avatar className="h-20 w-20">
+  return (
+    <article
+      className={`flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-16 ${isReversed ? 'lg:flex-row-reverse' : ''}`}
+    >
+      {/* Visual side */}
+      <div className="relative flex-1">
+        <div
+          className="absolute -inset-4 rounded-[2rem] opacity-20 blur-2xl"
+          style={{ backgroundColor: specialist.accentColor }}
+        />
+        <div
+          className="relative overflow-hidden rounded-[2rem] p-8 md:p-12"
+          style={{ backgroundColor: `${specialist.accentColor}08` }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-5">
+            <Avatar className="h-20 w-20 border-4 border-white shadow-xl">
               <AvatarImage src={specialist.avatarUrl} alt={specialist.name} />
               <AvatarFallback
-                className="text-lg font-semibold text-white"
-                style={{ backgroundColor: specialist.accentColor }}
+                className="text-2xl font-bold text-white"
+                style={{ background: `linear-gradient(135deg, ${specialist.accentColor}, ${specialist.accentColor}99)` }}
               >
                 {initials}
               </AvatarFallback>
             </Avatar>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                <span className="text-xs font-medium text-green-600">En ligne</span>
+              </div>
+              <h3 className="mt-1 text-2xl font-bold text-gray-900">{specialist.name}</h3>
+              <p className="font-medium" style={{ color: specialist.accentColor }}>
+                {specialist.domain}
+              </p>
+            </div>
           </div>
-          {/* Avatar inset highlight */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              borderRadius: 20,
-              boxShadow:
-                '0 2px 4px 0 rgba(255,255,255,0.50) inset, 0 -2px 4px 0 rgba(255,255,255,0.40) inset',
-            }}
-          />
+
+          {/* Tags */}
+          <div className="mt-6 flex flex-wrap gap-2">
+            {specialist.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border bg-white px-4 py-1.5 text-sm font-medium text-gray-700 shadow-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Description */}
+          <p className="mt-6 text-lg leading-relaxed text-gray-600">
+            {specialist.description}
+          </p>
+        </div>
+      </div>
+
+      {/* Interactive side */}
+      <div className="flex-1 space-y-6">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5" style={{ color: specialist.accentColor }} />
+          <span className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+            Posez vos questions
+          </span>
         </div>
 
-        {/* Info */}
-        <div className="text-center">
-          <h4 className="font-heading text-lg font-semibold text-white drop-shadow-sm">
-            {specialist.name}
-          </h4>
-          <p className="text-sm text-white/80">{specialist.domain}</p>
-        </div>
-
-        {/* Tags */}
-        <div className="flex flex-wrap justify-center gap-1.5">
-          {specialist.tags.slice(0, 4).map((tag) => (
-            <Badge key={tag} variant="category-glass" className="text-xs">
-              {tag}
-            </Badge>
+        <div className="space-y-4">
+          {specialist.quickPrompts.map((prompt, i) => (
+            <div
+              key={i}
+              className="group cursor-pointer rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
+            >
+              <p className="text-gray-700">{prompt}</p>
+              <div
+                className="mt-3 flex items-center gap-1 text-sm font-medium opacity-0 transition-opacity group-hover:opacity-100"
+                style={{ color: specialist.accentColor }}
+              >
+                <span>Commencer avec cette question</span>
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* Quick Prompts */}
-        <div role="list" className="flex w-full flex-col gap-2">
-          {specialist.quickPrompts.slice(0, 3).map((prompt) => (
-            <QuickPrompt key={prompt} prompt={prompt} />
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="mt-2 w-full">
+        <div className="pt-4">
           {!isAuthenticated ? (
             <Link
               href={`/register?callbackUrl=/specialist/${specialist.slug}?checkout=true`}
               aria-label={`${t.profile.startConversationAria} ${specialist.name}`}
-              className={cn(buttonVariants({ variant: 'white', size: 'pill' }), 'w-full')}
+              className="group inline-flex h-14 items-center gap-3 rounded-2xl px-8 text-lg font-semibold text-white transition-all hover:gap-4"
+              style={{ backgroundColor: specialist.accentColor }}
             >
-              {t.profile.startConversation}
+              <span>{t.profile.startConversation}</span>
+              <ArrowRight className="h-5 w-5" />
             </Link>
           ) : (
             <SubscribeButton
@@ -146,9 +140,6 @@ export function SpecialistCard({
           )}
         </div>
       </div>
-
-      {/* Bottom gradual blur */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 z-10 gradual-blur" />
     </article>
   );
 }

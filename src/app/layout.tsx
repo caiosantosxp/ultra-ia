@@ -4,7 +4,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { SessionProvider } from '@/components/shared/session-provider';
 import { CookieConsent } from '@/components/shared/cookie-consent';
-import { geistSans, geistMono } from '@/lib/fonts';
+import { plusJakartaSans, geistMono } from '@/lib/fonts';
 import { APP_NAME, APP_DESCRIPTION, APP_URL } from '@/lib/constants';
 import './globals.css';
 
@@ -28,8 +28,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
-      <body className="antialiased">
+    <html lang="fr" className={`${plusJakartaSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <body className="font-sans antialiased">
         <SessionProvider>
           <ThemeProvider>
             <TooltipProvider>

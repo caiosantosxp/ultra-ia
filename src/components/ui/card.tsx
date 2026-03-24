@@ -2,14 +2,25 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * NexAgent Design System — Card Component
+ *
+ * Variants:
+ * - default: White with subtle border and shadow
+ * - glass: Dark glass effect for dark backgrounds
+ * - glass-light: Light glass effect
+ * - elevated: Stronger shadow for prominence
+ */
 function Card({
   className,
   size = "default",
   variant = "default",
+  hover = false,
   ...props
 }: React.ComponentProps<"div"> & {
-  size?: "default" | "sm"
-  variant?: "default" | "glass"
+  size?: "default" | "sm" | "lg"
+  variant?: "default" | "glass" | "glass-light" | "elevated"
+  hover?: boolean
 }) {
   return (
     <div
@@ -17,8 +28,23 @@ function Card({
       data-size={size}
       data-variant={variant}
       className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden rounded-2xl bg-card py-4 text-sm text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl",
-        variant === "glass" && "glass-dark ring-0 border border-white/10",
+        // Base styles
+        "group/card flex flex-col overflow-hidden text-card-foreground transition-all duration-200",
+        // Size variants
+        size === "default" && "gap-4 rounded-[16px] p-[30px]",
+        size === "sm" && "gap-3 rounded-[12px] p-5",
+        size === "lg" && "gap-5 rounded-[20px] p-10",
+        // Variant styles
+        variant === "default" && "bg-white border border-[#f3f3f3] shadow-[0_2px_20px_rgba(0,0,0,0.05)] dark:bg-card dark:border-white/10",
+        variant === "glass" && "glass-dark",
+        variant === "glass-light" && "glass-light",
+        variant === "elevated" && "bg-white border border-[#f3f3f3] shadow-[0_8px_40px_rgba(0,0,0,0.08)] dark:bg-card dark:border-white/10",
+        // Hover effect
+        hover && "hover:-translate-y-1 hover:shadow-[0_8px_40px_rgba(3,103,251,0.15)] cursor-pointer",
+        // Image handling
+        "has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-[16px] *:[img:last-child]:rounded-b-[16px]",
+        // Footer handling
+        "has-data-[slot=card-footer]:pb-0",
         className
       )}
       {...props}
@@ -31,7 +57,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-header"
       className={cn(
-        "group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-2xl px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
+        "grid auto-rows-min items-start gap-2 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]",
         className
       )}
       {...props}
@@ -44,7 +70,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "text-base leading-snug font-medium group-data-[size=sm]/card:text-sm",
+        "text-lg leading-snug font-semibold text-[#161616] dark:text-white group-data-[size=sm]/card:text-base",
         className
       )}
       {...props}
@@ -56,7 +82,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn("text-sm text-[#787878] dark:text-white/60 leading-relaxed", className)}
       {...props}
     />
   )
@@ -79,7 +105,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-4 group-data-[size=sm]/card:px-3", className)}
+      className={cn("", className)}
       {...props}
     />
   )
@@ -90,7 +116,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center rounded-b-2xl border-t bg-muted/50 p-4 group-data-[size=sm]/card:p-3",
+        "flex items-center gap-3 pt-4 mt-auto border-t border-[#f3f3f3] dark:border-white/10",
         className
       )}
       {...props}

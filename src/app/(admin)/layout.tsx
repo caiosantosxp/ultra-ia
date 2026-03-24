@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { AdminSidebar, AdminMobileSidebar } from '@/components/admin/admin-sidebar';
-import { Breadcrumbs } from '@/components/admin/breadcrumbs';
 import { getT } from '@/lib/i18n/get-t';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,20 +32,25 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Desktop sidebar (240px, fixed) */}
-      <AdminSidebar user={user} />
+    <div className="flex min-h-screen bg-[#f8f9fa]" data-theme="light">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex sticky top-0 h-screen w-60 flex-col overflow-y-auto border-r border-[#e5e7eb] bg-white">
+        <div className="flex h-14 items-center border-b border-[#e5e7eb] px-4">
+          <span className="text-sm font-bold text-[#0367fb]">ultra-ia</span>
+          <span className="ml-2 text-xs text-[#787878]">Admin</span>
+        </div>
+        <AdminSidebar user={user} />
+      </aside>
 
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-auto">
-        {/* Mobile header with hamburger */}
-        <header className="flex h-14 items-center gap-3 border-b px-4 lg:hidden">
+        {/* Mobile header */}
+        <header className="flex h-14 items-center gap-3 border-b border-[#e5e7eb] bg-white px-4 lg:hidden">
           <AdminMobileSidebar user={user} />
-          <span className="font-heading text-sm font-bold text-primary">{t.admin.sidebar.adminTitle}</span>
+          <span className="text-sm font-bold text-[#0367fb]">{t.admin.sidebar.adminTitle}</span>
         </header>
 
         <main className="flex-1 p-6">
-          <Breadcrumbs />
           {children}
         </main>
       </div>

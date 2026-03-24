@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html class="w-mod-js w-mod-ix wf-intertight-n4-active wf-intertight-n8-active w-mod-ix3 wf-plusjakartasans-n4-active wf-plusjakartasans-n3-active wf-plusjakartasans-n5-active wf-plusjakartasans-n6-active wf-plusjakartasans-n8-active wf-plusjakartasans-n7-active wf-active" data-wf-domain="nexagent.webflow.io" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>NexAgent - Design System</title>
+  <meta content="Design System documentation for NexAgent template" name="description"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link href="assets/nexagent_3d0c4378b4b7.css" rel="stylesheet" type="text/css"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <script src="assets/webfont_3a3adf980c7d.js" type="text/javascript"></script>
+  <link href="assets/css_36aac23de48d.css" media="all" rel="stylesheet"/>
+  <script type="text/javascript">WebFont.load({  google: {    families: ["Plus Jakarta Sans:300,regular,500,600,700,800","Inter Tight:regular,800"]  }});</script>
+  <link href="assets/691cd1789a5354737de6672d_Fav_2_d951c20451cc.svg" rel="shortcut icon" type="image/x-icon"/>
+  <style>
+    /* Design System Navigation */
+    .ds-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      background: rgba(4, 28, 64, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .ds-nav-inner {
+      max-width: 1310px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .ds-nav-link {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      transition: color 0.2s;
+    }
+    .ds-nav-link:hover {
+      color: #0367fb;
+    }
+    .ds-nav-title {
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      margin-right: 20px;
+    }
+
+    /* Design System Section Styles */
+    .ds-section {
+      padding: 100px 0;
+      border-bottom: 1px solid var(--secondary-color--secondary-color-black-05);
+    }
+    .ds-section:first-of-type {
+      padding-top: 120px;
+    }
+    .ds-section-title {
+      font-family: "Inter Tight", sans-serif;
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1.32px;
+      margin-bottom: 60px;
+      color: var(--secondary-color--secondary-color-black-01);
+    }
+    .ds-section-subtitle {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.72px;
+      margin-bottom: 30px;
+      margin-top: 50px;
+      color: var(--secondary-color--secondary-color-black-02);
+    }
+
+    /* Typography Table */
+    .ds-type-row {
+      display: flex;
+      align-items: baseline;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--secondary-color--secondary-color-black-05);
+      gap: 40px;
+    }
+    .ds-type-label {
+      min-width: 160px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--secondary-color--secondary-color-black-03);
+      flex-shrink: 0;
+    }
+    .ds-type-preview {
+      flex: 1;
+    }
+    .ds-type-specs {
+      min-width: 120px;
+      text-align: right;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 12px;
+      color: var(--secondary-color--secondary-color-black-03);
+      flex-shrink: 0;
+    }
+
+    /* Color Swatches */
+    .ds-color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .ds-color-swatch {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .ds-color-preview {
+      height: 100px;
+    }
+    .ds-color-info {
+      padding: 16px;
+      background: white;
+    }
+    .ds-color-name {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--secondary-color--secondary-color-black-01);
+      margin-bottom: 4px;
+    }
+    .ds-color-value {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--secondary-color--secondary-color-black-03);
+    }
+
+    /* Component Grid */
+    .ds-component-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 30px;
+    }
+    .ds-component-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+      border: 1px solid var(--secondary-color--secondary-color-black-05);
+    }
+    .ds-component-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--secondary-color--secondary-color-black-03);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    /* Motion Gallery */
+    .ds-motion-item {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 20px;
+      border: 1px solid var(--secondary-color--secondary-color-black-05);
+    }
+    .ds-motion-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--secondary-color--secondary-color-black-03);
+      margin-bottom: 20px;
+    }
+
+    /* Layout Examples */
+    .ds-layout-example {
+      background: var(--secondary-color--secondary-color-black-05);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 30px;
+    }
+    .ds-layout-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--secondary-color--secondary-color-black-03);
+      margin-bottom: 20px;
+    }
+
+    /* Icon Grid */
+    .ds-icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .ds-icon-item {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--secondary-color--secondary-color-black-05);
+    }
+    .ds-icon-item img {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 10px;
+    }
+    .ds-icon-name {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 11px;
+      color: var(--secondary-color--secondary-color-black-03);
+    }
+
+    /* Surface Examples */
+    .ds-surface-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+    .ds-surface-card {
+      padding: 30px;
+      border-radius: 16px;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .ds-surface-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .ds-surface-value {
+      font-family: monospace;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    /* States Display */
+    .ds-states-row {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .ds-state-item {
+      text-align: center;
+    }
+    .ds-state-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 11px;
+      color: var(--secondary-color--secondary-color-black-03);
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Override for hero in design system context */
+    .section.home-hero-section {
+      padding-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Design System Navigation -->
+  <nav class="ds-nav">
+    <div class="ds-nav-inner">
+      <span class="ds-nav-title">Design System</span>
+      <a href="#hero" class="ds-nav-link">Hero</a>
+      <a href="#typography" class="ds-nav-link">Typography</a>
+      <a href="#colors" class="ds-nav-link">Colors</a>
+      <a href="#components" class="ds-nav-link">Components</a>
+      <a href="#layout" class="ds-nav-link">Layout</a>
+      <a href="#motion" class="ds-nav-link">Motion</a>
+      <a href="#icons" class="ds-nav-link">Icons</a>
+    </div>
+  </nav>
+
+  <!-- ============================================== -->
+  <!-- SECTION 0: HERO (Exact Clone) -->
+  <!-- ============================================== -->
+  <section class="section home-hero-section" id="hero">
+    <div class="w-layout-blockcontainer container w-container">
+      <div class="hero-content-details">
+        <div class="hero-title-max-width-632">
+          <div class="home-corner-icon-title-wrap">
+            <div class="home-corner-icon-wrap">
+              <img alt="" class="home-corner-icon" loading="lazy" src="assets/6909f20d87172346059eb3b8_corne_307db4a124bb.svg"/>
+              <img alt="" class="home-corner-icon" loading="lazy" src="assets/6909f20d87172346059eb3b8_corne_307db4a124bb.svg"/>
+            </div>
+            <div class="home-corner-title-wrap">
+              <p class="home-corner-title">NexAgent Design System Documentation</p>
+            </div>
+          </div>
+          <div class="home-hero-content-wrapper">
+            <div class="home-hero-title-wrap">
+              <div class="overflow-hidden">
+                <h1 class="home-hero-title">Design System</h1>
+              </div>
+              <div class="overflow-hidden">
+                <h1 class="home-hero-title"><span class="home-hero-blue-text">Pattern</span> Library</h1>
+              </div>
+            </div>
+            <div class="home-hero-sub-text-wrap">
+              <p class="home-hero-sub-text">A comprehensive collection of UI components, typography, colors, and patterns extracted from the NexAgent template for consistent design implementation.</p>
+            </div>
+            <div class="button-group">
+              <a class="button-wrap w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66 w-inline-block" href="#typography">
+                <div class="button-text-wrap">
+                  <p class="cta-text-2 _1 w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66">Explore Patterns</p>
+                  <p class="cta-text-2 _2 w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66">Explore Patterns</p>
+                </div>
+                <div class="btn-bg w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66"></div>
+              </a>
+              <a class="button-wrap black-button-wrap w-inline-block" href="#components">
+                <div class="button-text-wrap black-button-text-wrap">
+                  <p class="cta-text-2 _1 black-btn-text">View Components</p>
+                  <p class="cta-text-2 _2 black-btn-text">View Components</p>
+                </div>
+                <div class="btn-arrow-wrap">
+                  <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg"/>
+                  <img alt="" class="button-arrow _2" loading="lazy" src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg"/>
+                </div>
+                <div class="btn-bg footer-nav-link-8"></div>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="home-hero-right-content-wrap">
+          <div class="banner-json-wrap">
+            <img src="assets/6909f87f63adc7a16a050226_Hero__2e05ab27963f.svg" alt="Hero illustration" style="width: 100%; max-width: 500px;"/>
+          </div>
+        </div>
+      </div>
+      <div class="trusted-wrapper">
+        <div class="trusted-top-text-wrap">
+          <p class="trusted-top-text">Built & trained by top recruiters, with placements in top companies.</p>
+        </div>
+        <div class="trusted-all-image-wrap">
+          <div class="trusted-image-list">
+            <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0fbdac598627b502f0_Partn_cdbfc429267c.svg"/></div>
+            <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0fa5d6159707575f9a_Partn_81539d7ab316.svg"/></div>
+            <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0f8ce46d30ab69f061_Partn_d64ac771ef08.svg"/></div>
+            <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0f5b3328fe61b6949a_Partn_6f9bb7855f4a.svg"/></div>
+            <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf12370c8d09f6fa491b_Partn_bc4853deab23.svg"/></div>
+            <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf12d34631d353e0a94d_Partn_1fec95176875.svg"/></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1: TYPOGRAPHY -->
+  <!-- ============================================== -->
+  <section class="ds-section" id="typography" style="background: white;">
+    <div class="w-layout-blockcontainer container w-container">
+      <h2 class="ds-section-title">Typography</h2>
+
+      <!-- Heading 1 -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Heading 1</div>
+        <div class="ds-type-preview">
+          <h1 class="home-hero-title" style="margin: 0;">One Agent, Multiple Roles</h1>
+        </div>
+        <div class="ds-type-specs">94px / 110%</div>
+      </div>
+
+      <!-- Heading 2 -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Heading 2</div>
+        <div class="ds-type-preview">
+          <h2 class="section-title" style="margin: 0;">The Intelligent AI Behind</h2>
+        </div>
+        <div class="ds-type-specs">64px / 110%</div>
+      </div>
+
+      <!-- Heading 2 with gradient text -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Heading 2 (Blue Text)</div>
+        <div class="ds-type-preview">
+          <h2 class="section-title" style="margin: 0;"><span class="blue-text">Smarter Hiring</span></h2>
+        </div>
+        <div class="ds-type-specs">64px / 110%</div>
+      </div>
+
+      <!-- Heading 3 -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Heading 3</div>
+        <div class="ds-type-preview">
+          <h3 class="section-title-02" style="margin: 0;">Multi-Agent AI for Precision</h3>
+        </div>
+        <div class="ds-type-specs">44px / 120%</div>
+      </div>
+
+      <!-- Heading 4 -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Heading 4</div>
+        <div class="ds-type-preview">
+          <h4 class="pricing-name" style="margin: 0;">Basic Plan</h4>
+        </div>
+        <div class="ds-type-specs">28px / 120%</div>
+      </div>
+
+      <!-- Heading 5 -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Heading 5</div>
+        <div class="ds-type-preview">
+          <h5 class="footer-nav-title" style="margin: 0;">Product Navigation</h5>
+        </div>
+        <div class="ds-type-specs">24px / 120%</div>
+      </div>
+
+      <!-- Section Tag -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Section Tag</div>
+        <div class="ds-type-preview">
+          <div class="section-tag-wrap">
+            <p class="section-tag">NexAgent Features</p>
+          </div>
+        </div>
+        <div class="ds-type-specs">16px / 150%</div>
+      </div>
+
+      <!-- Hero Subtext -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Hero Subtext</div>
+        <div class="ds-type-preview">
+          <p class="home-hero-sub-text" style="margin: 0;">Your ultimate AI talent acquisition partner, from job open to offer released.</p>
+        </div>
+        <div class="ds-type-specs">20px / 150%</div>
+      </div>
+
+      <!-- Body Text -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Body / Paragraph</div>
+        <div class="ds-type-preview">
+          <p class="section-sub-text" style="margin: 0;">Aria Fusion is a first-of-its-kind AI ecosystem, combining specialized AI agents for resume parsing, skills assessment, and behavioral analysis.</p>
+        </div>
+        <div class="ds-type-specs">16px / 150%</div>
+      </div>
+
+      <!-- Pricing Description -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Small Text</div>
+        <div class="ds-type-preview">
+          <p class="pricing-description" style="margin: 0;">For individuals or very small teams just getting started with the platform</p>
+        </div>
+        <div class="ds-type-specs">14px / 150%</div>
+      </div>
+
+      <!-- Button Text -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Button Text</div>
+        <div class="ds-type-preview">
+          <p class="cta-text-2 _1" style="margin: 0; display: inline;">Talk to sales</p>
+        </div>
+        <div class="ds-type-specs">16px / 150%</div>
+      </div>
+
+      <!-- Price Display -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Price Display</div>
+        <div class="ds-type-preview">
+          <h3 class="product-price" style="margin: 0; display: inline;">$99</h3>
+          <p class="price-month-text" style="margin: 0; display: inline;">/monthly</p>
+        </div>
+        <div class="ds-type-specs">44px + 16px</div>
+      </div>
+
+      <!-- Hero Blue Text -->
+      <div class="ds-type-row">
+        <div class="ds-type-label">Hero Blue Accent</div>
+        <div class="ds-type-preview">
+          <h1 class="home-hero-title" style="margin: 0;"><span class="home-hero-blue-text">Multiple</span></h1>
+        </div>
+        <div class="ds-type-specs">94px / gradient</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2: COLORS & SURFACES -->
+  <!-- ============================================== -->
+  <section class="ds-section" id="colors" style="background: var(--secondary-color--secondary-color-black-05);">
+    <div class="w-layout-blockcontainer container w-container">
+      <h2 class="ds-section-title">Colors & Surfaces</h2>
+
+      <!-- Primary Colors -->
+      <h3 class="ds-section-subtitle">Primary Colors</h3>
+      <div class="ds-color-grid">
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #0367fb;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Primary Blue 01</div>
+            <div class="ds-color-value">#0367fb</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #5f9cff;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Primary Blue 02</div>
+            <div class="ds-color-value">#5f9cff</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #b5d1ff;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Primary Blue 03</div>
+            <div class="ds-color-value">#b5d1ff</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #deebff;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Primary Blue 04</div>
+            <div class="ds-color-value">#deebff</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #0061ff;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Primary Blue 05</div>
+            <div class="ds-color-value">#0061ff</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #90bafe;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Primary Blue 06</div>
+            <div class="ds-color-value">#90bafe</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Colors (Blacks) -->
+      <h3 class="ds-section-subtitle">Secondary Colors (Neutrals)</h3>
+      <div class="ds-color-grid">
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #161616;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Black 01</div>
+            <div class="ds-color-value">#161616</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #2d2d2d;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Black 06</div>
+            <div class="ds-color-value">#2d2d2d</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #444;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Black 02</div>
+            <div class="ds-color-value">#444444</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #787878;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Black 03</div>
+            <div class="ds-color-value">#787878</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #d9d9d9;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Black 04</div>
+            <div class="ds-color-value">#d9d9d9</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #f3f3f3;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Black 05</div>
+            <div class="ds-color-value">#f3f3f3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supporting Colors -->
+      <h3 class="ds-section-subtitle">Supporting Colors</h3>
+      <div class="ds-color-grid">
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #d1f801;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Light Green</div>
+            <div class="ds-color-value">#d1f801</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #f6fecc;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Light Green 02</div>
+            <div class="ds-color-value">#f6fecc</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #33e9bf;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Teal / BG 04</div>
+            <div class="ds-color-value">#33e9bf</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #c6eb00;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Yellow Green / BG 05</div>
+            <div class="ds-color-value">#c6eb00</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: white; border: 1px solid #f3f3f3;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">White</div>
+            <div class="ds-color-value">#ffffff</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Background Colors -->
+      <h3 class="ds-section-subtitle">Background Colors</h3>
+      <div class="ds-color-grid">
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #041c40;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Dark Blue (Hero BG)</div>
+            <div class="ds-color-value">#041c40</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: #102d23;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Dark Green</div>
+            <div class="ds-color-value">#102d23</div>
+          </div>
+        </div>
+        <div class="ds-color-swatch">
+          <div class="ds-color-preview" style="background: whitesmoke;"></div>
+          <div class="ds-color-info">
+            <div class="ds-color-name">Light Field</div>
+            <div class="ds-color-value">whitesmoke</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gradients -->
+      <h3 class="ds-section-subtitle">Gradients</h3>
+      <div class="ds-surface-grid">
+        <div class="ds-surface-card" style="background: linear-gradient(180deg, #0367fb, #33e9bf 51%, #c6eb00); color: white;">
+          <div class="ds-surface-label">Popular Pricing Card Gradient</div>
+          <div class="ds-surface-value">linear-gradient(180deg, Blue, Teal, Yellow-Green)</div>
+        </div>
+        <div class="ds-surface-card" style="background: linear-gradient(90deg, #8cb8ff, #eef4ff); color: #161616;">
+          <div class="ds-surface-label">Section Title Gradient</div>
+          <div class="ds-surface-value">linear-gradient(90deg, #8cb8ff, #eef4ff)</div>
+        </div>
+        <div class="ds-surface-card" style="background: linear-gradient(270deg, #102d2300 1%, #102d23 100%); color: white;">
+          <div class="ds-surface-label">Dark Fade Gradient</div>
+          <div class="ds-surface-value">linear-gradient(270deg, transparent, #102d23)</div>
+        </div>
+      </div>
+
+      <!-- Surfaces -->
+      <h3 class="ds-section-subtitle">Surfaces & Cards</h3>
+      <div class="ds-surface-grid">
+        <div class="ds-surface-card" style="background: white; border: 1px solid #f3f3f3; color: #161616;">
+          <div class="ds-surface-label">Card Surface</div>
+          <div class="ds-surface-value">White with border</div>
+        </div>
+        <div class="ds-surface-card" style="background: rgba(255,255,255,0.58); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: #161616;">
+          <div class="ds-surface-label">Glass Effect</div>
+          <div class="ds-surface-value">Blur with transparency</div>
+        </div>
+        <div class="ds-surface-card" style="background: #041c40; color: white;">
+          <div class="ds-surface-label">Dark Section</div>
+          <div class="ds-surface-value">#041c40</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3: UI COMPONENTS -->
+  <!-- ============================================== -->
+  <section class="ds-section" id="components" style="background: white;">
+    <div class="w-layout-blockcontainer container w-container">
+      <h2 class="ds-section-title">UI Components</h2>
+
+      <!-- Buttons -->
+      <h3 class="ds-section-subtitle">Buttons</h3>
+
+      <!-- Primary Button (Blue) -->
+      <div class="ds-component-card" style="margin-bottom: 30px;">
+        <div class="ds-component-label">Primary Button (Blue)</div>
+        <div class="ds-states-row">
+          <div class="ds-state-item">
+            <a class="button-wrap w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66 w-inline-block" href="#">
+              <div class="button-text-wrap">
+                <p class="cta-text-2 _1 w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66">Talk to sales</p>
+                <p class="cta-text-2 _2 w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66">Talk to sales</p>
+              </div>
+              <div class="btn-bg w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66"></div>
+            </a>
+            <div class="ds-state-label">Default</div>
+          </div>
+          <div class="ds-state-item">
+            <a class="button-wrap w-variant-c1d8d226-3ccb-fe73-827a-d3cef3e35ca1 w-inline-block" href="#">
+              <div class="button-text-wrap">
+                <p class="cta-text-2 _1 w-variant-c1d8d226-3ccb-fe73-827a-d3cef3e35ca1">Talk to sales</p>
+                <p class="cta-text-2 _2 w-variant-c1d8d226-3ccb-fe73-827a-d3cef3e35ca1">Talk to sales</p>
+              </div>
+              <div class="btn-arrow-wrap">
+                <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15e8425986336e74312_White_a7c9b358aec9.svg"/>
+                <img alt="" class="button-arrow _2" loading="lazy" src="assets/6909c15e8425986336e74312_White_a7c9b358aec9.svg"/>
+              </div>
+              <div class="btn-bg w-variant-c1d8d226-3ccb-fe73-827a-d3cef3e35ca1"></div>
+            </a>
+            <div class="ds-state-label">With Arrow</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Button (Black/Outline) -->
+      <div class="ds-component-card" style="margin-bottom: 30px;">
+        <div class="ds-component-label">Secondary Button (Black)</div>
+        <div class="ds-states-row">
+          <div class="ds-state-item">
+            <a class="button-wrap black-button-wrap w-inline-block" href="#">
+              <div class="button-text-wrap black-button-text-wrap">
+                <p class="cta-text-2 _1 black-btn-text">Talk to NexAgent</p>
+                <p class="cta-text-2 _2 black-btn-text">Talk to NexAgent</p>
+              </div>
+              <div class="btn-arrow-wrap">
+                <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg"/>
+                <img alt="" class="button-arrow _2" loading="lazy" src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg"/>
+              </div>
+              <div class="btn-bg footer-nav-link-8"></div>
+            </a>
+            <div class="ds-state-label">Default with Arrow</div>
+          </div>
+          <div class="ds-state-item">
+            <a class="button-wrap black-button-wrap w-variant-34d7c99d-b17a-2693-484f-88313d8898cf w-inline-block" href="#">
+              <div class="button-text-wrap black-button-text-wrap">
+                <p class="cta-text-2 _1 black-btn-text w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">Try for free</p>
+                <p class="cta-text-2 _2 black-btn-text w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">Try for free</p>
+              </div>
+              <div class="btn-arrow-wrap w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">
+                <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg"/>
+                <img alt="" class="button-arrow _2" loading="lazy" src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg"/>
+              </div>
+              <div class="btn-bg footer-nav-link-8"></div>
+            </a>
+            <div class="ds-state-label">Variant</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav Link Buttons -->
+      <div class="ds-component-card" style="margin-bottom: 30px;">
+        <div class="ds-component-label">Navigation Link Buttons</div>
+        <div class="ds-states-row">
+          <div class="ds-state-item">
+            <a class="button-wrap w-variant-8b20d5cb-03ca-bb0b-b38a-f5c8ba31dfbf w-inline-block" href="#">
+              <div class="button-text-wrap w-variant-8b20d5cb-03ca-bb0b-b38a-f5c8ba31dfbf">
+                <p class="cta-text-2 w-variant-8b20d5cb-03ca-bb0b-b38a-f5c8ba31dfbf _1">Features</p>
+                <p class="cta-text-2 w-variant-8b20d5cb-03ca-bb0b-b38a-f5c8ba31dfbf _2">Features</p>
+              </div>
+              <div class="btn-bg w-variant-8b20d5cb-03ca-bb0b-b38a-f5c8ba31dfbf"></div>
+            </a>
+            <div class="ds-state-label">Nav Link</div>
+          </div>
+          <div class="ds-state-item">
+            <a class="button-wrap w-variant-30174143-0c15-ac24-762b-b98e5e62e3c5 w-inline-block" href="#">
+              <div class="button-text-wrap">
+                <p class="cta-text-2 w-variant-30174143-0c15-ac24-762b-b98e5e62e3c5 _1">Home</p>
+                <p class="cta-text-2 w-variant-30174143-0c15-ac24-762b-b98e5e62e3c5 _2">Home</p>
+              </div>
+              <div class="btn-bg w-variant-30174143-0c15-ac24-762b-b98e5e62e3c5"></div>
+            </a>
+            <div class="ds-state-label">Footer Nav Link</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Fields -->
+      <h3 class="ds-section-subtitle">Input Fields</h3>
+      <div class="ds-component-card" style="margin-bottom: 30px; max-width: 500px;">
+        <div class="ds-component-label">Email Input with Button</div>
+        <div class="email-input-wrap" style="margin-top: 16px;">
+          <input class="email-input-box w-input" maxlength="256" name="email" placeholder="Enter your email..." type="email"/>
+          <input class="email-btn w-button" type="submit" value="Subscribe ->"/>
+        </div>
+      </div>
+
+      <!-- Section Tags -->
+      <h3 class="ds-section-subtitle">Section Tags</h3>
+      <div class="ds-component-grid">
+        <div class="ds-component-card">
+          <div class="ds-component-label">Default Tag</div>
+          <div class="section-tag-wrap" style="margin-top: 16px;">
+            <p class="section-tag">NexAgent Features</p>
+          </div>
+        </div>
+        <div class="ds-component-card">
+          <div class="ds-component-label">Integration Tag</div>
+          <div class="section-tag-wrap integration-tag-wrap" style="margin-top: 16px;">
+            <p class="section-tag integration">Integration</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Cards -->
+      <h3 class="ds-section-subtitle">Pricing Cards</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 30px;">
+        <!-- Basic Card -->
+        <div class="pricing-post-content">
+          <div class="pricing">
+            <div class="pricing-details-wrap">
+              <div class="pricing-icon-wrap">
+                <img alt="" loading="lazy" src="assets/690c2afac2f3b635f5e49726_Plans_769cfc0870f7.webp"/>
+              </div>
+              <div class="pricing-text-block">
+                <div class="pricing-name-block">
+                  <h4 class="pricing-name">Basic</h4>
+                </div>
+                <div class="pricing-description-block">
+                  <p class="pricing-description">For individuals or very small teams just getting started</p>
+                </div>
+              </div>
+              <div class="pricing-price-block">
+                <h3 class="product-price">$00</h3>
+                <p class="price-month-text">/monthly</p>
+              </div>
+              <div class="add-to-cart-button-wrap">
+                <a class="button-wrap black-button-wrap w-variant-34d7c99d-b17a-2693-484f-88313d8898cf w-inline-block" href="#">
+                  <div class="button-text-wrap black-button-text-wrap">
+                    <p class="cta-text-2 _1 black-btn-text w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">Try for free</p>
+                    <p class="cta-text-2 _2 black-btn-text w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">Try for free</p>
+                  </div>
+                  <div class="btn-arrow-wrap w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">
+                    <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg"/>
+                    <img alt="" class="button-arrow _2" loading="lazy" src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg"/>
+                  </div>
+                  <div class="btn-bg footer-nav-link-8"></div>
+                </a>
+              </div>
+              <div class="pricing-feature-block">
+                <ul class="feature-text-list" role="list">
+                  <li class="pricing-list-item">
+                    <div class="pricing-check-icon-wrap">
+                      <img alt="" class="pricing-check-icon" loading="lazy" src="assets/690c22fb37a068e6ae562d35_tick-_c8d900df65a6.svg"/>
+                    </div>
+                    <p class="product-list-text">500 AI credits per editor each month</p>
+                  </li>
+                  <li class="pricing-list-item">
+                    <div class="pricing-check-icon-wrap">
+                      <img alt="" class="pricing-check-icon" loading="lazy" src="assets/690c22fb37a068e6ae562d35_tick-_c8d900df65a6.svg"/>
+                    </div>
+                    <p class="product-list-text">Unlimited bases</p>
+                  </li>
+                  <li class="pricing-list-item">
+                    <div class="pricing-check-icon-wrap">
+                      <img alt="" class="pricing-check-icon" loading="lazy" src="assets/690c22fb37a068e6ae562d35_tick-_c8d900df65a6.svg"/>
+                    </div>
+                    <p class="product-list-text">Up to 5 editors</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Popular Card -->
+        <div class="pricing-post-content popular">
+          <div class="pricing popular-pricing">
+            <div class="popular-btn-wrap">
+              <p class="popular-btn-text">Most popular</p>
+            </div>
+            <div class="pricing-details-wrap">
+              <div class="pricing-icon-wrap">
+                <img alt="" loading="lazy" src="assets/690c6417b3a6a200c214c4ee_Plans_d7c7a87a59bc.png"/>
+              </div>
+              <div class="pricing-text-block">
+                <div class="pricing-name-block">
+                  <h4 class="pricing-name">Team</h4>
+                </div>
+                <div class="pricing-description-block">
+                  <p class="pricing-description">For teams that need to collaborate more efficiently</p>
+                </div>
+              </div>
+              <div class="pricing-price-block">
+                <h3 class="product-price">$20</h3>
+                <p class="price-month-text">/monthly</p>
+              </div>
+              <div class="add-to-cart-button-wrap">
+                <a class="button-wrap black-button-wrap w-variant-34d7c99d-b17a-2693-484f-88313d8898cf w-inline-block" href="#">
+                  <div class="button-text-wrap black-button-text-wrap">
+                    <p class="cta-text-2 _1 black-btn-text w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">Try for free</p>
+                    <p class="cta-text-2 _2 black-btn-text w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">Try for free</p>
+                  </div>
+                  <div class="btn-arrow-wrap w-variant-34d7c99d-b17a-2693-484f-88313d8898cf">
+                    <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg"/>
+                    <img alt="" class="button-arrow _2" loading="lazy" src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg"/>
+                  </div>
+                  <div class="btn-bg footer-nav-link-8"></div>
+                </a>
+              </div>
+              <div class="pricing-feature-block">
+                <ul class="feature-text-list" role="list">
+                  <li class="pricing-list-item">
+                    <div class="pricing-check-icon-wrap">
+                      <img alt="" class="pricing-check-icon" loading="lazy" src="assets/690c22fb37a068e6ae562d35_tick-_c8d900df65a6.svg"/>
+                    </div>
+                    <p class="product-list-text">Everything in Basic, plus</p>
+                  </li>
+                  <li class="pricing-list-item">
+                    <div class="pricing-check-icon-wrap">
+                      <img alt="" class="pricing-check-icon" loading="lazy" src="assets/690c22fb37a068e6ae562d35_tick-_c8d900df65a6.svg"/>
+                    </div>
+                    <p class="product-list-text">25,000 automation runs</p>
+                  </li>
+                  <li class="pricing-list-item">
+                    <div class="pricing-check-icon-wrap">
+                      <img alt="" class="pricing-check-icon" loading="lazy" src="assets/690c22fb37a068e6ae562d35_tick-_c8d900df65a6.svg"/>
+                    </div>
+                    <p class="product-list-text">Standard sync integrations</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Accordion -->
+      <h3 class="ds-section-subtitle">FAQ Accordion</h3>
+      <div class="ds-component-card" style="margin-top: 30px; max-width: 800px;">
+        <div class="ds-component-label">FAQ Item</div>
+        <div class="faq-body" style="margin-top: 16px;">
+          <div class="faq-qa w-dropdown">
+            <div aria-expanded="false" aria-haspopup="menu" class="dropdown-toggle w-dropdown-toggle" role="button" tabindex="0">
+              <div class="faq-question-left">
+                <p class="question-title">How does NexAgent's pricing work?</p>
+              </div>
+              <div class="plus-minus-wrap">
+                <img alt="" class="faq-minus" loading="lazy" src="assets/690dac033017bf8acc97b1fe_minus_e41c3b8c555f.svg"/>
+                <img alt="" class="faq-plus" loading="lazy" src="assets/690dac035a1dbd17db76ba46_add-0_0f4c2e6e9d18.svg"/>
+              </div>
+            </div>
+            <nav class="faq-list w-dropdown-list">
+              <div class="faq-answer-wrap">
+                <p class="faq-answer-text">NexAgent plans are charged per seat. If you are on NexAgent's Free plan, all users are free. If you are on a Team or Business plan, you will be charged for all users who have edit permissions.</p>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Links -->
+      <h3 class="ds-section-subtitle">Social Links</h3>
+      <div class="ds-component-card" style="margin-top: 30px;">
+        <div class="ds-component-label">Social Icon Links</div>
+        <div class="socail-icon-wrap" style="margin-top: 16px; display: flex; gap: 16px;">
+          <a class="socail-link w-inline-block" href="#" target="_blank">
+            <img alt="Social Icon" class="socail-icon" loading="lazy" src="assets/69082303d8473b6eaeba8b1a_Faceb_7b008bb52082.svg"/>
+            <div class="socail-icon-bg"></div>
+          </a>
+          <a class="socail-link w-inline-block" href="#" target="_blank">
+            <img alt="Social Icon" class="socail-icon" loading="lazy" src="assets/690823037c6adaec69f91ec3_Linke_c5212e77a14f.svg"/>
+            <div class="socail-icon-bg"></div>
+          </a>
+          <a class="socail-link w-inline-block" href="#" target="_blank">
+            <img alt="Social Icon" class="socail-icon" loading="lazy" src="assets/69082303b61734a11a07c378_Insta_4a81e7c12c0a.svg"/>
+            <div class="socail-icon-bg"></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Testimonial Card -->
+      <h3 class="ds-section-subtitle">Testimonial / Slider Card</h3>
+      <div class="ds-component-card" style="margin-top: 30px; max-width: 600px;">
+        <div class="ds-component-label">Testimonial Card</div>
+        <div class="testimonial-slider-item-content" style="margin-top: 16px;">
+          <div class="testimonial-icon-text-block">
+            <div class="testimonial-icon-wrap">
+              <img alt="" class="testimonial-qutation-icon" loading="lazy" src="assets/6921f83b70cc3376da4d5d96_icon-_2126156bd20e.svg"/>
+            </div>
+            <div class="testimonial-title-wrap">
+              <h3 class="heading">AI-Powered Precision & Accuracy</h3>
+            </div>
+          </div>
+          <div class="testimonial-text-block">
+            <p class="slider-subtext-01">Right Talent, Every Time</p>
+            <p class="slider-subtext-02">Backed by proprietary AI algorithms and deep recruitment expertise, our platform evaluates skills, culture fit, and career trajectory to deliver data-driven hiring.</p>
+          </div>
+          <div class="testimonial-btn-wrap">
+            <a class="button-wrap black-button-wrap w-inline-block" href="#">
+              <div class="button-text-wrap black-button-text-wrap">
+                <p class="cta-text-2 _1 black-btn-text">Talk to NexAgent</p>
+                <p class="cta-text-2 _2 black-btn-text">Talk to NexAgent</p>
+              </div>
+              <div class="btn-arrow-wrap">
+                <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg"/>
+                <img alt="" class="button-arrow _2" loading="lazy" src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg"/>
+              </div>
+              <div class="btn-bg footer-nav-link-8"></div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4: LAYOUT & SPACING -->
+  <!-- ============================================== -->
+  <section class="ds-section" id="layout" style="background: var(--secondary-color--secondary-color-black-05);">
+    <div class="w-layout-blockcontainer container w-container">
+      <h2 class="ds-section-title">Layout & Spacing</h2>
+
+      <!-- Container -->
+      <h3 class="ds-section-subtitle">Container</h3>
+      <div class="ds-layout-example">
+        <div class="ds-layout-label">Container: max-width 1310px, centered</div>
+        <div class="w-layout-blockcontainer container w-container" style="background: white; padding: 40px; border-radius: 12px;">
+          <p class="section-sub-text" style="margin: 0;">This is the standard container used throughout the design. Maximum width of 1310px with auto margins for centering.</p>
+        </div>
+      </div>
+
+      <!-- Hero Layout Pattern -->
+      <h3 class="ds-section-subtitle">Hero Layout Pattern</h3>
+      <div class="ds-layout-example">
+        <div class="ds-layout-label">Two-column hero: Content left (max 632px), Image right</div>
+        <div class="hero-content-details" style="background: white; padding: 40px; border-radius: 12px;">
+          <div class="hero-title-max-width-632" style="background: #deebff; padding: 20px; border-radius: 8px;">
+            <p style="margin: 0; font-size: 14px; color: #787878;">Content Area: max-width 632px</p>
+          </div>
+          <div class="home-hero-right-content-wrap" style="background: #b5d1ff; padding: 20px; border-radius: 8px;">
+            <p style="margin: 0; font-size: 14px; color: #444;">Image/Animation Area</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Title Pattern -->
+      <h3 class="ds-section-subtitle">Section Title Pattern</h3>
+      <div class="ds-layout-example">
+        <div class="ds-layout-label">Centered section header with tag, title, and subtitle</div>
+        <div style="background: white; padding: 60px 40px; border-radius: 12px;">
+          <div class="section-title-content">
+            <div class="section-tag-wrap">
+              <p class="section-tag">Section Tag</p>
+            </div>
+            <div class="section-title-wrap">
+              <div class="overflow-hidden">
+                <h2 class="section-title">Section Title Goes Here</h2>
+              </div>
+            </div>
+            <div class="section-sub-text-wrap">
+              <p class="section-sub-text">Section subtitle or description text that provides additional context about the section content.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid Patterns -->
+      <h3 class="ds-section-subtitle">Feature Grid Pattern</h3>
+      <div class="ds-layout-example">
+        <div class="ds-layout-label">Feature tabs with content grid (left text, right image)</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; background: white; padding: 40px; border-radius: 12px;">
+          <div style="background: #deebff; padding: 30px; border-radius: 12px;">
+            <p style="margin: 0; font-size: 14px; color: #787878;">Content: H3 Title + Description + Button</p>
+          </div>
+          <div style="background: #b5d1ff; padding: 30px; border-radius: 12px;">
+            <p style="margin: 0; font-size: 14px; color: #444;">Feature Image/Animation</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacing Values -->
+      <h3 class="ds-section-subtitle">Spacing Scale</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-top: 30px;">
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 20px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">20px (6xs)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 24px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">24px (5xs)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 30px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">30px (3xs)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 40px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">40px (s)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 60px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">60px (xl)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 80px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">80px (4xl)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 120px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">120px (section-bottom)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+          <div style="height: 140px; background: #0367fb; border-radius: 4px; margin-bottom: 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">140px (section-top)</p>
+        </div>
+      </div>
+
+      <!-- Border Radius Scale -->
+      <h3 class="ds-section-subtitle">Border Radius Scale</h3>
+      <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-top: 30px;">
+        <div style="background: white; padding: 20px; border-radius: 6px; text-align: center; width: 100px;">
+          <div style="width: 60px; height: 60px; background: #0367fb; border-radius: 6px; margin: 0 auto 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">6px (2xs)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; width: 100px;">
+          <div style="width: 60px; height: 60px; background: #0367fb; border-radius: 8px; margin: 0 auto 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">8px (xs)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; width: 100px;">
+          <div style="width: 60px; height: 60px; background: #0367fb; border-radius: 10px; margin: 0 auto 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">10px (l)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; width: 100px;">
+          <div style="width: 60px; height: 60px; background: #0367fb; border-radius: 12px; margin: 0 auto 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">12px (xl)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; width: 100px;">
+          <div style="width: 60px; height: 60px; background: #0367fb; border-radius: 16px; margin: 0 auto 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">16px (2xl)</p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 20px; text-align: center; width: 100px;">
+          <div style="width: 60px; height: 60px; background: #0367fb; border-radius: 20px; margin: 0 auto 10px;"></div>
+          <p style="margin: 0; font-size: 12px; color: #787878;">20px (3xl)</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- SECTION 5: MOTION & INTERACTION -->
+  <!-- ============================================== -->
+  <section class="ds-section" id="motion" style="background: white;">
+    <div class="w-layout-blockcontainer container w-container">
+      <h2 class="ds-section-title">Motion & Interaction</h2>
+
+      <!-- Button Hover States -->
+      <h3 class="ds-section-subtitle">Button Hover Effects</h3>
+      <div class="ds-motion-item">
+        <div class="ds-motion-label">Primary Button: Background particle animation + text slide</div>
+        <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: center;">
+          <a class="button-wrap w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66 w-inline-block" href="#">
+            <div class="button-text-wrap">
+              <p class="cta-text-2 _1 w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66">Hover me</p>
+              <p class="cta-text-2 _2 w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66">Hover me</p>
+            </div>
+            <div class="btn-bg w-variant-8cc7407a-c720-b5a5-58d5-96894e426d66"></div>
+          </a>
+          <span style="font-size: 14px; color: #787878;">Hover to see text transition effect</span>
+        </div>
+      </div>
+
+      <div class="ds-motion-item">
+        <div class="ds-motion-label">Secondary Button: Arrow slide + text transition</div>
+        <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: center;">
+          <a class="button-wrap black-button-wrap w-inline-block" href="#">
+            <div class="button-text-wrap black-button-text-wrap">
+              <p class="cta-text-2 _1 black-btn-text">Hover me</p>
+              <p class="cta-text-2 _2 black-btn-text">Hover me</p>
+            </div>
+            <div class="btn-arrow-wrap">
+              <img alt="" class="button-arrow _1" loading="lazy" src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg"/>
+              <img alt="" class="button-arrow _2" loading="lazy" src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg"/>
+            </div>
+            <div class="btn-bg footer-nav-link-8"></div>
+          </a>
+          <span style="font-size: 14px; color: #787878;">Hover to see arrow animation</span>
+        </div>
+      </div>
+
+      <!-- Social Icon Hover -->
+      <div class="ds-motion-item">
+        <div class="ds-motion-label">Social Icons: Scale + background reveal</div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+          <a class="socail-link w-inline-block" href="#" target="_blank">
+            <img alt="Social Icon" class="socail-icon" loading="lazy" src="assets/69082303d8473b6eaeba8b1a_Faceb_7b008bb52082.svg"/>
+            <div class="socail-icon-bg"></div>
+          </a>
+          <a class="socail-link w-inline-block" href="#" target="_blank">
+            <img alt="Social Icon" class="socail-icon" loading="lazy" src="assets/690823037c6adaec69f91ec3_Linke_c5212e77a14f.svg"/>
+            <div class="socail-icon-bg"></div>
+          </a>
+          <a class="socail-link w-inline-block" href="#" target="_blank">
+            <img alt="Social Icon" class="socail-icon" loading="lazy" src="assets/69082303b61734a11a07c378_Insta_4a81e7c12c0a.svg"/>
+            <div class="socail-icon-bg"></div>
+          </a>
+          <span style="font-size: 14px; color: #787878; margin-left: 20px;">Hover for scale effect</span>
+        </div>
+      </div>
+
+      <!-- Entrance Animations Info -->
+      <h3 class="ds-section-subtitle">Entrance Animations</h3>
+      <div class="ds-motion-item">
+        <div class="ds-motion-label">Title Reveal: translateY from 100% to 0% with overflow-hidden</div>
+        <div style="background: #f3f3f3; padding: 30px; border-radius: 12px; margin-top: 16px;">
+          <div class="overflow-hidden" style="display: inline-block;">
+            <h2 class="section-title" style="margin: 0;">Animated Title</h2>
+          </div>
+          <p style="font-size: 14px; color: #787878; margin-top: 16px;">The overflow-hidden wrapper clips the title during the slide-up animation, creating a reveal effect.</p>
+        </div>
+      </div>
+
+      <div class="ds-motion-item">
+        <div class="ds-motion-label">Fade + Slide: opacity 0-1 with translateY</div>
+        <div style="background: #f3f3f3; padding: 30px; border-radius: 12px; margin-top: 16px;">
+          <p class="section-sub-text" style="margin: 0;">Content elements fade in while sliding up from their initial position.</p>
+          <p style="font-size: 14px; color: #787878; margin-top: 16px;">Typically triggered on scroll or page load.</p>
+        </div>
+      </div>
+
+      <!-- Transition Timing -->
+      <h3 class="ds-section-subtitle">Transition Properties</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 30px;">
+        <div style="background: #f3f3f3; padding: 24px; border-radius: 12px;">
+          <p style="font-weight: 600; color: #161616; margin-bottom: 8px;">Button Transitions</p>
+          <p style="font-size: 14px; color: #787878; margin: 0;">transform 0.3s ease, opacity 0.3s ease</p>
+        </div>
+        <div style="background: #f3f3f3; padding: 24px; border-radius: 12px;">
+          <p style="font-weight: 600; color: #161616; margin-bottom: 8px;">Entrance Animations</p>
+          <p style="font-size: 14px; color: #787878; margin: 0;">0.6s - 1.2s duration with ease-out</p>
+        </div>
+        <div style="background: #f3f3f3; padding: 24px; border-radius: 12px;">
+          <p style="font-weight: 600; color: #161616; margin-bottom: 8px;">Hover Effects</p>
+          <p style="font-size: 14px; color: #787878; margin: 0;">0.2s - 0.4s with ease-in-out</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6: ICONS -->
+  <!-- ============================================== -->
+  <section class="ds-section" id="icons" style="background: var(--secondary-color--secondary-color-black-05);">
+    <div class="w-layout-blockcontainer container w-container">
+      <h2 class="ds-section-title">Icons</h2>
+
+      <h3 class="ds-section-subtitle">UI Icons</h3>
+      <div class="ds-icon-grid">
+        <div class="ds-icon-item">
+          <img src="assets/6909c15e8425986336e74312_White_a7c9b358aec9.svg" alt="Arrow White"/>
+          <div class="ds-icon-name">Arrow (White)</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/6909c15edeb54c49164715c3_Black_0b68b70ec439.svg" alt="Arrow Black"/>
+          <div class="ds-icon-name">Arrow (Black)</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/691cd1f3852a5c9d3ba45415_chevr_3c0047c7aba3.svg" alt="Chevron Blue"/>
+          <div class="ds-icon-name">Chevron (Blue)</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/6909f20d87172346059eb3b8_corne_307db4a124bb.svg" alt="Corner"/>
+          <div class="ds-icon-name">Corner Decoration</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/690c22fb37a068e6ae562d35_tick-_c8d900df65a6.svg" alt="Check"/>
+          <div class="ds-icon-name">Checkmark</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/690dac035a1dbd17db76ba46_add-0_0f4c2e6e9d18.svg" alt="Plus"/>
+          <div class="ds-icon-name">Plus (FAQ)</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/690dac033017bf8acc97b1fe_minus_e41c3b8c555f.svg" alt="Minus"/>
+          <div class="ds-icon-name">Minus (FAQ)</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/6921f83b70cc3376da4d5d96_icon-_2126156bd20e.svg" alt="Quote"/>
+          <div class="ds-icon-name">Quotation</div>
+        </div>
+      </div>
+
+      <h3 class="ds-section-subtitle">Feature Icons</h3>
+      <div class="ds-icon-grid">
+        <div class="ds-icon-item">
+          <img src="assets/690ac653f64845574df62c1e_Featu_674c338b6c44.svg" alt="Feature Icon"/>
+          <div class="ds-icon-name">Feature Tab Icon</div>
+        </div>
+      </div>
+
+      <h3 class="ds-section-subtitle">Social Icons</h3>
+      <div class="ds-icon-grid">
+        <div class="ds-icon-item">
+          <img src="assets/69082303d8473b6eaeba8b1a_Faceb_7b008bb52082.svg" alt="Facebook"/>
+          <div class="ds-icon-name">Facebook</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/690823037c6adaec69f91ec3_Linke_c5212e77a14f.svg" alt="LinkedIn"/>
+          <div class="ds-icon-name">LinkedIn</div>
+        </div>
+        <div class="ds-icon-item">
+          <img src="assets/69082303b61734a11a07c378_Insta_4a81e7c12c0a.svg" alt="Instagram"/>
+          <div class="ds-icon-name">Instagram</div>
+        </div>
+      </div>
+
+      <h3 class="ds-section-subtitle">Brand Logos</h3>
+      <div class="ds-icon-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
+        <div class="ds-icon-item" style="padding: 30px;">
+          <img src="assets/690795a7d8a87712ab44e663_Logo__0164ced4a840.svg" alt="Logo Icon" style="width: auto; height: 32px;"/>
+          <div class="ds-icon-name">Logo Icon</div>
+        </div>
+        <div class="ds-icon-item" style="padding: 30px;">
+          <img src="assets/690795a9225ee4460c01587f_NexAg_70b8dd0d4144.svg" alt="Logo Text" style="width: auto; height: 24px;"/>
+          <div class="ds-icon-name">Logo Text</div>
+        </div>
+        <div class="ds-icon-item" style="padding: 30px;">
+          <img src="assets/690795a856aaa885684ae105_Foote_23aecbfce1f3.svg" alt="Footer Logo" style="width: auto; height: 40px;"/>
+          <div class="ds-icon-name">Footer Logo</div>
+        </div>
+      </div>
+
+      <h3 class="ds-section-subtitle">Partner/Trust Logos</h3>
+      <div class="trusted-all-image-wrap" style="margin-top: 30px; background: white; padding: 40px; border-radius: 16px;">
+        <div class="trusted-image-list" style="animation: none; display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;">
+          <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0fbdac598627b502f0_Partn_cdbfc429267c.svg"/></div>
+          <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0fa5d6159707575f9a_Partn_81539d7ab316.svg"/></div>
+          <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0f8ce46d30ab69f061_Partn_d64ac771ef08.svg"/></div>
+          <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf0f5b3328fe61b6949a_Partn_6f9bb7855f4a.svg"/></div>
+          <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf12370c8d09f6fa491b_Partn_bc4853deab23.svg"/></div>
+          <div class="trusted-image-wrap"><img alt="" class="trusted-image" loading="lazy" src="assets/6909bf12d34631d353e0a94d_Partn_1fec95176875.svg"/></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background: #041c40; padding: 40px 0; text-align: center;">
+    <div class="w-layout-blockcontainer container w-container">
+      <p style="color: rgba(255,255,255,0.5); font-size: 14px; margin: 0;">NexAgent Design System - Extracted from the original template</p>
+    </div>
+  </footer>
+
+  <!-- Webflow JS -->
+  <script src="assets/nexagent_3d0c4378b4b7.js" type="text/javascript"></script>
+</body>
+</html>

@@ -35,16 +35,16 @@ export function Breadcrumbs() {
 
   return (
     <nav aria-label="Breadcrumb" className="mb-4">
-      <ol className="flex items-center gap-1 text-sm text-muted-foreground">
+      <ol className="flex items-center gap-1 text-sm text-[#787878]">
         {crumbs.map((crumb, index) => (
           <li key={crumb.href} className="flex items-center gap-1">
             {index > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
             {crumb.isLast ? (
-              <span className="font-medium text-foreground" aria-current="page">
+              <span className="font-medium text-[#161616]" aria-current="page">
                 {crumb.label}
               </span>
             ) : (
-              <Link href={crumb.href} className="hover:text-foreground transition-colors">
+              <Link href={crumb.href} className="hover:text-[#161616] transition-colors">
                 {crumb.label}
               </Link>
             )}

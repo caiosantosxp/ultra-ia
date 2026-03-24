@@ -23,6 +23,11 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
+/**
+ * NexAgent Design System — Dialog Overlay
+ *
+ * Dark overlay with blur effect
+ */
 function DialogOverlay({
   className,
   ...props
@@ -31,7 +36,7 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 bg-black/50 duration-200 supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -39,6 +44,15 @@ function DialogOverlay({
   )
 }
 
+/**
+ * NexAgent Design System — Dialog Content
+ *
+ * Styling:
+ * - Border Radius: 20px
+ * - Padding: 40px
+ * - Shadow: Modal shadow
+ * - Animation: fadeIn + scaleUp
+ */
 function DialogContent({
   className,
   children,
@@ -53,7 +67,16 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-background p-4 text-sm ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          // Position
+          "fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
+          // Size
+          "grid w-full max-w-[calc(100%-2rem)] sm:max-w-[440px]",
+          // Styling
+          "gap-4 rounded-[20px] bg-white p-8 text-sm shadow-[0_20px_60px_rgba(0,0,0,0.2)] outline-none",
+          // Dark mode
+          "dark:bg-[#0a2a5c] dark:border dark:border-white/10",
+          // Animation
+          "duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
@@ -65,13 +88,12 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2"
+                className="absolute top-4 right-4"
                 size="icon-sm"
               />
             }
           >
-            <XIcon
-            />
+            <XIcon />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
@@ -102,17 +124,17 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 sm:flex-row sm:justify-end",
+        "flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end",
         className
       )}
       {...props}
     >
-      {children}
       {showCloseButton && (
         <DialogPrimitive.Close render={<Button variant="outline" />}>
           Close
         </DialogPrimitive.Close>
       )}
+      {children}
     </div>
   )
 }
@@ -121,7 +143,10 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-base leading-none font-medium", className)}
+      className={cn(
+        "text-xl leading-tight font-semibold text-[#161616] dark:text-white",
+        className
+      )}
       {...props}
     />
   )
@@ -135,7 +160,7 @@ function DialogDescription({
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        "text-sm text-[#787878] dark:text-white/60 leading-relaxed *:[a]:underline *:[a]:underline-offset-3 *:[a]:text-[#0367fb] *:[a]:hover:text-[#0061ff]",
         className
       )}
       {...props}

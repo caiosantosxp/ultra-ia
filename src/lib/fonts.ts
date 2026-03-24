@@ -1,13 +1,15 @@
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { GeistMono } from 'geist/font/mono';
 
-export const inter = Inter({
+export const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-sans',
+  weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 export const geistMono = GeistMono;
 
-// Legacy aliases para não quebrar imports existentes
-export const geistSans = inter; // aponta para Inter
-export const poppins = { variable: inter.variable };
+// Legacy aliases
+export const inter = plusJakartaSans;
+export const geistSans = plusJakartaSans;
+export const poppins = { variable: plusJakartaSans.variable };

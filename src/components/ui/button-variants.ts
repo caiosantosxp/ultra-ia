@@ -1,45 +1,93 @@
 import { cva } from "class-variance-authority"
 
+/**
+ * NexAgent Design System — Button Variants
+ *
+ * Primary: Blue (#0367fb) - main CTAs
+ * Secondary: Black outline - secondary actions
+ * Ghost: Transparent - tertiary actions
+ */
 export const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all duration-200 ease-out outline-none select-none focus-visible:ring-3 focus-visible:ring-[#0367fb]/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
-        outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+        /* NexAgent Primary - Blue */
+        default:
+          "bg-[#0367fb] text-white rounded-[10px] hover:bg-[#0061ff] active:scale-[0.98] shadow-sm hover:shadow-md",
+
+        /* NexAgent Primary with Arrow */
+        primary:
+          "bg-[#0367fb] text-white rounded-[10px] hover:bg-[#0061ff] active:scale-[0.98] shadow-sm hover:shadow-md gap-2",
+
+        /* NexAgent Secondary - Black Outline */
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-transparent border-[#161616] text-[#161616] rounded-[10px] hover:bg-[#161616] hover:text-white active:scale-[0.98] dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-[#161616]",
+
+        /* NexAgent Outline - Light border */
+        outline:
+          "border-[#d9d9d9] bg-white text-[#161616] rounded-[10px] hover:bg-[#f3f3f3] hover:border-[#787878] dark:bg-transparent dark:border-white/20 dark:text-white dark:hover:bg-white/10",
+
+        /* Ghost - No background */
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "hover:bg-[#f3f3f3] text-[#161616] rounded-[10px] dark:hover:bg-white/10 dark:text-white",
+
+        /* Link style */
+        link:
+          "text-[#0367fb] underline-offset-4 hover:underline p-0 h-auto",
+
+        /* Destructive */
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
-        /* Design System variants */
-        white:
-          "bg-white text-gray-900 rounded-2xl shadow-lg hover:bg-gray-100 hover:shadow-xl border-transparent",
+          "bg-[#EF4444]/10 text-[#EF4444] rounded-[10px] hover:bg-[#EF4444]/20 focus-visible:ring-[#EF4444]/30",
+
+        /* NexAgent Glass - Dark translucent */
         glass:
-          "glass-dark text-white rounded-2xl hover:bg-black/50 border-transparent",
-        "glass-subtle":
-          "glass-subtle text-white rounded-full hover:bg-white/30 border-transparent",
+          "glass-dark text-white rounded-[10px] hover:bg-[#041c40]/80 border-white/10",
+
+        /* NexAgent Glass Light */
+        "glass-light":
+          "glass-light text-[#161616] rounded-[10px] hover:bg-white/70",
+
+        /* NexAgent Nav Link */
+        nav:
+          "bg-transparent text-[#787878] rounded-[10px] hover:text-[#161616] hover:bg-[#f3f3f3] dark:text-white/70 dark:hover:text-white dark:hover:bg-white/10",
+
+        /* Featured/Gradient - for special CTAs */
+        featured:
+          "bg-gradient-to-r from-[#0367fb] via-[#33e9bf] to-[#c6eb00] text-white rounded-[10px] hover:opacity-90 active:scale-[0.98] shadow-md",
+
+        /* Icon only - subtle */
         "icon-ghost":
-          "bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-xl border-transparent",
+          "bg-transparent hover:bg-[#f3f3f3] text-[#787878] hover:text-[#161616] rounded-[10px] dark:hover:bg-white/10 dark:text-white/60 dark:hover:text-white",
       },
       size: {
+        /* NexAgent sizes */
         default:
-          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
-        icon: "size-8",
+          "h-10 gap-2 px-4 text-sm rounded-[10px]",
+        xs:
+          "h-7 gap-1 px-2.5 text-xs rounded-[8px] [&_svg:not([class*='size-'])]:size-3",
+        sm:
+          "h-8 gap-1.5 px-3 text-sm rounded-[8px] [&_svg:not([class*='size-'])]:size-3.5",
+        lg:
+          "h-11 gap-2 px-5 text-base rounded-[10px]",
+        xl:
+          "h-12 gap-2.5 px-6 text-base rounded-[12px] font-semibold",
+
+        /* Icon sizes */
+        icon:
+          "size-10 rounded-[10px]",
         "icon-xs":
-          "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
+          "size-7 rounded-[8px] [&_svg:not([class*='size-'])]:size-3",
         "icon-sm":
-          "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        "icon-lg": "size-9",
-        /* Design System sizes */
-        pill: "h-11 gap-2 px-6 rounded-2xl text-base has-data-[icon=inline-end]:pr-5 has-data-[icon=inline-start]:pl-5",
-        submit: "size-14 rounded-full [&_svg:not([class*='size-'])]:size-5",
+          "size-8 rounded-[8px] [&_svg:not([class*='size-'])]:size-3.5",
+        "icon-lg":
+          "size-11 rounded-[10px]",
+
+        /* Special sizes */
+        pill:
+          "h-11 gap-2 px-6 rounded-full text-base",
+        submit:
+          "size-14 rounded-full [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {

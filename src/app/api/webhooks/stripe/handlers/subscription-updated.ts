@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { SubscriptionStatus } from '@prisma/client';
+import { SubscriptionStatus } from '@/generated/prisma';
 
 import { prisma } from '@/lib/prisma';
 

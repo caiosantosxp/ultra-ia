@@ -9,8 +9,13 @@ interface QuickPromptProps {
   onClick?: (prompt: string) => void;
 }
 
+/**
+ * NexAgent Design System — Quick Prompt
+ *
+ * Glass-effect prompt buttons for specialist cards
+ */
 const baseClassName =
-  'block rounded-md border bg-surface px-3 py-2 text-sm text-muted-foreground transition-colors duration-150 hover:border-primary hover:text-primary';
+  'block rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white/70 transition-all duration-200 hover:border-[#0367fb]/40 hover:bg-[#0367fb]/10 hover:text-white';
 
 export function QuickPrompt({ prompt, href, ariaLabel, onClick }: QuickPromptProps) {
   if (href) {

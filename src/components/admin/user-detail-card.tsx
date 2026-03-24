@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, ExternalLink, Clock, XCircle } from 'lucide-react';
-import type { SubscriptionStatus } from '@prisma/client';
+import type { SubscriptionStatus } from '@/generated/prisma';
 import { toast } from 'sonner';
 import {
   AlertDialog,

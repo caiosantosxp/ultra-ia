@@ -12,6 +12,9 @@ import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validation
 import { requestPasswordReset } from '@/actions/auth-actions';
 import { useT } from '@/lib/i18n/use-t';
 
+/**
+ * NexAgent Design System — Forgot Password Form
+ */
 export function ForgotPasswordForm() {
   const t = useT();
   const [isPending, startTransition] = useTransition();
@@ -35,14 +38,17 @@ export function ForgotPasswordForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-lg border border-border bg-card p-6 text-center">
-        <CheckCircle className="mx-auto mb-3 size-10 text-blue-500" aria-hidden="true" />
-        <p className="text-sm text-foreground">
+      <div className="w-full rounded-[20px] bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)] text-center sm:p-12">
+        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#33e9bf]/15">
+          <CheckCircle className="size-8 text-[#1a9e7a]" aria-hidden="true" />
+        </div>
+        <h2 className="mb-2 text-xl font-semibold text-[#161616]">Email envoyé</h2>
+        <p className="text-sm text-[#787878]">
           {t.forgotPasswordForm.successMessage}
         </p>
         <Link
           href="/login"
-          className="mt-4 inline-block text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="mt-6 inline-block text-sm font-medium text-[#0367fb] transition-colors hover:text-[#0061ff]"
         >
           {t.forgotPasswordForm.successBackToLogin}
         </Link>
@@ -51,48 +57,57 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-      <div className="space-y-1.5">
-        <label
-          htmlFor="email"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Email *
-        </label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder={t.forgotPasswordForm.emailPlaceholder}
-          aria-required="true"
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? 'email-error' : undefined}
-          {...register('email')}
-        />
-        {errors.email && (
-          <p id="email-error" className="text-xs text-destructive" role="alert">
-            {errors.email.message}
-          </p>
-        )}
+    <div className="w-full rounded-[20px] bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-12">
+      {/* Header */}
+      <div className="mb-8 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight text-[#161616]">
+          Mot de passe oublié
+        </h1>
+        <p className="mt-2 text-sm text-[#787878]">
+          Entrez votre email pour recevoir un lien de réinitialisation
+        </p>
       </div>
 
-      <Button
-        type="submit"
-        variant="default"
-        className="min-h-11 w-full"
-        disabled={isPending}
-      >
-        {isPending ? t.forgotPasswordForm.sending : t.forgotPasswordForm.send}
-      </Button>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="email" className="text-sm font-medium text-[#161616]">
+            Email <span aria-hidden="true" className="text-[#EF4444]">*</span>
+          </label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder={t.forgotPasswordForm.emailPlaceholder}
+            aria-required="true"
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? 'email-error' : undefined}
+            {...register('email')}
+          />
+          {errors.email && (
+            <p id="email-error" className="text-xs text-[#EF4444]" role="alert">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
 
-      <div className="text-center">
-        <Link
-          href="/login"
-          className="text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-2 w-full"
+          disabled={isPending}
         >
-          {t.forgotPasswordForm.backToLogin}
-        </Link>
-      </div>
-    </form>
+          {isPending ? t.forgotPasswordForm.sending : t.forgotPasswordForm.send}
+        </Button>
+
+        <div className="text-center">
+          <Link
+            href="/login"
+            className="text-sm text-[#787878] transition-colors hover:text-[#0367fb]"
+          >
+            {t.forgotPasswordForm.backToLogin}
+          </Link>
+        </div>
+      </form>
+    </div>
   );
 }

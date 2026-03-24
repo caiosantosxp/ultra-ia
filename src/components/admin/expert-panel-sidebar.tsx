@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -11,17 +11,14 @@ import {
   Globe,
   LayoutDashboard,
   LogOut,
-  Moon,
   Settings,
   Settings2,
-  Sun,
   TrendingUp,
   User,
   Users,
   Users2,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
-import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
 import { fr, en } from '@/lib/i18n';
@@ -41,7 +38,6 @@ interface ExpertPanelSidebarProps {
   specialistId: string;
   specialistName: string;
   accentColor: string;
-  /** Override base path. Defaults to /admin/agents/${specialistId} */
   basePath?: string;
   initialLocale?: string;
   user?: {
@@ -65,14 +61,11 @@ export function ExpertPanelSidebar({
   const storeLocale = useLanguageStore((s) => s.locale);
   const setLocale = useLanguageStore((s) => s.setLocale);
 
-  // After Zustand hydrates from localStorage, sync to local state
   useEffect(() => {
     setLocaleState(storeLocale);
   }, [storeLocale]);
 
   const t = locale === 'en' ? en : fr;
-  const { theme, setTheme } = useTheme();
-  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const base = basePath ?? `/admin/agents/${specialistId}`;
 
   function isActive(segment: string) {
@@ -101,8 +94,8 @@ export function ExpertPanelSidebar({
           'flex items-center gap-2.5 rounded-lg py-2 text-sm transition-colors',
           indent ? 'pl-7 pr-3' : 'px-3',
           active
-            ? 'bg-muted font-medium text-foreground'
-            : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+            ? 'bg-[#0367fb]/10 font-medium text-[#0367fb]'
+            : 'text-[#787878] hover:bg-[#f3f3f3] hover:text-[#161616]'
         )}
       >
         <Icon className="h-4 w-4 shrink-0" />
@@ -113,7 +106,7 @@ export function ExpertPanelSidebar({
 
   function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
-      <p className="mt-4 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+      <p className="mt-4 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-[#787878]/70">
         {children}
       </p>
     );
@@ -123,16 +116,16 @@ export function ExpertPanelSidebar({
   const rendasActive = isActive('monetizacao/rendas');
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r bg-background">
+    <aside className="flex w-56 shrink-0 flex-col border-r border-[#e5e7eb] bg-white">
       {/* Expert identity */}
-      <div className="flex items-center gap-3 border-b px-4 py-4">
+      <div className="flex items-center gap-3 border-b border-[#e5e7eb] px-4 py-4">
         <div
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
           style={{ backgroundColor: accentColor }}
         >
           {specialistName.charAt(0).toUpperCase()}
         </div>
-        <span className="truncate text-sm font-medium">{specialistName}</span>
+        <span className="truncate text-sm font-medium text-[#161616]">{specialistName}</span>
       </div>
 
       {/* Navigation */}
@@ -172,7 +165,7 @@ export function ExpertPanelSidebar({
             pathname.endsWith('/identidade')
           }
         />
-<NavItem
+        <NavItem
           href={`${base}/identidade/instrucoes`}
           icon={Settings}
           label={t.admin.expertSidebar.instructions}
@@ -187,8 +180,8 @@ export function ExpertPanelSidebar({
             className={cn(
               'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm',
               leadsActive
-                ? 'font-medium text-foreground'
-                : 'text-muted-foreground'
+                ? 'font-medium text-[#161616]'
+                : 'text-[#787878]'
             )}
           >
             <Users className="h-4 w-4 shrink-0" />
@@ -200,7 +193,6 @@ export function ExpertPanelSidebar({
               )}
             />
           </div>
-          {/* Sub-items always visible when in leads section, or always show */}
           <div className="mt-0.5 space-y-0.5">
             <NavItem
               href={`${base}/monetizacao/leads`}
@@ -230,52 +222,52 @@ export function ExpertPanelSidebar({
         />
       </nav>
 
-      {/* Back link — only shown in admin view */}
+      {/* Back link */}
       {!basePath && (
-        <div className="border-t px-2 py-3">
+        <div className="border-t border-[#e5e7eb] px-2 py-3">
           <Link
             href="/admin/agents"
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-[#787878] hover:text-[#161616] transition-colors"
           >
-            {t.admin.expertSidebar.backToAgents}
+            ← {t.admin.expertSidebar.backToAgents}
           </Link>
         </div>
       )}
 
       {/* User account section */}
       {user && (
-        <div className="border-t px-2 py-3">
+        <div className="border-t border-[#e5e7eb] px-2 py-3">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted/60 focus:outline-none bg-transparent border-0">
-                <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
-                  {user.image ? (
-                    <Image
-                      src={user.image}
-                      alt={user.name ?? ''}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted text-xs font-semibold text-muted-foreground">
-                      {user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
-                    </div>
-                  )}
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col text-left">
-                  <span className="truncate text-xs font-medium text-foreground">
-                    {user.name ?? t.admin.expertSidebar.myAccount}
+            <DropdownMenuTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-[#f3f3f3] focus:outline-none bg-transparent border-0">
+              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt={user.name ?? ''}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[#f3f3f3] text-xs font-semibold text-[#787878]">
+                    {user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
+                  </div>
+                )}
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col text-left">
+                <span className="truncate text-xs font-medium text-[#161616]">
+                  {user.name ?? t.admin.expertSidebar.myAccount}
+                </span>
+                {user.email && (
+                  <span className="truncate text-[10px] text-[#787878]">
+                    {user.email}
                   </span>
-                  {user.email && (
-                    <span className="truncate text-[10px] text-muted-foreground">
-                      {user.email}
-                    </span>
-                  )}
-                </div>
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-40" />
+                )}
+              </div>
+              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#787878]" />
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="start" className="w-52">
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                <DropdownMenuLabel className="text-xs text-[#787878] font-normal">
                   {user.email}
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
@@ -296,18 +288,10 @@ export function ExpertPanelSidebar({
               >
                 <Globe className="mr-2 h-4 w-4" />
                 <span className="flex-1">{t.admin.expertSidebar.language}</span>
-                <span className="text-xs text-muted-foreground font-medium">
+                <span className="text-xs text-[#787878] font-medium">
                   {locale === 'fr' ? 'EN' : 'FR'}
                 </span>
               </DropdownMenuItem>
-              {mounted && (
-                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                  {theme === 'dark'
-                    ? <Sun className="mr-2 h-4 w-4" />
-                    : <Moon className="mr-2 h-4 w-4" />}
-                  {theme === 'dark' ? t.admin.expertSidebar.lightMode : t.admin.expertSidebar.darkMode}
-                </DropdownMenuItem>
-              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"

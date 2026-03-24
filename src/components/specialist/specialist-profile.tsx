@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowLeft, MessageCircle, Star, Send } from 'lucide-react';
-import type { Specialist } from '@prisma/client';
+import type { Specialist } from '@/generated/prisma';
 
 import { Badge } from '@/components/ui/badge';
 import { QuickPrompt } from '@/components/specialist/quick-prompt';
