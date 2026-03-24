@@ -45,18 +45,10 @@ export function ChatMessage({
     >
       {/* Avatar */}
       {!isUser && (
-        <Avatar className="h-9 w-9 shrink-0 self-end">
+        <Avatar className="h-8 w-8 shrink-0 self-end ring-2 ring-white shadow-sm">
           <AvatarImage src={specialistAvatarUrl} alt={specialistName} />
-          <AvatarFallback className="text-xs">
+          <AvatarFallback className="text-xs bg-[#0367fb] text-white font-semibold">
             {specialistName.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
-      {isUser && userAvatarUrl && (
-        <Avatar className="h-9 w-9 shrink-0 self-end">
-          <AvatarImage src={userAvatarUrl} alt={userName ?? 'Vous'} />
-          <AvatarFallback className="text-xs">
-            {(userName ?? 'V').slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       )}
@@ -64,23 +56,23 @@ export function ChatMessage({
       {/* Bubble */}
       <div
         className={cn(
-          'flex max-w-[480px] flex-col gap-1',
+          'flex max-w-[520px] flex-col gap-1.5',
           isUser ? 'items-end' : 'items-start'
         )}
       >
         <div
           className={cn(
-            'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+            'rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm',
             isUser
-              ? 'rounded-br-sm bg-primary text-primary-foreground'
-              : 'rounded-bl-sm bg-muted text-foreground'
+              ? 'rounded-br-md bg-[#0367fb] text-white'
+              : 'rounded-bl-md bg-white text-[#161616] border border-[#e5e7eb]'
           )}
         >
           <p className="whitespace-pre-wrap break-words">{message.content}</p>
         </div>
         <time
           dateTime={new Date(message.createdAt).toISOString()}
-          className="px-1 text-xs text-muted-foreground"
+          className="px-2 text-xs text-[#9ca3af]"
         >
           {timeAgo}
         </time>

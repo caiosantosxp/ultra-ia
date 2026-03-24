@@ -11,6 +11,17 @@ export type SubscriptionAccess = {
 };
 
 export async function checkSubscriptionAccess(userId: string): Promise<SubscriptionAccess> {
+  // TODO: Temporarily disabled - free access for all users
+  // Re-enable subscription checks when ready to monetize
+  return {
+    hasAccess: true,
+    status: 'ACTIVE',
+    isPastDue: false,
+    isCancelScheduled: false,
+    subscription: null,
+  };
+
+  /* Original subscription check - uncomment to re-enable
   const subscription = await prisma.subscription.findFirst({
     where: { userId },
     orderBy: { createdAt: 'desc' },
@@ -25,4 +36,5 @@ export async function checkSubscriptionAccess(userId: string): Promise<Subscript
   const isCancelScheduled = subscription.cancelAtPeriodEnd;
 
   return { hasAccess, status: subscription.status, isPastDue, isCancelScheduled, subscription };
+  */
 }

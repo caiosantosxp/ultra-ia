@@ -143,7 +143,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
   const isEmpty = messages.length === 0 && !isStreaming;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden bg-[#f8f9fa]">
       {/* Messages area */}
       <div
         ref={scrollRef}
@@ -154,19 +154,22 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
       >
         {isEmpty && specialist ? (
           /* Welcome state */
-          <div className="flex h-full flex-col items-center justify-center gap-6 px-4 py-8">
-            <div className="flex flex-col items-center gap-3 text-center">
-              <Avatar className="h-16 w-16">
+          <div className="flex h-full flex-col items-center justify-center gap-8 px-4 py-12">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg">
                 <AvatarImage src={specialist.avatarUrl} alt={specialist.name} />
-                <AvatarFallback className="text-lg">
+                <AvatarFallback
+                  className="text-xl font-bold text-white"
+                  style={{ backgroundColor: specialist.accentColor || '#0367fb' }}
+                >
                   {specialist.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-base font-semibold">{specialist.name}</h2>
-                <p className="text-sm text-muted-foreground">{specialist.domain}</p>
+                <h2 className="text-xl font-semibold text-[#161616]">{specialist.name}</h2>
+                <p className="text-sm text-[#787878] mt-1">{specialist.domain}</p>
               </div>
-              <p className="max-w-sm text-sm text-muted-foreground whitespace-pre-wrap">
+              <p className="max-w-md text-[15px] text-[#6b7280] whitespace-pre-wrap leading-relaxed">
                 {specialist.firstMessage
                   ? specialist.firstMessage
                   : `${t.chatArea.greeting} ${specialist.domain}${t.chatArea.greetingSuffix}`}
@@ -176,7 +179,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
             {/* Quick prompts */}
             {specialist.quickPrompts.length > 0 && (
               <div
-                className="flex w-full max-w-lg gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:overflow-x-visible"
+                className="flex w-full max-w-2xl gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:overflow-x-visible"
                 role="list"
                 aria-label={t.chatArea.suggestedQuestions}
               >
@@ -189,7 +192,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
         ) : (
           /* Messages list */
           <ul
-            className="mx-auto w-full max-w-3xl space-y-4 px-4 py-4"
+            className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6"
             role="list"
             aria-label={t.chatArea.messageHistory}
           >
@@ -228,11 +231,11 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
         )}
       </div>
 
-      {/* Disclaimer (AC3) + Input */}
-      <div className="shrink-0 border-t bg-background">
+      {/* Input area */}
+      <div className="shrink-0 bg-[#f8f9fa] pb-2">
         <div className="mx-auto w-full max-w-3xl px-4">
           {isLimitReached && (
-            <p className="py-2 text-center text-xs text-destructive" role="alert">
+            <p className="py-2 text-center text-xs text-red-500 font-medium" role="alert">
               {t.chatArea.limitReached}
             </p>
           )}

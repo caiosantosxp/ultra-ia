@@ -12,10 +12,10 @@ interface QuickPromptProps {
 /**
  * NexAgent Design System — Quick Prompt
  *
- * Glass-effect prompt buttons for specialist cards
+ * Light theme prompt buttons for chat area
  */
 const baseClassName =
-  'block rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white/70 transition-all duration-200 hover:border-[#0367fb]/40 hover:bg-[#0367fb]/10 hover:text-white';
+  'block rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 text-sm text-[#787878] shadow-sm transition-all duration-200 hover:border-[#0367fb]/40 hover:bg-[#0367fb]/5 hover:text-[#161616] hover:shadow-md';
 
 export function QuickPrompt({ prompt, href, ariaLabel, onClick }: QuickPromptProps) {
   if (href) {

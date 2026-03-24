@@ -30,8 +30,9 @@ export function ConversationList({
 
   if (conversations.length === 0) {
     return (
-      <div className="px-3 py-4 text-center text-xs text-muted-foreground">
-        {t.sidebar.noConversations}
+      <div className="px-3 py-8 text-center">
+        <MessageSquare className="mx-auto h-8 w-8 text-[#d9d9d9] mb-2" />
+        <p className="text-xs text-[#787878]">{t.sidebar.noConversations}</p>
       </div>
     );
   }
@@ -65,26 +66,34 @@ export function ConversationList({
               <Link
                 href={`/chat/${conversation.id}`}
                 className={cn(
-                  'flex items-start gap-2 rounded-md px-2 py-2 pr-8 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
-                  isActive && 'bg-accent text-accent-foreground font-medium',
+                  'flex items-start gap-2.5 rounded-lg px-3 py-2.5 pr-9 text-sm transition-all',
+                  isActive
+                    ? 'bg-[#0367fb]/10 text-[#0367fb] font-medium'
+                    : 'text-[#161616] hover:bg-[#f3f3f3]',
                   isDeleting && 'opacity-50 pointer-events-none',
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <MessageSquare
-                  className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                  className={cn(
+                    'mt-0.5 h-4 w-4 shrink-0',
+                    isActive ? 'text-[#0367fb]' : 'text-[#787878]'
+                  )}
                   aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 text-sm leading-snug">{title}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo}</p>
+                  <p className={cn(
+                    'mt-1 text-xs',
+                    isActive ? 'text-[#0367fb]/70' : 'text-[#787878]'
+                  )}>{timeAgo}</p>
                 </div>
               </Link>
               {onDelete && (
                 <button
                   onClick={(e) => handleDelete(e, conversation.id)}
                   disabled={isDeleting}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-50"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[#787878] opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-50"
                   aria-label={`${t.sidebar.deleteAria} ${title}`}
                   title={t.sidebar.delete}
                 >
