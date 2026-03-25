@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { ConversationSidebar } from '@/components/chat/conversation-sidebar';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +43,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       <SidebarInset className="overflow-hidden">
         {/* Dashboard Header */}
-        <header className="flex h-14 shrink-0 items-center border-b bg-background px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
+          <SidebarTrigger className="shrink-0" />
           <Link href="/" className="font-heading text-sm font-semibold text-primary hover:opacity-80 transition-opacity">ultra-ia</Link>
         </header>
 

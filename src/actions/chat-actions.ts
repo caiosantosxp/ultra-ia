@@ -20,6 +20,14 @@ export async function createConversation(input: unknown) {
     return { success: false as const, error: { code: 'NOT_FOUND', message: 'Spécialiste non trouvé' } };
   }
 
+  const subscription = await prisma.subscription.findFirst({
+    where: { userId: session.user.id, specialistId: specialist.id, status: 'ACTIVE' },
+    select: { id: true },
+  });
+  if (!subscription) {
+    return { success: false as const, error: { code: 'FORBIDDEN', message: 'Assinatura ativa necessária para este especialista' } };
+  }
+
   // MEDIUM-4 fix: set default title consistently with API route (AC11)
   const conversation = await prisma.conversation.create({
     data: {

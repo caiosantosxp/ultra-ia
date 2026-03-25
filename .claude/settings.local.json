@@ -196,7 +196,10 @@
       "Bash(xargs grep -l \"Lead\\\\|lead\")",
       "Bash(npm run seed)",
       "Bash(xargs wc -l)",
-      "Bash(cat e:/projetos-caio/ultra-ia/src/app/\\\\\\(admin\\\\\\)/admin/settings/page.tsx)"
+      "Bash(cat e:/projetos-caio/ultra-ia/src/app/\\\\\\(admin\\\\\\)/admin/settings/page.tsx)",
+      "Bash(xargs grep -l \"revenue\\\\|rendas\\\\|Revenue\")",
+      "Bash(xargs grep -l \"revenue\\\\|Revenue\\\\|rendas\")",
+      "Bash(ls -la /e/projetos-caio/ultra-ia/src/app/\\\\\\(expert\\\\\\)/expert/)"
     ]
   }
 }

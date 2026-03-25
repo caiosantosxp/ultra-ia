@@ -39,7 +39,7 @@ export function ChatMessage({
       role="listitem"
       aria-label={`${senderLabel}, ${timeAgo}`}
       className={cn(
-        'flex items-end gap-2',
+        'flex items-end gap-2.5',
         isUser ? 'flex-row-reverse' : 'flex-row'
       )}
     >

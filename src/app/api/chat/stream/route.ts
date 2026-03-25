@@ -50,9 +50,21 @@ export async function POST(req: Request) {
   }
   const { conversationId, content } = parsed.data;
 
-  // AC9 — Subscription check (ACTIVE required)
+  // Conversation ownership check (moved before subscription to obtain specialistId)
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    include: { specialist: { select: { slug: true } } },
+  });
+  if (!conversation || conversation.userId !== userId) {
+    return Response.json(
+      { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } },
+      { status: 403 }
+    );
+  }
+
+  // AC9 — Subscription check specific to the conversation's specialist
   const subscription = await prisma.subscription.findFirst({
-    where: { userId, status: 'ACTIVE' },
+    where: { userId, specialistId: conversation.specialistId, status: 'ACTIVE' },
     orderBy: { createdAt: 'desc' },
   });
   if (!subscription) {
@@ -74,18 +86,6 @@ export async function POST(req: Request) {
           'X-RateLimit-Remaining': '0',
         },
       }
-    );
-  }
-
-  // AC11 — Conversation ownership check
-  const conversation = await prisma.conversation.findUnique({
-    where: { id: conversationId },
-    include: { specialist: { select: { slug: true } } },
-  });
-  if (!conversation || conversation.userId !== userId) {
-    return Response.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } },
-      { status: 403 }
     );
   }
 

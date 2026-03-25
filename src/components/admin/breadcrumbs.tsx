@@ -16,22 +16,36 @@ export function Breadcrumbs() {
     users: t.admin.nav.users,
     analytics: t.admin.nav.analytics,
     settings: t.admin.nav.settings,
+    identidade: t.admin.expertSidebar.identitySection,
+    treinamento: t.admin.expertSidebar.training,
+    instrucoes: t.admin.expertSidebar.instructions,
+    personalizacao: t.admin.expertSidebar.customization,
+    monetizacao: t.admin.expertSidebar.monetizationSection,
+    leads: t.admin.expertSidebar.leads,
+    configuracao: t.admin.expertSidebar.leadsConfig,
+    rendas: t.admin.expertSidebar.revenue,
+    subscribers: t.admin.expertSidebar.subscribers,
   };
+
+  // Detects CUID / UUID / any opaque ID segment (long random-looking string)
+  const ID_PATTERN = /^[a-z0-9]{20,}$|^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   function formatSegment(segment: string): string {
     return SEGMENT_LABELS[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
   }
-  const segments = pathname.split('/').filter(Boolean);
 
-  if (segments.length === 0) return null;
+  const rawSegments = pathname.split('/').filter(Boolean);
+  if (rawSegments.length === 0) return null;
 
-  const crumbs = segments.map((segment, index) => {
-    const href = '/' + segments.slice(0, index + 1).join('/');
-    const label = formatSegment(segment);
-    const isLast = index === segments.length - 1;
-
-    return { href, label, isLast };
+  // Build cumulative hrefs, skip opaque ID segments from display
+  const crumbs: Array<{ href: string; label: string; isLast: boolean }> = [];
+  rawSegments.forEach((segment, index) => {
+    const href = '/' + rawSegments.slice(0, index + 1).join('/');
+    if (ID_PATTERN.test(segment)) return; // hide raw IDs
+    crumbs.push({ href, label: formatSegment(segment), isLast: false });
   });
+
+  crumbs.forEach((c, i) => { c.isLast = i === crumbs.length - 1; });
 
   return (
     <nav aria-label="Breadcrumb" className="mb-4">

@@ -104,8 +104,6 @@ export default async function ExpertPersonalizacaoPage() {
             <TabsList>
               <TabsTrigger value="em-geral">Em geral</TabsTrigger>
               <TabsTrigger value="equipe">Equipe</TabsTrigger>
-              <TabsTrigger value="limites">Limites</TabsTrigger>
-              <TabsTrigger value="acessos">Acessos</TabsTrigger>
             </TabsList>
 
             <TabsContent value="em-geral" className="mt-6">
@@ -118,39 +116,6 @@ export default async function ExpertPersonalizacaoPage() {
                 specialistName={specialist.name}
                 initialMembers={specialist.teamMembers}
               />
-            </TabsContent>
-
-            <TabsContent value="limites" className="mt-6">
-              <div className="max-w-3xl rounded-lg border p-6 space-y-4">
-                <h3 className="text-sm font-semibold">Limites de portée</h3>
-                {specialist.scopeLimits ? (
-                  <p className="text-sm whitespace-pre-wrap">{specialist.scopeLimits}</p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Nenhum limite configurado.</p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Para editar, acesse Experiência → Perfil.
-                </p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="acessos" className="mt-6">
-              <div className="max-w-3xl rounded-lg border p-6 space-y-4">
-                <h3 className="text-sm font-semibold">Controle de acessos e preço</h3>
-                <div className="flex justify-between py-2 border-b text-sm">
-                  <span className="text-muted-foreground">Preço da assinatura</span>
-                  <span className="font-medium">
-                    {new Intl.NumberFormat('fr-FR', {
-                      style: 'currency',
-                      currency: 'EUR',
-                    }).format(specialist.price / 100)}
-                    /mês
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Para editar o preço, acesse Experiência → Perfil.
-                </p>
-              </div>
             </TabsContent>
           </Tabs>
         </TabsContent>

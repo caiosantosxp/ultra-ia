@@ -145,7 +145,6 @@ export function ConversationSidebar({
                 <p className="truncate text-xs text-[#787878]">{specialistDomain}</p>
               </div>
             </div>
-            <SidebarTrigger className="shrink-0" aria-label={t.sidebar.toggleAria} />
           </div>
         </SidebarHeader>
       ) : (
@@ -156,6 +155,8 @@ export function ConversationSidebar({
           </div>
         </SidebarHeader>
       )}
+
+      {!specialistId && <SidebarContent />}
 
       {specialistId && (
         <>
