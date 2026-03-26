@@ -15,6 +15,7 @@ type KnowledgeDoc = {
   fileUrl: string;
   mimeType: string;
   fileSize: number;
+  createdAt: Date;
 };
 
 const ACCEPTED_TYPES = ['application/pdf', 'text/plain',
@@ -79,6 +80,7 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
           fileUrl: result.data!.fileUrl,
           mimeType: file.type,
           fileSize: file.size,
+          createdAt: result.data!.createdAt,
         },
       ]);
       toast.success(t.knowledgeUpload.uploadSuccess);
@@ -160,6 +162,14 @@ export function KnowledgeUpload({ specialistId, initialDocuments }: KnowledgeUpl
                   <p className="text-sm font-medium truncate">{doc.fileName}</p>
                   <p className="text-xs text-muted-foreground">
                     {formatBytes(doc.fileSize)}
+                    {' · '}
+                    {new Date(doc.createdAt).toLocaleString(t.dateLocale, {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </p>
                 </div>
               </div>

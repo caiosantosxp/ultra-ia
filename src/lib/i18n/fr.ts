@@ -421,6 +421,7 @@ export const fr = {
     deleteAria: 'Supprimer',
   },
   agentForm: {
+    agentIdLabel: "ID de l'agent",
     nameLabel: 'Nom',
     namePlaceholder: 'Ex : Expert Juridique',
     slugLabel: 'Slug',
@@ -444,6 +445,7 @@ export const fr = {
     systemPromptPlaceholder: "Instructions système pour l'agent IA...",
     scopeLimitsLabel: 'Limites de portée',
     scopeLimitsPlaceholder: "Définissez les limites du domaine de l'agent...",
+    webhookUrlLabel: 'URL du webhook',
     cancel: 'Annuler',
     saving: 'Enregistrement...',
     save: 'Enregistrer',
@@ -455,6 +457,9 @@ export const fr = {
   createAgentDialog: {
     trigger: 'Créer un agent',
     title: 'Créer un agent',
+  },
+  editAgentDialog: {
+    title: "Modifier l'agent",
   },
   privacy: {
     metaTitle: 'Politique de Confidentialité',
@@ -889,6 +894,7 @@ export const fr = {
       statusInactive: 'Inactif',
       noOwner: 'Aucun',
       editAction: 'Éditer',
+      expertPanelAction: 'Panneau expert',
       deleteAction: 'Supprimer',
       toggleStatusError: 'Échec de la mise à jour du statut',
       deleteConfirm: 'Êtes-vous sûr de vouloir supprimer cet agent ?',

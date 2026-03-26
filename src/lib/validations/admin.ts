@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const createSpecialistSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').max(100),
   slug: z
     .string()
@@ -21,6 +22,7 @@ export const createSpecialistSchema = z.object({
   systemPrompt: z.string().max(10000).optional(),
   scopeLimits: z.string().max(5000).optional(),
   firstMessage: z.string().max(2000).optional(),
+  webhookUrl: z.string().url('URL de webhook invalide').optional().or(z.literal('')),
 });
 
 export const updateSpecialistSchema = createSpecialistSchema.partial();

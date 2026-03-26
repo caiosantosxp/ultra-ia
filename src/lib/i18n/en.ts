@@ -420,6 +420,7 @@ export const en: Translation = {
     deleteAria: 'Delete',
   },
   agentForm: {
+    agentIdLabel: 'Agent ID',
     nameLabel: 'Name',
     namePlaceholder: 'Ex: Legal Expert',
     slugLabel: 'Slug',
@@ -443,6 +444,7 @@ export const en: Translation = {
     systemPromptPlaceholder: 'System instructions for the AI agent...',
     scopeLimitsLabel: 'Scope limits',
     scopeLimitsPlaceholder: "Define the agent's domain limits...",
+    webhookUrlLabel: 'Webhook URL',
     cancel: 'Cancel',
     saving: 'Saving...',
     save: 'Save',
@@ -454,6 +456,9 @@ export const en: Translation = {
   createAgentDialog: {
     trigger: 'Create agent',
     title: 'Create agent',
+  },
+  editAgentDialog: {
+    title: 'Edit agent',
   },
   privacy: {
     metaTitle: 'Privacy Policy',
@@ -882,6 +887,7 @@ export const en: Translation = {
       statusInactive: 'Inactive',
       noOwner: 'None',
       editAction: 'Edit',
+      expertPanelAction: 'Expert panel',
       deleteAction: 'Delete',
       toggleStatusError: 'Failed to update status',
       deleteConfirm: 'Are you sure you want to delete this agent?',

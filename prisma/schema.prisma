@@ -106,6 +106,7 @@ model Specialist {
   scopeLimits      String?
   systemPrompt     String?
   firstMessage     String?
+  webhookUrl       String?
   // Security settings
   showSources      Boolean             @default(false)
   showBranding     Boolean             @default(true)
@@ -133,6 +134,8 @@ model KnowledgeDocument {
   fileUrl      String
   mimeType     String
   fileSize     Int
+  geminiFileId String?
+  status       String     @default("processing")
   createdAt    DateTime   @default(now())
   specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
 

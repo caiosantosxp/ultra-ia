@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { Copy, Check } from 'lucide-react';
 
 import { createSpecialist, updateSpecialist } from '@/actions/admin-actions';
 import { createSpecialistSchema, type CreateSpecialistInput } from '@/lib/validations/admin';
@@ -47,6 +50,14 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
   const t = useT();
   const router = useRouter();
   const isEdit = !!specialistId;
+  const [agentId] = useState(() => crypto.randomUUID());
+  const [copied, setCopied] = useState(false);
+
+  function handleCopyId() {
+    navigator.clipboard.writeText(isEdit ? (specialistId ?? '') : agentId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   // H1 Fix: mode: 'onBlur' enables inline Zod validation on field blur (AC #2)
   const form = useForm<CreateSpecialistInput, unknown, CreateSpecialistInput>({
@@ -65,6 +76,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
       language: 'fr',
       systemPrompt: '',
       scopeLimits: '',
+      webhookUrl: '',
       ...defaultValues,
     },
   });
@@ -73,7 +85,7 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
     // H2 Fix: data already contains validated tags/quickPrompts arrays from RHF
     const result = isEdit
       ? await updateSpecialist(specialistId, data)
-      : await createSpecialist(data);
+      : await createSpecialist({ ...data, id: agentId });
 
     if (result.success) {
       toast.success(isEdit ? t.agentForm.updateSuccess : t.agentForm.createSuccess);
@@ -329,6 +341,36 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="webhookUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t.agentForm.webhookUrlLabel}</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="https://..." type="url" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex items-center justify-between rounded-md bg-muted px-3 py-2">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-muted-foreground">{t.agentForm.agentIdLabel}</p>
+            <p className="font-mono text-xs mt-0.5 truncate">{isEdit ? specialistId : agentId}</p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyId}
+            className="ml-2 shrink-0"
+          >
+            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          </Button>
+        </div>
 
         {/* M2 Fix: Annuler button added (AC Dev Notes) */}
         <div className="flex justify-end gap-3 pt-2">

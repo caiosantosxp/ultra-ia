@@ -5,12 +5,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, MessageSquare, MoreHorizontal, Pencil, Trash2, Users } from 'lucide-react';
+import { ArrowUpDown, LayoutDashboard, MessageSquare, MoreHorizontal, Pencil, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { toggleSpecialistActive, deleteSpecialist } from '@/actions/admin-actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { EditAgentDialog } from '@/components/admin/edit-agent-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +33,13 @@ export type AgentRow = {
   accentColor: string;
   avatarUrl: string;
   createdAt: Date;
+  description: string;
+  language: string;
+  tags: string[];
+  quickPrompts: string[];
+  systemPrompt: string | null;
+  scopeLimits: string | null;
+  webhookUrl: string | null;
   owner?: { id: string; name: string | null; email: string | null } | null;
   _count: { subscriptions: number; conversations: number };
 };
@@ -68,6 +76,7 @@ function ActionsCell({ row }: { row: { original: AgentRow } }) {
   const router = useRouter();
   const t = useT();
   const agent = row.original;
+  const [editOpen, setEditOpen] = useState(false);
 
   async function handleDelete() {
     if (!confirm(t.admin.agentsPage.deleteConfirm)) return;
@@ -81,32 +90,39 @@ function ActionsCell({ row }: { row: { original: AgentRow } }) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Actions" />
-        }
-      >
-        <MoreHorizontal className="h-4 w-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem>
-          <Link href={`/admin/agents/${agent.id}`} className="flex items-center gap-2 w-full">
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Actions" />
+          }
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setEditOpen(true)} className="flex items-center gap-2">
             <Pencil className="h-4 w-4" />
             {t.admin.agentsPage.editAction}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={handleDelete}
-          className="flex items-center gap-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          {t.admin.agentsPage.deleteAction}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Link href={`/admin/agents/${agent.id}`} className="flex items-center gap-2 w-full">
+              <LayoutDashboard className="h-4 w-4" />
+              {t.admin.agentsPage.expertPanelAction}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={handleDelete}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            {t.admin.agentsPage.deleteAction}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <EditAgentDialog agent={agent} open={editOpen} onOpenChange={setEditOpen} />
+    </>
   );
 }
 

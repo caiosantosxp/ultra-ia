@@ -8,10 +8,11 @@ import { cn } from '@/lib/utils';
 const COOKIE_CONSENT_KEY = 'cookie-consent';
 
 export function CookieConsent() {
-  const [isVisible, setIsVisible] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return !localStorage.getItem(COOKIE_CONSENT_KEY);
-  });
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(!localStorage.getItem(COOKIE_CONSENT_KEY));
+  }, []);
 
   const dialogRef = useRef<HTMLDivElement>(null);
 

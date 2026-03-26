@@ -17,7 +17,37 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CancelSubscriptionButton } from '@/components/admin/cancel-subscription-button';
+import { SubscribersFilters } from '@/components/expert/subscribers-filters';
 import { getT } from '@/lib/i18n/get-t';
+
+type StatusFilter = 'all' | 'active' | 'new' | 'past_due' | 'canceled' | 'expired' | 'pending';
+type PeriodFilter = 'all' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year';
+
+function getPeriodDate(period: PeriodFilter): Date | null {
+  const now = new Date();
+  switch (period) {
+    case 'this_month':
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    case 'last_month':
+      return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    case 'last_3_months':
+      return new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    case 'last_6_months':
+      return new Date(now.getFullYear(), now.getMonth() - 6, 1);
+    case 'this_year':
+      return new Date(now.getFullYear(), 0, 1);
+    default:
+      return null;
+  }
+}
+
+function getPeriodEndDate(period: PeriodFilter): Date | null {
+  const now = new Date();
+  if (period === 'last_month') {
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  return null;
+}
 
 export async function generateMetadata({
   params,
@@ -36,14 +66,34 @@ export async function generateMetadata({
 
 export default async function SubscribersPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ status?: string; period?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id || session.user.role !== 'ADMIN') redirect('/chat');
 
   const t = await getT();
   const { id } = await params;
+  const sp = await searchParams;
+
+  const statusFilter = (sp.status ?? 'all') as StatusFilter;
+  const periodFilter = (sp.period ?? 'all') as PeriodFilter;
+
+  const periodStart = getPeriodDate(periodFilter);
+  const periodEnd = getPeriodEndDate(periodFilter);
+
+  const isNewFilter = statusFilter === 'new';
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const statusMap: Record<string, string> = {
+    active: 'ACTIVE',
+    past_due: 'PAST_DUE',
+    canceled: 'CANCELED',
+    expired: 'EXPIRED',
+    pending: 'PENDING',
+  };
 
   const [specialist, subscriptions] = await Promise.all([
     prisma.specialist.findUnique({
@@ -51,7 +101,21 @@ export default async function SubscribersPage({
       select: { id: true, name: true, accentColor: true },
     }),
     prisma.subscription.findMany({
-      where: { specialistId: id },
+      where: {
+        specialistId: id,
+        ...(statusFilter !== 'all' && !isNewFilter
+          ? { status: statusMap[statusFilter] }
+          : {}),
+        ...(isNewFilter ? { createdAt: { gte: thirtyDaysAgo } } : {}),
+        ...(periodStart
+          ? {
+              createdAt: {
+                gte: periodStart,
+                ...(periodEnd ? { lt: periodEnd } : {}),
+              },
+            }
+          : {}),
+      },
       include: {
         user: {
           select: { id: true, name: true, email: true, role: true, createdAt: true },
@@ -84,6 +148,7 @@ export default async function SubscribersPage({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t.admin.subscribersPage.listTitle}</CardTitle>
+          <SubscribersFilters />
         </CardHeader>
         <CardContent className="p-0">
           <Table>

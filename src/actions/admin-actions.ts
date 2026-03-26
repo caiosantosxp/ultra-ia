@@ -4,7 +4,9 @@ import { Prisma } from '@/generated/prisma';
 
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
+import { auth as getSession } from '@/lib/auth';
 import { saveFile, deleteFile } from '@/lib/storage';
+import { notifyN8NKnowledgeUpload, notifyN8NKnowledgeDelete, notifyN8NAgentCreated, notifyExpertKnowledgeUpload } from '@/lib/n8n';
 import {
   createSpecialistSchema,
   updateSpecialistSchema,
@@ -29,6 +31,22 @@ export async function createSpecialist(input: unknown) {
     const specialist = await prisma.specialist.create({
       data: { ...parsed.data, isActive: false },
     });
+
+    await notifyN8NAgentCreated({
+      id: specialist.id,
+      name: specialist.name,
+      slug: specialist.slug,
+      domain: specialist.domain,
+      description: specialist.description,
+      price: specialist.price,
+      language: specialist.language,
+      isActive: specialist.isActive,
+      createdAt: specialist.createdAt.toISOString(),
+      webhookUrl: specialist.webhookUrl,
+      systemPrompt: specialist.systemPrompt,
+      scopeLimits: specialist.scopeLimits,
+    });
+
     return { success: true, data: specialist };
   } catch (error) {
     const isDuplicate =
@@ -103,9 +121,27 @@ export async function toggleSpecialistActive(id: string) {
 }
 
 export async function uploadKnowledgeDocument(specialistId: string, formData: FormData) {
-  const auth = await requireAdmin();
-  if ('error' in auth) {
-    return { success: false, error: auth.error };
+  const session = await getSession();
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'AUTH_REQUIRED', message: 'Authentification requise' } };
+  }
+  if (session.user.role !== 'ADMIN' && session.user.role !== 'EXPERT') {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Accès refusé' } };
+  }
+  let specialistInfo: { id: string; name: string; slug: string; domain: string } | null = null;
+  if (session.user.role === 'EXPERT') {
+    specialistInfo = await prisma.specialist.findFirst({
+      where: { id: specialistId, ownerId: session.user.id },
+      select: { id: true, name: true, slug: true, domain: true },
+    });
+    if (!specialistInfo) {
+      return { success: false, error: { code: 'FORBIDDEN', message: 'Accès refusé' } };
+    }
+  } else if (session.user.role === 'ADMIN') {
+    specialistInfo = await prisma.specialist.findUnique({
+      where: { id: specialistId },
+      select: { id: true, name: true, slug: true, domain: true },
+    });
   }
 
   const file = formData.get('file') as File | null;
@@ -139,21 +175,50 @@ export async function uploadKnowledgeDocument(specialistId: string, formData: Fo
         fileUrl,
         mimeType: file.type,
         fileSize: file.size,
+        status: 'processing',
       },
     });
-    return { success: true, data: { id: doc.id, fileName: doc.fileName, fileUrl: doc.fileUrl } };
-  } catch {
+
+    const uploadPayload = {
+      documentId: doc.id,
+      specialistId,
+      fileName: file.name,
+      mimeType: file.type,
+      fileSize: file.size,
+      fileBase64: buffer.toString('base64'),
+    };
+
+    await notifyN8NKnowledgeUpload(uploadPayload);
+
+    if (specialistInfo) {
+      await notifyExpertKnowledgeUpload({
+        ...uploadPayload,
+        agent: {
+          id: specialistInfo.id,
+          name: specialistInfo.name,
+          slug: specialistInfo.slug,
+          domain: specialistInfo.domain,
+        },
+      });
+    }
+
+    return { success: true, data: { id: doc.id, fileName: doc.fileName, fileUrl: doc.fileUrl, status: doc.status, createdAt: doc.createdAt } };
+  } catch (err) {
+    console.error('[uploadKnowledgeDocument]', err);
     return {
       success: false,
-      error: { code: 'INTERNAL_ERROR', message: "Échec de l'upload" },
+      error: { code: 'INTERNAL_ERROR', message: err instanceof Error ? err.message : "Échec de l'upload" },
     };
   }
 }
 
 export async function deleteKnowledgeDocument(documentId: string) {
-  const auth = await requireAdmin();
-  if ('error' in auth) {
-    return { success: false, error: auth.error };
+  const session = await getSession();
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'AUTH_REQUIRED', message: 'Authentification requise' } };
+  }
+  if (session.user.role !== 'ADMIN' && session.user.role !== 'EXPERT') {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Accès refusé' } };
   }
 
   try {
@@ -161,9 +226,26 @@ export async function deleteKnowledgeDocument(documentId: string) {
     if (!doc) {
       return { success: false, error: { code: 'NOT_FOUND', message: 'Document introuvable' } };
     }
+    if (session.user.role === 'EXPERT') {
+      const specialist = await prisma.specialist.findFirst({
+        where: { id: doc.specialistId, ownerId: session.user.id },
+      });
+      if (!specialist) {
+        return { success: false, error: { code: 'FORBIDDEN', message: 'Accès refusé' } };
+      }
+    }
 
     await deleteFile(doc.fileUrl);
     await prisma.knowledgeDocument.delete({ where: { id: documentId } });
+
+    if (doc.geminiFileId) {
+      await notifyN8NKnowledgeDelete({
+        documentId,
+        geminiFileId: doc.geminiFileId,
+        specialistId: doc.specialistId,
+      });
+    }
+
     return { success: true, data: { id: documentId } };
   } catch {
     return {
