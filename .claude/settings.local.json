@@ -199,7 +199,10 @@
       "Bash(cat e:/projetos-caio/ultra-ia/src/app/\\\\\\(admin\\\\\\)/admin/settings/page.tsx)",
       "Bash(xargs grep -l \"revenue\\\\|rendas\\\\|Revenue\")",
       "Bash(xargs grep -l \"revenue\\\\|Revenue\\\\|rendas\")",
-      "Bash(ls -la /e/projetos-caio/ultra-ia/src/app/\\\\\\(expert\\\\\\)/expert/)"
+      "Bash(ls -la /e/projetos-caio/ultra-ia/src/app/\\\\\\(expert\\\\\\)/expert/)",
+      "Bash(find \"/e/projetos-caio/ultra-ia/src/app/\\(expert\\)\" -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\))",
+      "Bash(ls -la \"/e/projetos-caio/ultra-ia/src/app/\\(expert\\)/\")",
+      "Bash(ls -la \"/e/projetos-caio/ultra-ia/src/app/\\(expert\\)/expert/identidade/\")"
     ]
   }
 }
