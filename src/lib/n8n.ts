@@ -36,6 +36,31 @@ export async function notifyN8NAgentCreated(payload: N8NAgentCreatedPayload): Pr
   }
 }
 
+export interface N8NPromptUpdatedPayload {
+  id: string;
+  name: string;
+  slug: string;
+  domain: string;
+  ownerId: string | null;
+  systemPrompt: string | null;
+}
+
+export async function notifyN8NPromptUpdated(payload: N8NPromptUpdatedPayload): Promise<void> {
+  const webhookUrl = process.env.N8N_PROMPT_WEBHOOK_URL ?? 'https://api1.vogastrategie.com/in/c0b8ba50-ba52-41d1-9130-b95331ac2621';
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'prompt_updated', ...payload }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    console.log('[n8n] prompt_updated response:', res.status, res.statusText);
+  } catch (err) {
+    console.error('[n8n] falha ao notificar atualização do prompt:', err);
+  }
+}
+
 export interface N8NKnowledgeUploadPayload {
   documentId: string;
   specialistId: string;
@@ -84,7 +109,7 @@ export interface ExpertKnowledgeUploadPayload extends N8NKnowledgeUploadPayload 
 }
 
 export async function notifyExpertKnowledgeUpload(payload: ExpertKnowledgeUploadPayload): Promise<void> {
-  const webhookUrl = process.env.EXPERT_KNOWLEDGE_WEBHOOK_URL ?? 'https://api.desbug.com.br/in/0c08aa25-91dd-452e-83ee-529c58bcfd0c';
+  const webhookUrl = process.env.EXPERT_KNOWLEDGE_WEBHOOK_URL ?? 'https://api1.vogastrategie.com/in/2cebfd42-c686-434e-be37-a0adbe613834';
 
   try {
     const res = await fetch(webhookUrl, {
@@ -201,10 +226,8 @@ export async function callN8NStream(payload: N8NStreamPayload): Promise<Readable
     throw new N8NCircuitOpenError();
   }
 
-  const webhookUrl = process.env.N8N_WEBHOOK_URL;
-  if (!webhookUrl) {
-    throw new N8NError('N8N_WEBHOOK_URL environment variable is not configured');
-  }
+  const webhookUrl = process.env.N8N_WEBHOOK_URL ?? 'https://api1.vogastrategie.com/in/0d0faa1c-060a-4e82-9346-987c3e70c74e';
+
 
   const signal = AbortSignal.timeout(Number(process.env.N8N_TIMEOUT_MS ?? 30000));
 
@@ -221,6 +244,7 @@ export async function callN8NStream(payload: N8NStreamPayload): Promise<Readable
 
     if (!response.ok) {
       circuitBreaker.onFailure();
+      console.error(`[n8n] webhook error: ${response.status} ${response.statusText} — url: ${webhookUrl}`);
       throw new N8NError(`N8N returned ${response.status}`, response.status);
     }
 

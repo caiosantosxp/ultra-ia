@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
 import { auth as getSession } from '@/lib/auth';
 import { saveFile, deleteFile } from '@/lib/storage';
-import { notifyN8NKnowledgeUpload, notifyN8NKnowledgeDelete, notifyN8NAgentCreated, notifyExpertKnowledgeUpload } from '@/lib/n8n';
+import { notifyN8NKnowledgeUpload, notifyN8NKnowledgeDelete, notifyN8NAgentCreated, notifyExpertKnowledgeUpload, notifyN8NPromptUpdated } from '@/lib/n8n';
 import {
   createSpecialistSchema,
   updateSpecialistSchema,
@@ -50,11 +50,11 @@ export async function createSpecialist(input: unknown) {
     return { success: true, data: specialist };
   } catch (error) {
     const isDuplicate =
-      error instanceof Error && error.message.includes('Unique constraint');
+      error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
     return {
       success: false,
       error: {
-        code: 'INTERNAL_ERROR',
+        code: isDuplicate ? 'DUPLICATE_SLUG' : 'INTERNAL_ERROR',
         message: isDuplicate ? 'Ce slug est déjà utilisé' : "Échec de la création",
       },
     };
@@ -330,6 +330,49 @@ export async function deleteSpecialist(id: string) {
     return {
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Échec de la suppression' },
+    };
+  }
+}
+
+export async function updateSystemPrompt(specialistId: string, systemPrompt: string) {
+  const session = await getSession();
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'AUTH_REQUIRED', message: 'Authentification requise' } };
+  }
+
+  if (session.user.role === 'EXPERT') {
+    const owns = await prisma.specialist.findFirst({
+      where: { id: specialistId, ownerId: session.user.id },
+      select: { id: true },
+    });
+    if (!owns) {
+      return { success: false, error: { code: 'FORBIDDEN', message: 'Accès refusé' } };
+    }
+  } else if (session.user.role !== 'ADMIN') {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Accès refusé' } };
+  }
+
+  try {
+    const specialist = await prisma.specialist.update({
+      where: { id: specialistId },
+      data: { systemPrompt },
+      select: { id: true, name: true, slug: true, domain: true, ownerId: true, systemPrompt: true },
+    });
+
+    await notifyN8NPromptUpdated({
+      id: specialist.id,
+      name: specialist.name,
+      slug: specialist.slug,
+      domain: specialist.domain,
+      ownerId: specialist.ownerId,
+      systemPrompt: specialist.systemPrompt,
+    });
+
+    return { success: true };
+  } catch {
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Échec de la mise à jour du prompt' },
     };
   }
 }
