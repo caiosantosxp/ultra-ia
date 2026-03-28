@@ -31,7 +31,6 @@ export default async function ExpertPanelLayout({ params, children }: Props) {
         specialistName={specialist.name}
         accentColor={specialist.accentColor}
         initialLocale={lang}
-        user={session.user}
       />
       <div className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
         {children}

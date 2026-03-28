@@ -44,13 +44,22 @@ interface AgentFormProps {
   defaultValues?: Partial<CreateSpecialistInput>;
   onSuccess?: () => void;
   onCancel?: () => void;
+  hideWebhook?: boolean;
+  updateAction?: (
+    id: string,
+    input: unknown
+  ) => Promise<{ success: boolean; error?: { code: string; message: string } }>;
 }
 
-export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: AgentFormProps) {
+export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel, hideWebhook, updateAction }: AgentFormProps) {
   const t = useT();
   const router = useRouter();
   const isEdit = !!specialistId;
-  const [agentId] = useState(() => crypto.randomUUID());
+  const [agentId] = useState(() =>
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2) + Date.now().toString(36)
+  );
   const [copied, setCopied] = useState(false);
 
   function handleCopyId() {
@@ -83,8 +92,9 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
 
   async function onSubmit(data: CreateSpecialistInput) {
     // H2 Fix: data already contains validated tags/quickPrompts arrays from RHF
+    const doUpdate = updateAction ?? updateSpecialist;
     const result = isEdit
-      ? await updateSpecialist(specialistId, data)
+      ? await doUpdate(specialistId, data)
       : await createSpecialist({ ...data, id: agentId });
 
     if (result.success) {
@@ -92,7 +102,12 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
       onSuccess?.();
       router.refresh();
     } else {
-      toast.error(result.error?.message ?? t.agentForm.errorDefault);
+      const message = result.error?.message ?? t.agentForm.errorDefault;
+      if (result.error?.code === 'DUPLICATE_SLUG') {
+        form.setError('slug', { message });
+      } else {
+        toast.error(message);
+      }
     }
   }
 
@@ -111,8 +126,8 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
                     {...field}
                     placeholder={t.agentForm.namePlaceholder}
                     onChange={(e) => {
-                      field.onChange(e); // Ensure RHF tracks the change
-                      if (!isEdit || !form.getValues('slug')) {
+                      field.onChange(e);
+                      if (!isEdit) {
                         form.setValue('slug', generateSlug(e.target.value), {
                           shouldValidate: true,
                         });
@@ -342,19 +357,21 @@ export function AgentForm({ specialistId, defaultValues, onSuccess, onCancel }: 
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="webhookUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.agentForm.webhookUrlLabel}</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="https://..." type="url" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!hideWebhook && (
+          <FormField
+            control={form.control}
+            name="webhookUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t.agentForm.webhookUrlLabel}</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="https://..." type="url" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex items-center justify-between rounded-md bg-muted px-3 py-2">
           <div className="min-w-0">

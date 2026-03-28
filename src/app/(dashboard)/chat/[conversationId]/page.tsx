@@ -59,16 +59,6 @@ export default async function ConversationPage({ params }: ConversationPageProps
     notFound();
   }
 
-  const subscription = await prisma.subscription.findFirst({
-    where: {
-      userId: session.user.id,
-      specialistId: conversation.specialistId,
-      status: 'ACTIVE',
-    },
-    select: { id: true },
-  });
-  if (!subscription) redirect('/');
-
   return (
     <ChatArea
       key={conversation.id}

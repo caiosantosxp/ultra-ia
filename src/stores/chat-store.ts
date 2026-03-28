@@ -47,7 +47,7 @@ export const useChatStore = create<ChatState>()((set) => ({
     streamingContent: '',
     isStreaming: false,
   })),
-  setStreaming: (status) => set({ isStreaming: status }),
+  setStreaming: (status) => set(status ? { isStreaming: true } : { isStreaming: false, streamingContent: '' }),
   setConversation: (id) => set({ currentConversationId: id }),
   setMessages: (messages) => set({ messages }),
   initializeConversation: (conversationId, messages) =>

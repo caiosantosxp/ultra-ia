@@ -165,12 +165,14 @@ export function ExpertPanelSidebar({
             pathname.endsWith('/identidade')
           }
         />
-        <NavItem
-          href={`${base}/identidade/instrucoes`}
-          icon={Settings}
-          label={t.admin.expertSidebar.instructions}
-          active={pathname.includes('/identidade/instrucoes')}
-        />
+        {!basePath && (
+          <NavItem
+            href={`${base}/identidade/instrucoes`}
+            icon={Settings}
+            label={t.admin.expertSidebar.instructions}
+            active={pathname.includes('/identidade/instrucoes')}
+          />
+        )}
 
         <SectionLabel>{t.admin.expertSidebar.monetizationSection}</SectionLabel>
 
@@ -223,7 +225,7 @@ export function ExpertPanelSidebar({
       </nav>
 
       {/* Back link */}
-      {!basePath && (
+      {!basePath && user && (
         <div className="border-t border-[#e5e7eb] px-2 py-3">
           <Link
             href="/admin/agents"

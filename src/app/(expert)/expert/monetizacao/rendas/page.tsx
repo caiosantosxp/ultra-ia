@@ -48,7 +48,7 @@ function getPeriodRange(period: string): { gte?: Date; lte?: Date } {
 }
 
 type Props = {
-  searchParams: Promise<{ period?: string }>;
+  searchParams: Promise<{ period?: string; from?: string; to?: string }>;
 };
 
 export default async function ExpertRendasPage({ searchParams }: Props) {
@@ -56,9 +56,17 @@ export default async function ExpertRendasPage({ searchParams }: Props) {
   const t = await getT();
   const lang = (await cookies()).get('LANG')?.value ?? 'fr';
   const locale = lang === 'en' ? 'en-GB' : 'fr-FR';
-  const { period = 'all' } = await searchParams;
+  const { period = 'all', from, to } = await searchParams;
 
-  const dateRange = getPeriodRange(period);
+  let dateRange: { gte?: Date; lte?: Date };
+  if (period === 'custom' && from) {
+    dateRange = {
+      gte: new Date(from),
+      ...(to ? { lte: new Date(to + 'T23:59:59') } : {}),
+    };
+  } else {
+    dateRange = getPeriodRange(period);
+  }
   const createdAtFilter = Object.keys(dateRange).length > 0 ? { createdAt: dateRange } : {};
 
   const [specialist, activeSubscriptions, totalSubscriptions, subscriptionHistory] = await Promise.all([

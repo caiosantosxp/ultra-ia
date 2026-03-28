@@ -54,7 +54,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
   const t = useT();
   const { messages, isStreaming, streamingContent, setMessages, setConversation, addMessage } =
     useChatStore();
-  const { startStream } = useStreaming();
+  const { startStream, error: streamError } = useStreaming();
   const { isLimitReached } = useUsageLimit();
   const [activeConversationId, setActiveConversationId] = useState<string | null>(conversationId);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -73,6 +73,11 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
       }))
     );
   }, [conversationId, initialMessages, setConversation, setMessages]);
+
+  // Show toast when streaming fails
+  useEffect(() => {
+    if (streamError) toast.error(streamError);
+  }, [streamError]);
 
   // Auto-scroll when messages or streaming content changes
   useEffect(() => {
@@ -107,7 +112,7 @@ export function ChatArea({ initialMessages, conversationId, specialist }: ChatAr
 
       // Optimistically add user message to store
       addMessage({
-        id: crypto.randomUUID(),
+        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         conversationId: currentConversationId,
         content,
         role: 'USER',

@@ -23,7 +23,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     },
   });
 
-  const specialist = subscription?.specialist ?? null;
+  // Fall back to configured default specialist (by slug) or first available specialist
+  const defaultSlug = process.env.DEFAULT_SPECIALIST_SLUG;
+  const specialist =
+    subscription?.specialist ??
+    (await prisma.specialist.findFirst({
+      where: defaultSlug ? { slug: defaultSlug } : {},
+      select: { id: true, name: true, avatarUrl: true, domain: true },
+    }));
 
   const user = {
     name: session.user.name,

@@ -68,23 +68,12 @@ export default async function ExpertDashboardPage() {
     []
   );
 
-  // TODO: remove mock data — only for UI testing
-  const chartData = (() => {
-    const days = Array.from({ length: 90 }, (_, i) => {
-      const d = new Date(now.getTime() - (89 - i) * 24 * 60 * 60 * 1000);
-      return d.toISOString().split('T')[0];
-    });
-    if (subsChartData.length > 0) {
-      const realByDay = Object.fromEntries(subsChartData.map(p => [p.date, p.count]));
-      return days.map(date => ({ date, count: realByDay[date] ?? 0 }));
-    }
-    const mockByIndex: Record<number, number> = {
-      5:2, 8:1, 12:3, 15:1, 18:2, 22:4, 25:1, 28:3, 30:2, 33:1,
-      36:5, 40:2, 43:1, 46:3, 50:2, 53:4, 56:1, 59:2, 62:3, 65:1,
-      68:5, 71:2, 74:3, 77:1, 80:4, 83:2, 85:1, 87:3, 88:2, 89:1,
-    };
-    return days.map((date, i) => ({ date, count: mockByIndex[i] ?? 0 }));
-  })();
+  const days = Array.from({ length: 90 }, (_, i) => {
+    const d = new Date(now.getTime() - (89 - i) * 24 * 60 * 60 * 1000);
+    return d.toISOString().split('T')[0];
+  });
+  const realByDay = Object.fromEntries(subsChartData.map(p => [p.date, p.count]));
+  const chartData = days.map(date => ({ date, count: realByDay[date] ?? 0 }));
 
   return (
     <div className="space-y-6">

@@ -99,6 +99,7 @@ export function useStreaming() {
       useChatStore.getState().setStreaming(false);
     } finally {
       setIsStreaming(false);
+      useChatStore.getState().setStreaming(false);
     }
   }, []);
 

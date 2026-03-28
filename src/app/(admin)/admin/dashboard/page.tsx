@@ -18,6 +18,7 @@ import {
 import { MetricsCard } from '@/components/dashboard/metrics-card';
 import { MetricsCardSkeleton } from '@/components/dashboard/metrics-card-skeleton';
 import { AnalyticsChart } from '@/components/admin/analytics-chart';
+import { DashboardPeriodFilter } from '@/components/admin/dashboard-period-filter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useT } from '@/lib/i18n/use-t';
@@ -33,9 +34,6 @@ function formatMRR(cents: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100);
 }
 
-const PERIOD_VALUES = [7, 30, 90] as const;
-type Period = (typeof PERIOD_VALUES)[number];
-
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-4">
@@ -49,7 +47,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default function AdminDashboardPage() {
   const t = useT();
-  const [period, setPeriod] = useState<Period>(30);
+  const [period, setPeriod] = useState<number>(30);
 
   const { data, isLoading, error, mutate } = useSWR<{ success: boolean; data: PlatformMetrics }>(
     `/api/admin/analytics?type=platform&period=${period}`,
@@ -68,26 +66,7 @@ export default function AdminDashboardPage() {
           <p className="mt-1 text-sm text-muted-foreground">{t.admin.dashboard.subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border bg-muted/30 p-1 gap-1">
-            {PERIOD_VALUES.map((value) => {
-              const label = value === 7
-                ? t.admin.dashboard.period7d
-                : value === 30
-                  ? t.admin.dashboard.period30d
-                  : t.admin.dashboard.period90d;
-              return (
-                <Button
-                  key={value}
-                  variant={period === value ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="h-7 px-3 text-xs"
-                  onClick={() => setPeriod(value)}
-                >
-                  {label}
-                </Button>
-              );
-            })}
-          </div>
+          <DashboardPeriodFilter onChange={setPeriod} />
           <Button
             variant="outline"
             size="sm"

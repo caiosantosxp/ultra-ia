@@ -15,17 +15,12 @@ export async function createConversation(input: unknown) {
     return { success: false as const, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } };
   }
 
-  const specialist = await prisma.specialist.findUnique({ where: { id: parsed.data.specialistId } });
+  const specialist = await prisma.specialist.findUnique({
+    where: { id: parsed.data.specialistId },
+    select: { id: true, firstMessage: true },
+  });
   if (!specialist) {
     return { success: false as const, error: { code: 'NOT_FOUND', message: 'Spécialiste non trouvé' } };
-  }
-
-  const subscription = await prisma.subscription.findFirst({
-    where: { userId: session.user.id, specialistId: specialist.id, status: 'ACTIVE' },
-    select: { id: true },
-  });
-  if (!subscription) {
-    return { success: false as const, error: { code: 'FORBIDDEN', message: 'Assinatura ativa necessária para este especialista' } };
   }
 
   // MEDIUM-4 fix: set default title consistently with API route (AC11)
@@ -36,6 +31,17 @@ export async function createConversation(input: unknown) {
       title: 'Nouvelle conversation',
     },
   });
+
+  if (specialist.firstMessage) {
+    await prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        userId: null,
+        content: specialist.firstMessage,
+        role: 'ASSISTANT',
+      },
+    });
+  }
 
   return { success: true as const, data: { conversationId: conversation.id } };
 }

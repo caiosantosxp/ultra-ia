@@ -270,7 +270,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type');
   const specialistId = searchParams.get('specialistId') ?? null;
   const rawPeriod = parseInt(searchParams.get('period') ?? '30');
-  const period = Math.min(90, Math.max(7, isNaN(rawPeriod) ? 30 : rawPeriod)) as 7 | 15 | 30 | 90;
+  const period = Math.min(365, Math.max(7, isNaN(rawPeriod) ? 30 : rawPeriod));
 
   const isAdmin = session.user.role === 'ADMIN';
   const isExpert = session.user.role === 'EXPERT';

@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/table';
 import { SubscribersFilters } from '@/components/expert/subscribers-filters';
 
-type StatusFilter = 'all' | 'active' | 'new' | 'past_due' | 'canceled' | 'expired' | 'pending';
-type PeriodFilter = 'all' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year';
+type StatusFilter = 'all' | 'active' | 'new';
+type PeriodFilter = 'all' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom';
 
 function getPeriodDate(period: PeriodFilter): Date | null {
   const now = new Date();
@@ -47,7 +47,7 @@ function getPeriodEndDate(period: PeriodFilter): Date | null {
 export default async function ExpertSubscribersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; period?: string }>;
+  searchParams: Promise<{ status?: string; period?: string; from?: string; to?: string }>;
 }) {
   const { specialist } = await requireExpert();
   const t = await getT();
@@ -56,47 +56,65 @@ export default async function ExpertSubscribersPage({
   const statusFilter = (params.status ?? 'all') as StatusFilter;
   const periodFilter = (params.period ?? 'all') as PeriodFilter;
 
-  // Build date filter
-  const periodStart = getPeriodDate(periodFilter);
-  const periodEnd = getPeriodEndDate(periodFilter);
+  let periodStart: Date | null = null;
+  let periodEnd: Date | null = null;
 
-  // Build status filter for Prisma
-  const isNewFilter = statusFilter === 'new';
+  if (periodFilter === 'custom' && params.from) {
+    periodStart = new Date(params.from);
+    periodEnd = params.to ? new Date(params.to + 'T23:59:59') : null;
+  } else {
+    periodStart = getPeriodDate(periodFilter);
+    periodEnd = getPeriodEndDate(periodFilter);
+  }
+
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const statusMap: Record<string, string> = {
-    active: 'ACTIVE',
-    past_due: 'PAST_DUE',
-    canceled: 'CANCELED',
-    expired: 'EXPIRED',
-    pending: 'PENDING',
-  };
+  // Build where for conversations
+  const dateWhere = periodStart
+    ? { createdAt: { gte: periodStart, ...(periodEnd ? { lt: periodEnd } : {}) } }
+    : {};
 
-  const subscriptions = await prisma.subscription.findMany({
+  const activeWhere = statusFilter === 'active' ? { updatedAt: { gte: sevenDaysAgo } } : {};
+
+  const conversationGroups = await prisma.conversation.groupBy({
+    by: ['userId'],
     where: {
       specialistId: specialist.id,
-      ...(statusFilter !== 'all' && !isNewFilter
-        ? { status: statusMap[statusFilter] }
-        : {}),
-      ...(isNewFilter ? { createdAt: { gte: thirtyDaysAgo } } : {}),
-      ...(periodStart
-        ? {
-            createdAt: {
-              gte: periodStart,
-              ...(periodEnd ? { lt: periodEnd } : {}),
-            },
-          }
-        : {}),
+      userId: { not: null },
+      isDeleted: false,
+      ...dateWhere,
+      ...activeWhere,
     },
-    include: {
-      user: {
-        select: { id: true, name: true, email: true },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
+    _count: { id: true },
+    _min: { createdAt: true },
+    _max: { updatedAt: true },
+    orderBy: { _max: { updatedAt: 'desc' } },
+    ...(statusFilter === 'new'
+      ? { having: { createdAt: { _min: { gte: thirtyDaysAgo } } } }
+      : {}),
   });
 
-  const activeCount = subscriptions.filter((s) => s.status === 'ACTIVE').length;
+  const userIds = conversationGroups
+    .map((g) => g.userId)
+    .filter((id): id is string => id !== null);
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, name: true, email: true },
+  });
+
+  const userMap = new Map(users.map((u) => [u.id, u]));
+
+  const rows = conversationGroups.map((g) => ({
+    userId: g.userId as string,
+    conversationCount: g._count.id,
+    firstSeen: g._min.createdAt as Date,
+    lastSeen: g._max.updatedAt as Date,
+    user: userMap.get(g.userId as string),
+  }));
+
+  const activeCount = rows.filter((r) => r.lastSeen >= thirtyDaysAgo).length;
 
   return (
     <div className="space-y-6">
@@ -110,7 +128,7 @@ export default async function ExpertSubscribersPage({
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
             {activeCount} {t.admin.subscribersPage.activeCount}
           </Badge>
-          {' '}/ {subscriptions.length} {t.admin.subscribersPage.total}
+          {' '}/ {rows.length} {t.admin.subscribersPage.total}
         </p>
       </div>
 
@@ -125,38 +143,29 @@ export default async function ExpertSubscribersPage({
               <TableRow>
                 <TableHead>{t.admin.subscribersPage.colName}</TableHead>
                 <TableHead>{t.admin.subscribersPage.colEmail}</TableHead>
-                <TableHead>{t.admin.subscribersPage.colStatus}</TableHead>
+                <TableHead>{t.admin.subscribersPage.colConversations}</TableHead>
                 <TableHead>{t.admin.subscribersPage.colSince}</TableHead>
                 <TableHead>{t.admin.subscribersPage.colPeriodEnd}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {subscriptions.length === 0 ? (
+              {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
                     {t.admin.subscribersPage.noSubscribers}
                   </TableCell>
                 </TableRow>
               ) : (
-                subscriptions.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell className="font-medium">{sub.user?.name ?? '—'}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{sub.user?.email ?? '—'}</TableCell>
-                    <TableCell>
-                      <SubscriptionStatusBadge status={sub.status} t={t} />
+                rows.map((row) => (
+                  <TableRow key={row.userId}>
+                    <TableCell className="font-medium">{row.user?.name ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{row.user?.email ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{row.conversationCount}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {row.firstSeen.toLocaleDateString(t.dateLocale)}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {new Date(sub.createdAt).toLocaleDateString(t.dateLocale)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {sub.currentPeriodEnd
-                        ? new Date(sub.currentPeriodEnd).toLocaleDateString(t.dateLocale)
-                        : '—'}
-                      {sub.cancelAtPeriodEnd && (
-                        <span className="ml-1 text-orange-600 text-xs">
-                          {t.admin.subscribersPage.scheduledCancellation}
-                        </span>
-                      )}
+                      {row.lastSeen.toLocaleDateString(t.dateLocale)}
                     </TableCell>
                   </TableRow>
                 ))
@@ -167,21 +176,4 @@ export default async function ExpertSubscribersPage({
       </Card>
     </div>
   );
-}
-
-function SubscriptionStatusBadge({ status, t }: { status: string; t: Awaited<ReturnType<typeof getT>> }) {
-  switch (status) {
-    case 'ACTIVE':
-      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{t.admin.subscribersPage.statusActive}</Badge>;
-    case 'PAST_DUE':
-      return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">{t.admin.subscribersPage.statusPastDue}</Badge>;
-    case 'CANCELED':
-      return <Badge variant="secondary">{t.admin.subscribersPage.statusCanceled}</Badge>;
-    case 'EXPIRED':
-      return <Badge variant="secondary">{t.admin.subscribersPage.statusExpired}</Badge>;
-    case 'PENDING':
-      return <Badge variant="outline">{t.admin.subscribersPage.statusPending}</Badge>;
-    default:
-      return <Badge variant="outline">{status}</Badge>;
-  }
 }

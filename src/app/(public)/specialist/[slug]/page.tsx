@@ -56,12 +56,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SpecialistPage({ params, searchParams }: Props) {
   const [{ slug }, { checkout }] = await Promise.all([params, searchParams]);
-  const specialist = await getSpecialist(slug);
-  if (!specialist) notFound();
-
-  // Check auth and subscription status for CTA (AC #1, #9)
   const session = await auth();
   const userId = session?.user?.id;
+
+  let specialist = await getSpecialist(slug);
+  let isOwnerPreview = false;
+
+  if (!specialist) {
+    // Allow owner to preview inactive specialist
+    if (userId) {
+      const inactive = await prisma.specialist.findUnique({ where: { slug } });
+      if (inactive?.ownerId === userId) {
+        specialist = inactive;
+        isOwnerPreview = true;
+      }
+    }
+    if (!specialist) notFound();
+  }
+
+  // Check auth and subscription status for CTA (AC #1, #9)
   let hasActiveSubscription = false;
   if (userId) {
     const sub = await prisma.subscription.findUnique({
@@ -91,6 +104,11 @@ export default async function SpecialistPage({ params, searchParams }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>') }}
       />
+      {isOwnerPreview && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-sm text-amber-800">
+          Aperçu — votre profil n&apos;est pas encore publié
+        </div>
+      )}
       <div className="mx-auto max-w-[720px] px-4 py-8 sm:px-6">
         <SpecialistProfile
           specialist={specialist}

@@ -62,18 +62,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // AC9 — Subscription check specific to the conversation's specialist
-  const subscription = await prisma.subscription.findFirst({
-    where: { userId, specialistId: conversation.specialistId, status: 'ACTIVE' },
-    orderBy: { createdAt: 'desc' },
-  });
-  if (!subscription) {
-    return Response.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Active subscription required' } },
-      { status: 403 }
-    );
-  }
-
   // AC8 — Daily rate limit check
   const rateLimit = await checkAndIncrementDailyUsage(userId);
   if (!rateLimit.allowed) {
@@ -105,6 +93,21 @@ export async function POST(req: Request) {
   await prisma.message.create({
     data: { conversationId, userId, content, role: 'USER' },
   });
+
+  // Auto-create Lead record for this user if not exists (fire-and-forget)
+  if (conversation.specialistId && session.user.email) {
+    const userEmail = session.user.email;
+    const specialistId = conversation.specialistId;
+    prisma.lead.findFirst({ where: { email: userEmail, specialistId } })
+      .then((existing) => {
+        if (!existing) {
+          return prisma.lead.create({
+            data: { email: userEmail, name: session.user.name ?? null, specialistId, status: 'NEW' },
+          });
+        }
+      })
+      .catch(() => {});
+  }
 
   // Auto-update title from first message (AC11 - Story 4.3)
   if (!conversation.title || conversation.title === 'Nouvelle conversation') {

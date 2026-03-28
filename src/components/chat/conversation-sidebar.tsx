@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { ChevronRight, Globe, LogOut, MessageSquare, Moon, Plus, Search, Settings, Sun, User } from 'lucide-react';
+import { ChevronRight, Globe, LogOut, MessageSquare, Plus, Search, Settings, User } from 'lucide-react';
 import { signOut } from 'next-auth/react';
-import { useTheme } from 'next-themes';
 
 import { createConversation, deleteConversation } from '@/actions/chat-actions';
 import { useConversations } from '@/hooks/use-conversations';
@@ -15,7 +14,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
@@ -65,8 +63,6 @@ export function ConversationSidebar({
 
   const locale = useLanguageStore((s) => s.locale);
   const setLocale = useLanguageStore((s) => s.setLocale);
-  const { theme, setTheme } = useTheme();
-  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
   const { conversations, hasMore, isLoading, loadMore, mutate } = useConversations();
 
@@ -149,10 +145,7 @@ export function ConversationSidebar({
         </SidebarHeader>
       ) : (
         <SidebarHeader className="border-b border-[#e5e7eb] px-4 py-4">
-          <div className="flex items-center justify-between">
-            <span className="font-heading text-sm font-bold text-[#0367fb]">ultra-ia</span>
-            <SidebarTrigger className="shrink-0" aria-label={t.sidebar.toggleAria} />
-          </div>
+          <span className="font-heading text-sm font-bold text-[#0367fb]">ultra-ia</span>
         </SidebarHeader>
       )}
 

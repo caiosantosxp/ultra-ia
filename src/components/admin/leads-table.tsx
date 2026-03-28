@@ -87,9 +87,19 @@ function AvatarInitials({ name, email }: { name: string | null; email: string })
   );
 }
 
+type TabKey = 'all' | LeadStatus;
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'all', label: 'Todos' },
+  { key: 'NEW', label: 'Novo' },
+  { key: 'CONTACTED', label: 'Ativo' },
+  { key: 'CONVERTED', label: 'Convertido' },
+  { key: 'LOST', label: 'Inativo' },
+];
+
 export function LeadsTable({ leads, specialistId }: LeadsTableProps) {
   const [search, setSearch] = useState('');
-  const [tab, setTab] = useState<'all' | 'new'>('all');
+  const [tab, setTab] = useState<TabKey>('all');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
@@ -99,14 +109,16 @@ export function LeadsTable({ leads, specialistId }: LeadsTableProps) {
       !search ||
       (l.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
       l.email.toLowerCase().includes(search.toLowerCase());
-    const matchesTab = tab === 'all' || l.status === 'NEW';
+    const matchesTab = tab === 'all' || l.status === tab;
     return matchesSearch && matchesTab;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const newCount = leads.filter((l) => l.status === 'NEW').length;
+  function countByStatus(status: LeadStatus) {
+    return leads.filter((l) => l.status === status).length;
+  }
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -145,31 +157,24 @@ export function LeadsTable({ leads, specialistId }: LeadsTableProps) {
   return (
     <div className="space-y-3">
       {/* Tabs */}
-      <div className="flex items-center gap-4 border-b">
-        <button
-          onClick={() => { setTab('all'); setPage(1); }}
-          className={cn(
-            'flex items-center gap-1.5 pb-2 text-sm font-medium border-b-2 -mb-px transition-colors',
-            tab === 'all'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          )}
-        >
-          Todos
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs">{leads.length}</span>
-        </button>
-        <button
-          onClick={() => { setTab('new'); setPage(1); }}
-          className={cn(
-            'flex items-center gap-1.5 pb-2 text-sm font-medium border-b-2 -mb-px transition-colors',
-            tab === 'new'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          )}
-        >
-          Novo
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs">{newCount}</span>
-        </button>
+      <div className="flex items-center gap-4 border-b overflow-x-auto">
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => { setTab(key); setPage(1); }}
+            className={cn(
+              'flex shrink-0 items-center gap-1.5 pb-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+              tab === key
+                ? 'border-primary text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {label}
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs">
+              {key === 'all' ? leads.length : countByStatus(key as LeadStatus)}
+            </span>
+          </button>
+        ))}
       </div>
 
       {/* Toolbar */}

@@ -1,7 +1,12 @@
+import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
+
 import { AgentForm } from '@/components/admin/agent-form';
+import { updateExpertSpecialist } from '@/actions/expert-actions';
 import { SecuritySettingsForm } from '@/components/admin/security-settings-form';
 import { TeamMembersManager } from '@/components/admin/team-members-manager';
 import { FirstMessageForm } from '@/components/expert/first-message-form';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { requireExpert } from '@/lib/expert-helpers';
 import { prisma } from '@/lib/prisma';
@@ -44,9 +49,19 @@ export default async function ExpertPersonalizacaoPage() {
 
             <TabsContent value="perfil" className="mt-6">
               <div className="max-w-3xl rounded-lg border p-6">
-                <h3 className="mb-4 text-sm font-semibold">Informações do perfil</h3>
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Informações do perfil</h3>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/specialist/${specialist.slug}`} target="_blank">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Ver perfil público
+                    </Link>
+                  </Button>
+                </div>
                 <AgentForm
                   specialistId={specialist.id}
+                  hideWebhook
+                  updateAction={updateExpertSpecialist}
                   defaultValues={{
                     name: specialist.name,
                     slug: specialist.slug,

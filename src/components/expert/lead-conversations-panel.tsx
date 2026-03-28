@@ -2,9 +2,15 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import { ChevronRight, MessageCircle } from 'lucide-react';
+import { CalendarDays, ChevronRight, MessageCircle } from 'lucide-react';
+import { format } from 'date-fns';
+import type { DateRange } from 'react-day-picker';
 
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -40,6 +46,7 @@ const STATUS_LABELS: Record<string, string> = {
   CONTACTED: 'Contacté',
   CONVERTED: 'Converti',
   LOST: 'Perdu',
+  USER: 'Utilisateur',
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -47,7 +54,39 @@ const STATUS_COLORS: Record<string, string> = {
   CONTACTED: 'bg-blue-500/10 text-blue-500',
   CONVERTED: 'bg-green-500/10 text-green-600',
   LOST: 'bg-destructive/10 text-destructive',
+  USER: 'bg-muted text-muted-foreground',
 };
+
+type PeriodKey = 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom';
+
+const PERIOD_OPTIONS: { value: PeriodKey; label: string }[] = [
+  { value: 'this_month',    label: 'Ce mois' },
+  { value: 'last_month',    label: 'Mois dernier' },
+  { value: 'last_3_months', label: '3 derniers mois' },
+  { value: 'last_6_months', label: '6 derniers mois' },
+  { value: 'this_year',     label: 'Cette année' },
+];
+
+function getPeriodDates(period: PeriodKey): { from: Date; to?: Date } {
+  const now = new Date();
+  switch (period) {
+    case 'this_month':
+      return { from: new Date(now.getFullYear(), now.getMonth(), 1) };
+    case 'last_month': {
+      const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const to = new Date(now.getFullYear(), now.getMonth(), 0);
+      return { from, to };
+    }
+    case 'last_3_months':
+      return { from: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000) };
+    case 'last_6_months':
+      return { from: new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000) };
+    case 'this_year':
+      return { from: new Date(now.getFullYear(), 0, 1) };
+    default:
+      return { from: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) };
+  }
+}
 
 const fetcher = (url: string) =>
   fetch(url).then((r) => {
@@ -117,17 +156,30 @@ function ChatThread({ convId, onBack }: { convId: string; onBack: () => void }) 
   );
 }
 
-type Period = 7 | 15 | 30;
-
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function LeadConversationsPanel() {
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
-  const [period, setPeriod] = useState<Period>(30);
+  const [period, setPeriod] = useState<PeriodKey>('this_month');
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  // Build API URL
+  const apiUrl = (() => {
+    if (period === 'custom' && customRange?.from) {
+      const from = format(customRange.from, 'yyyy-MM-dd');
+      const to = customRange.to ? format(customRange.to, 'yyyy-MM-dd') : '';
+      return `/api/expert/conversations?from=${from}${to ? `&to=${to}` : ''}`;
+    }
+    const { from, to } = getPeriodDates(period);
+    const fromStr = format(from, 'yyyy-MM-dd');
+    const toStr = to ? `&to=${format(to, 'yyyy-MM-dd')}` : '';
+    return `/api/expert/conversations?from=${fromStr}${toStr}`;
+  })();
 
   const { data, isLoading } = useSWR<{ leads: LeadItem[] }>(
-    `/api/expert/conversations?period=${period}`,
+    apiUrl,
     fetcher,
     { refreshInterval: 300_000 }
   );
@@ -140,26 +192,69 @@ export function LeadConversationsPanel() {
     setSelectedConvId(null);
   }
 
-  function handlePeriod(p: Period) {
+  function handlePeriodChange(p: PeriodKey) {
     setPeriod(p);
+    setCustomRange(undefined);
     setSelectedEmail(null);
     setSelectedConvId(null);
+    setPopoverOpen(false);
   }
 
+  function applyCustomRange() {
+    if (!customRange?.from) return;
+    setPeriod('custom');
+    setSelectedEmail(null);
+    setSelectedConvId(null);
+    setPopoverOpen(false);
+  }
+
+  // Period button label
+  const periodLabel = (() => {
+    if (period === 'custom' && customRange?.from) {
+      return `${format(customRange.from, 'dd/MM/yy')}${customRange.to ? ` → ${format(customRange.to, 'dd/MM/yy')}` : ''}`;
+    }
+    return PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? 'Ce mois';
+  })();
+
   const PeriodFilter = (
-    <div className="flex items-center gap-1.5">
-      {([7, 15, 30] as Period[]).map((p) => (
-        <button
-          key={p}
-          onClick={() => handlePeriod(p)}
-          className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-            period === p ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          }`}
-        >
-          {p} dias
-        </button>
-      ))}
-    </div>
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-8 text-sm gap-1.5')}>
+        <CalendarDays className="h-3.5 w-3.5" />
+        {periodLabel}
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="end">
+        <div className="p-2 border-b space-y-0.5">
+          {PERIOD_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              onClick={() => handlePeriodChange(o.value)}
+              className={`w-full text-left px-3 py-1.5 rounded text-sm transition-colors ${
+                period === o.value && period !== 'custom'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-muted text-foreground'
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+        <Calendar
+          mode="range"
+          selected={customRange}
+          onSelect={setCustomRange}
+          numberOfMonths={2}
+          disabled={{ after: new Date() }}
+        />
+        <div className="flex items-center justify-end gap-2 p-3 border-t">
+          <Button variant="ghost" size="sm" onClick={() => { setCustomRange(undefined); handlePeriodChange('this_month'); }}>
+            Effacer
+          </Button>
+          <Button size="sm" onClick={applyCustomRange} disabled={!customRange?.from}>
+            Appliquer
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 
   if (isLoading) {
@@ -186,7 +281,7 @@ export function LeadConversationsPanel() {
         <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
           <div className="flex flex-col items-center gap-2 text-muted-foreground">
             <MessageCircle className="h-8 w-8" />
-            <p className="text-sm">Aucune conversation de leads pour le moment</p>
+            <p className="text-sm">Aucune conversation pour le moment</p>
           </div>
         </div>
       </div>
@@ -197,11 +292,11 @@ export function LeadConversationsPanel() {
     <div className="space-y-3">
       <div className="flex items-center justify-end">{PeriodFilter}</div>
     <div className="flex h-[calc(100dvh-160px)] overflow-hidden rounded-lg border text-sm">
-      {/* Panel 1 — Lead list */}
+      {/* Panel 1 — User list */}
       <div className="w-56 shrink-0 overflow-y-auto border-r">
         <div className="sticky top-0 border-b bg-muted/40 px-3 py-2.5">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Leads ({leads.length})
+            Utilisateurs ({leads.length})
           </p>
         </div>
         {leads.map((lead) => {
@@ -232,11 +327,11 @@ export function LeadConversationsPanel() {
         })}
       </div>
 
-      {/* Panel 2 — Conversation list for selected lead */}
+      {/* Panel 2 — Conversation list for selected user */}
       <div className="w-64 shrink-0 overflow-y-auto border-r">
         {!selectedLead ? (
           <div className="flex h-full items-center justify-center">
-            <p className="px-4 text-center text-xs text-muted-foreground">Sélectionnez un lead pour voir ses conversations</p>
+            <p className="px-4 text-center text-xs text-muted-foreground">Sélectionnez un utilisateur pour voir ses conversations</p>
           </div>
         ) : (
           <>
